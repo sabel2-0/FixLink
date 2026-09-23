@@ -1,0 +1,1875 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F2F2F7" />
+<title>FixLink — Trusted Appliance Repair</title>
+<link rel="icon" href="data:,">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{
+  --ink:#000000; --ink-2:#3C3C43;
+  --paper:#F2F2F7; --surface:#FFFFFF; --surface-2:#F2F2F7; --surface-3:#E5E5EA;
+  --line:#D1D1D6; --line-2:#E5E5EA;
+  --accent:#007AFF; --accent-2:#0A84FF; --accent-soft:#E5F0FF;
+  --muted:#8E8E93; --muted-2:#6C6C70;
+  --success:#34C759; --danger:#FF3B30; --warn:#FF9500;
+  color-scheme: light;
+}
+[data-theme="dark"]{
+  --ink:#FFFFFF; --ink-2:#EBEBF5;
+  --paper:#000000; --surface:#1C1C1E; --surface-2:#2C2C2E; --surface-3:#3A3A3C;
+  --line:#38383A; --line-2:#2C2C2E;
+  --accent:#0A84FF; --accent-2:#409CFF; --accent-soft:#0A2540;
+  --muted:#8E8E93; --muted-2:#AEAEB2;
+  --success:#30D158; --danger:#FF453A; --warn:#FF9F0A;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--paper);color:var(--ink);}
+body{font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.4;letter-spacing:-0.01em;transition:background-color .2s ease, color .2s ease;}
+.display{letter-spacing:-0.02em;font-weight:700;}
+.text-accent{color:var(--accent);} .bg-accent{background:var(--accent);}
+.text-muted{color:var(--muted);} .text-ink{color:var(--ink);}
+.border-line{border-color:var(--line-2);}
+.bg-paper{background:var(--paper);} .bg-surface{background:var(--surface);} .bg-surface-2{background:var(--surface-2);}
+.bg-accent-soft{background:var(--accent-soft);}
+
+.card{background:var(--surface);border-radius:12px;overflow:hidden;}
+.card-bordered{border:1px solid var(--line-2);}
+
+.ios-list{background:var(--surface);border-radius:12px;overflow:hidden;}
+.ios-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--line-2);min-height:44px;}
+.ios-row:last-child{border-bottom:none;}
+
+.btn-primary{background:var(--accent);color:#fff;font-weight:600;padding:14px 20px;border-radius:12px;font-size:17px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;font-family:inherit;transition:opacity .12s ease, transform .08s ease;letter-spacing:-0.01em;}
+.btn-primary:hover{opacity:.9;} .btn-primary:active{transform:scale(.98);}
+.btn-primary:disabled{background:var(--surface-3);color:var(--muted);cursor:not-allowed;}
+.btn-secondary{background:var(--surface-2);color:var(--ink);font-weight:600;padding:14px 20px;border-radius:12px;font-size:17px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;font-family:inherit;transition:background .12s ease, transform .08s ease;letter-spacing:-0.01em;}
+.btn-secondary:hover{background:var(--surface-3);} .btn-secondary:active{transform:scale(.98);}
+.btn-danger{background:transparent;color:var(--danger);font-weight:600;padding:14px 20px;border-radius:12px;font-size:17px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;font-family:inherit;letter-spacing:-0.01em;}
+.btn-danger:hover{background:color-mix(in srgb, var(--danger) 10%, transparent);}
+.btn-ghost{background:transparent;color:var(--accent);font-weight:400;font-size:15px;display:inline-flex;align-items:center;gap:4px;border:none;cursor:pointer;padding:6px 8px;border-radius:8px;font-family:inherit;letter-spacing:-0.01em;}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-link{background:transparent;color:var(--accent);font-weight:400;font-size:15px;display:inline-flex;align-items:center;gap:4px;border:none;cursor:pointer;padding:0;font-family:inherit;letter-spacing:-0.01em;}
+.btn-link:hover{opacity:.7;}
+.btn-back{display:inline-flex;align-items:center;gap:2px;color:var(--accent);font-weight:400;font-size:17px;background:none;border:none;cursor:pointer;padding:0;font-family:inherit;letter-spacing:-0.01em;}
+
+.input{width:100%;background:var(--surface);color:var(--ink);border:none;border-radius:10px;padding:12px 14px;font-size:17px;font-family:inherit;transition:background .15s;letter-spacing:-0.01em;}
+.input::placeholder{color:var(--muted);}
+.input:focus{outline:none;background:var(--surface-2);}
+.input-label{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;display:block;font-weight:500;}
+
+.seg{display:inline-flex;background:var(--surface-3);border-radius:9px;padding:2px;gap:2px;width:100%;}
+[data-theme="dark"] .seg{background:var(--surface-2);}
+.seg button{flex:1;border:none;background:transparent;color:var(--ink);font-size:13px;font-weight:500;padding:6px 12px;border-radius:7px;cursor:pointer;font-family:inherit;transition:background .15s,box-shadow .15s;letter-spacing:-0.01em;}
+.seg button.active{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600;}
+[data-theme="dark"] .seg button.active{background:var(--surface-3);}
+
+.chip{border:none;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:500;white-space:nowrap;color:var(--ink);background:var(--surface-2);cursor:pointer;transition:background .15s, color .15s;font-family:inherit;letter-spacing:-0.01em;}
+.chip:hover{background:var(--surface-3);}
+.chip-active{background:var(--accent);color:#fff;}
+.chip-active:hover{background:var(--accent-2);color:#fff;}
+
+.badge{display:inline-flex;align-items:center;font-size:12px;font-weight:500;padding:3px 9px;border-radius:6px;white-space:nowrap;letter-spacing:-0.01em;}
+.badge-active{background:color-mix(in srgb, var(--success) 15%, transparent);color:var(--success);}
+.badge-pending{background:color-mix(in srgb, var(--warn) 15%, transparent);color:var(--warn);}
+.badge-suspended{background:color-mix(in srgb, var(--danger) 15%, transparent);color:var(--danger);}
+.badge-completed{background:var(--surface-2);color:var(--muted-2);}
+.badge-cancelled{background:color-mix(in srgb, var(--danger) 15%, transparent);color:var(--danger);}
+.badge-demo{background:var(--ink);color:var(--paper);}
+.badge-info{background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);}
+.badge-warn{background:color-mix(in srgb, var(--warn) 15%, transparent);color:var(--warn);}
+.badge-accent{background:var(--accent-soft);color:var(--accent);}
+
+.sidenav-link{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:15px;font-weight:400;color:var(--ink);transition:background .12s;cursor:pointer;background:transparent;border:none;font-family:inherit;width:100%;text-align:left;letter-spacing:-0.01em;}
+.sidenav-link:hover{background:var(--surface-2);}
+.sidenav-link.active{background:var(--surface-2);font-weight:600;}
+.sidenav-link svg{color:var(--accent);flex-shrink:0;}
+
+.ios-toggle{position:relative;width:51px;height:31px;flex-shrink:0;display:inline-block;}
+.ios-toggle input{opacity:0;width:0;height:0;}
+.ios-toggle .slider{position:absolute;inset:0;background:var(--surface-3);border-radius:999px;transition:background .25s;cursor:pointer;}
+.ios-toggle .slider::before{content:'';position:absolute;width:27px;height:27px;left:2px;top:2px;background:#fff;border-radius:50%;transition:transform .25s;box-shadow:0 2px 4px rgba(0,0,0,.15),0 0 1px rgba(0,0,0,.1);}
+.ios-toggle input:checked + .slider{background:var(--success);}
+.ios-toggle input:checked + .slider::before{transform:translateX(20px);}
+
+.icon-btn{width:32px;height:32px;border-radius:50%;background:transparent;border:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent);transition:background .12s;}
+.icon-btn:hover{background:var(--surface-2);}
+
+#map,#inline-map,#explore-map{height:100%;width:100%;z-index:0;}
+.leaflet-container{font-family:inherit;background:var(--surface-2);}
+.tech-marker{background:var(--ink);color:var(--paper);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface);}
+.cust-marker{background:var(--accent);color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface);}
+[data-theme="dark"] .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9);}
+[data-theme="dark"] .leaflet-bar a{background:var(--surface);color:var(--ink);border-color:var(--line);}
+.leaflet-popup-content-wrapper{background:var(--surface);color:var(--ink);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);}
+.leaflet-popup-tip{background:var(--surface);}
+
+.timeline-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;margin-top:6px;}
+.quote-line{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line-2);font-size:15px;}
+.quote-line:last-child{border-bottom:none;}
+.step-bar{display:flex;align-items:center;gap:4px;}
+.step-bar .step{flex:1;height:2px;border-radius:2px;background:var(--surface-3);}
+.step-bar .step.done{background:var(--success);}
+.step-bar .step.current{background:var(--accent);}
+
+.topnav{background:color-mix(in srgb, var(--surface) 80%, transparent);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line-2);}
+.landing-nav{background:color-mix(in srgb, var(--surface) 80%, transparent);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line-2);}
+.section-alt{background:var(--surface);}
+
+.appliance-tile{background:var(--surface);border:none;border-radius:14px;padding:20px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;cursor:pointer;transition:transform .12s ease, background .12s;font-family:inherit;letter-spacing:-0.01em;}
+.appliance-tile:hover{background:var(--surface-2);}
+.appliance-tile:active{transform:scale(.97);}
+.appliance-tile.selected{background:var(--accent-soft);}
+.appliance-tile .icon-wrap{width:52px;height:52px;border-radius:14px;background:var(--surface-2);color:var(--ink);display:flex;align-items:center;justify-content:center;}
+.appliance-tile.selected .icon-wrap{background:var(--accent);color:#fff;}
+.appliance-tile .icon-wrap svg{width:26px;height:26px;}
+.appliance-tile .label{font-size:12px;font-weight:500;color:var(--ink);line-height:1.2;}
+
+.appliance-icon{width:22px;height:22px;}
+.star-row{display:inline-flex;gap:1px;color:var(--warn);}
+.star-row svg{width:14px;height:14px;}
+
+.problem-checkbox{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border:none;border-bottom:1px solid var(--line-2);cursor:pointer;font-family:inherit;width:100%;text-align:left;font-size:15px;color:var(--ink);letter-spacing:-0.01em;}
+.problem-checkbox:last-child{border-bottom:none;}
+.problem-checkbox:hover{background:var(--surface-2);}
+.problem-checkbox .box{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;background:var(--surface);}
+.problem-checkbox.selected .box{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+.wizard-steps{display:flex;align-items:center;gap:6px;margin-bottom:28px;}
+.wizard-steps .dot{width:26px;height:26px;border-radius:50%;background:var(--surface-2);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;transition:all .2s;}
+.wizard-steps .dot.active{background:var(--accent);color:#fff;}
+.wizard-steps .dot.done{background:var(--success);color:#fff;}
+.wizard-steps .bar{flex:1;height:1px;background:var(--line-2);}
+.wizard-steps .bar.done{background:var(--success);}
+
+.auth-seg{display:inline-flex;background:var(--surface-3);border-radius:9px;padding:2px;width:100%;gap:2px;margin-bottom:24px;}
+[data-theme="dark"] .auth-seg{background:var(--surface-2);}
+.auth-seg button{flex:1;border:none;background:transparent;color:var(--ink);font-size:13px;font-weight:500;padding:7px 12px;border-radius:7px;cursor:pointer;font-family:inherit;transition:background .15s, box-shadow .15s;letter-spacing:-0.01em;}
+.auth-seg button.active{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600;}
+[data-theme="dark"] .auth-seg button.active{background:var(--surface-3);}
+.social-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:12px;background:var(--surface-2);border:none;color:var(--ink);font-weight:500;font-size:15px;cursor:pointer;font-family:inherit;transition:background .12s;letter-spacing:-0.01em;}
+.social-btn:hover{background:var(--surface-3);}
+
+.demo-card{background:var(--surface);border:none;border-radius:14px;padding:16px;cursor:pointer;transition:background .12s;display:flex;align-items:center;gap:14px;text-align:left;width:100%;font-family:inherit;color:var(--ink);letter-spacing:-0.01em;}
+.demo-card:hover{background:var(--surface-2);}
+.demo-card:active{transform:scale(.99);}
+.demo-card .demo-icon{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+.location-verified{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:10px;background:var(--surface-2);color:var(--ink);font-size:14px;font-weight:400;letter-spacing:-0.01em;}
+.location-verified .dot{width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0;}
+
+/* Price stage pills */
+.price-stage{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:3px 8px;border-radius:5px;letter-spacing:-0.01em;}
+.stage-estimated{background:var(--surface-2);color:var(--muted-2);}
+.stage-quotation{background:color-mix(in srgb, var(--warn) 15%, transparent);color:var(--warn);}
+.stage-final{background:color-mix(in srgb, var(--success) 15%, transparent);color:var(--success);}
+
+/* Multi-tech selection card */
+.tech-select-card{background:var(--surface);border:1.5px solid var(--line-2);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .15s, background .15s;}
+.tech-select-card:hover{border-color:var(--accent);}
+.tech-select-card.selected{border-color:var(--accent);background:var(--accent-soft);}
+.tech-select-card .check-circle{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.tech-select-card.selected .check-circle{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+.toast-item{background:var(--ink);color:var(--paper);border-radius:12px;padding:10px 16px;font-size:14px;font-weight:400;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:toast-in .2s ease;max-width:340px;letter-spacing:-0.01em;}
+@keyframes toast-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+@media (max-width:640px){
+  .sheet{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.15);max-height:92vh;overflow-y:auto;animation:sheet-up .25s ease;padding-bottom:env(safe-area-inset-bottom);}
+  @keyframes sheet-up{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  #page-shell .sheet{position:static;border-radius:14px;animation:none;}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important; scroll-behavior:auto !important;} }
+</style>
+<script>
+(function(){ try{ if(localStorage.getItem('fixlink.theme') === 'dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){} })();
+</script>
+</head>
+<body>
+
+<!-- ============ LANDING ============ -->
+<div id="page-landing">
+  <header class="sticky top-0 z-40 landing-nav">
+    <div class="max-w-5xl mx-auto px-5 h-11 flex items-center justify-between">
+      <a href="#/" class="display text-lg font-semibold text-ink tracking-tight">FixLink</a>
+      <nav class="hidden md:flex items-center gap-7 text-sm text-muted">
+        <a href="#problem" class="hover:text-ink">Problem</a>
+        <a href="#how" class="hover:text-ink">How it works</a>
+        <a href="#pricing" class="hover:text-ink">Pricing</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <a href="#/demo" class="text-sm text-muted hover:text-ink hidden sm:inline">Demo</a>
+        <a href="#/login" class="text-sm text-accent font-medium">Log in</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="max-w-5xl mx-auto px-5 pt-24 pb-24 grid md:grid-cols-2 gap-16 items-center">
+    <div>
+      <h1 class="display text-5xl sm:text-6xl font-semibold leading-[1.05] mb-6 text-ink tracking-tighter">Trusted appliance repair, near you.</h1>
+      <p class="text-muted text-lg mb-8 max-w-md leading-relaxed">Verified technicians for aircon, ref, washer, TV, and more. Real ratings, live tracking, and a written quote you approve before any work begins.</p>
+      <div class="flex flex-wrap gap-3">
+        <a href="#/login" class="btn-primary">Get started</a>
+        <a href="#how" class="btn-secondary">How it works</a>
+      </div>
+    </div>
+    <div class="card p-7">
+      <p class="text-xs uppercase tracking-wider text-muted mb-5 font-medium">Right now</p>
+      <div class="space-y-1">
+        <div class="flex items-center justify-between py-3.5 border-b border-line">
+          <div><p class="text-sm font-medium text-ink">Aircon cleaning — Lahug</p><p class="text-xs text-muted mt-0.5">4 techs · 0.8 km</p></div>
+          <span class="badge badge-active">Open</span>
+        </div>
+        <div class="flex items-center justify-between py-3.5 border-b border-line">
+          <div><p class="text-sm font-medium text-ink">Ref check — Mabolo</p><p class="text-xs text-muted mt-0.5">2 techs · 1.3 km</p></div>
+          <span class="badge badge-active">Open</span>
+        </div>
+        <div class="flex items-center justify-between py-3.5">
+          <div><p class="text-sm font-medium text-ink">Washer — Talamban</p><p class="text-xs text-muted mt-0.5">3 techs · 1.9 km</p></div>
+          <span class="badge badge-active">Open</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="problem" class="section-alt border-y border-line">
+    <div class="max-w-5xl mx-auto px-5 py-20">
+      <h2 class="display text-3xl font-semibold mb-3 text-ink tracking-tight">Why finding a repair tech is hard</h2>
+      <p class="text-muted mb-12 max-w-xl">Four problems homeowners keep running into.</p>
+      <div class="grid sm:grid-cols-2 gap-x-12 gap-y-8">
+        <div><p class="font-medium mb-2 text-ink">Trust is a gamble</p><p class="text-sm text-muted leading-relaxed">It's hard to find repair workers you can actually trust with your appliance.</p></div>
+        <div><p class="font-medium mb-2 text-ink">No idea what's fair</p><p class="text-sm text-muted leading-relaxed">Customers rarely know the correct price before a technician arrives.</p></div>
+        <div><p class="font-medium mb-2 text-ink">Reliability varies</p><p class="text-sm text-muted leading-relaxed">Some workers no-show, show up late, or don't finish the job properly.</p></div>
+        <div><p class="font-medium mb-2 text-ink">Searching wastes time</p><p class="text-sm text-muted leading-relaxed">Asking around for a referral takes too long.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="max-w-5xl mx-auto px-5 py-20">
+    <h2 class="display text-3xl font-semibold mb-3 text-ink tracking-tight">How it works</h2>
+    <p class="text-muted mb-12 max-w-xl">Six steps from a broken appliance to a five-star technician.</p>
+    <div class="grid sm:grid-cols-3 gap-x-10 gap-y-10">
+      <div><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">01</p><p class="font-medium mb-1 text-ink">Describe the problem</p><p class="text-sm text-muted leading-relaxed">Pick the appliance and symptoms.</p></div>
+      <div><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">02</p><p class="font-medium mb-1 text-ink">Pick technicians</p><p class="text-sm text-muted leading-relaxed">Choose one or more. Compare their estimates.</p></div>
+      <div><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">03</p><p class="font-medium mb-1 text-ink">Estimated price</p><p class="text-sm text-muted leading-relaxed">Each tech gives an estimate based on the issue.</p></div>
+      <div><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">04</p><p class="font-medium mb-1 text-ink">Quote after inspection</p><p class="text-sm text-muted leading-relaxed">The tech arrives, checks the unit, submits a formal quotation.</p></div>
+      <div><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">05</p><p class="font-medium mb-1 text-ink">Approve the final price</p><p class="text-sm text-muted leading-relaxed">You approve. Work starts. That's the price.</p></div>
+      <div><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">06</p><p class="font-medium mb-1 text-ink">Rate the job</p><p class="text-sm text-muted leading-relaxed">Your review helps the next customer.</p></div>
+    </div>
+    <div class="card p-6 mt-12 max-w-2xl">
+      <p class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Three prices, one job</p>
+      <div class="space-y-3 text-sm">
+        <div class="flex items-start gap-3"><span class="price-stage stage-estimated">Estimated</span><p class="text-ink">A pre-inspection guess. What you compare when picking a technician. Not binding.</p></div>
+        <div class="flex items-start gap-3"><span class="price-stage stage-quotation">Quotation</span><p class="text-ink">The formal price after the technician inspects the appliance on-site. Itemized.</p></div>
+        <div class="flex items-start gap-3"><span class="price-stage stage-final">Final</span><p class="text-ink">What you approve and pay. Cash or GCash, directly to the technician.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="section-alt border-y border-line">
+    <div class="max-w-5xl mx-auto px-5 py-20">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
+        <div>
+          <p class="text-accent font-medium text-sm mb-3">For technicians</p>
+          <h2 class="display text-3xl font-semibold text-ink mb-3 tracking-tight">Free to join. 12% commission per completed job.</h2>
+          <p class="text-muted max-w-xl text-sm leading-relaxed">No monthly fees. No upfront cost. You only pay when you get paid. FixLink charges 12% of the final approved price — the customer pays you directly, and you remit the commission to FixLink.</p>
+        </div>
+        <a href="#/login" class="btn-primary whitespace-nowrap">Apply as a technician</a>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-3">
+        <div class="card p-6">
+          <p class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Free to join</p>
+          <p class="text-2xl font-semibold text-ink mb-2 tracking-tight">₱0 upfront</p>
+          <p class="text-sm text-muted leading-relaxed">Sign up, get verified, list your services. No credit card. No commitment.</p>
+        </div>
+        <div class="card p-6">
+          <p class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Commission</p>
+          <p class="text-2xl font-semibold text-ink mb-2 tracking-tight">12% per job</p>
+          <p class="text-sm text-muted leading-relaxed">Charged only on completed jobs, on the final approved price. If you don't get paid, FixLink doesn't either.</p>
+        </div>
+        <div class="card p-6">
+          <p class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Payment</p>
+          <p class="text-2xl font-semibold text-ink mb-2 tracking-tight">Direct to you</p>
+          <p class="text-sm text-muted leading-relaxed">The customer pays you directly. Remit your 12% to FixLink after each completed job — cash, GCash, or auto-deducted from your wallet.</p>
+        </div>
+      </div>
+      <div class="card p-6 mt-6 max-w-2xl">
+        <p class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Example</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between"><span class="text-muted">Customer approves final price</span><span class="text-ink font-medium">₱1,000</span></div>
+          <div class="flex justify-between"><span class="text-muted">FixLink commission (12%)</span><span class="text-ink">₱120</span></div>
+          <div class="flex justify-between pt-2 border-t border-line"><span class="text-muted">Technician keeps</span><span class="text-ink font-medium">₱880</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="text-sm text-muted">
+    <div class="max-w-5xl mx-auto px-5 py-10 flex flex-col sm:flex-row justify-between gap-3 border-t border-line">
+      <p>FixLink — 2026</p>
+      <div class="flex gap-6"><a href="#/login" class="hover:text-ink">Log in</a><a href="#/demo" class="hover:text-ink">Demo</a></div>
+    </div>
+  </footer>
+</div>
+
+<!-- ============ DEMO ============ -->
+<div id="page-demo" class="hidden min-h-screen bg-paper py-16 px-4">
+  <div class="w-full max-w-md mx-auto">
+    <a href="#/" class="display text-lg font-semibold block text-center mb-1 text-ink tracking-tight">FixLink</a>
+    <p class="text-center text-sm text-muted mb-10">Choose a role to explore.</p>
+    <div class="space-y-2 mb-8">
+      <button onclick="location.hash='#/app'" class="demo-card">
+        <div class="demo-icon"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div class="flex-1"><p class="font-medium text-ink">Customer</p><p class="text-xs text-muted mt-0.5">Book, track, review</p></div>
+        <svg class="w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button onclick="location.hash='#/tech'" class="demo-card">
+        <div class="demo-icon"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <div class="flex-1"><p class="font-medium text-ink">Technician</p><p class="text-xs text-muted mt-0.5">Jobs, quotes, schedule</p></div>
+        <svg class="w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button onclick="location.hash='#/admin'" class="demo-card">
+        <div class="demo-icon"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="flex-1"><p class="font-medium text-ink">Admin</p><p class="text-xs text-muted mt-0.5">Users, verify, disputes</p></div>
+        <svg class="w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="text-center"><p class="text-xs text-muted mb-3">Or use the real login</p><a href="#/login" class="btn-secondary w-full">Go to log in</a></div>
+    <p class="text-center text-xs text-muted mt-8"><a href="#/" class="btn-link">← Back to home</a></p>
+  </div>
+</div>
+
+<!-- ============ LOGIN ============ -->
+<div id="page-login" class="hidden min-h-screen bg-paper py-16 px-4">
+  <div class="w-full max-w-sm mx-auto">
+    <a href="#/" class="display text-lg font-semibold block text-center mb-8 text-ink tracking-tight">FixLink</a>
+    <div class="card card-bordered p-6">
+      <div class="auth-seg" id="auth-seg">
+        <button type="button" class="active" onclick="setAuthMode('login')">Log in</button>
+        <button type="button" onclick="setAuthMode('register')">Sign up</button>
+      </div>
+
+      <div id="auth-login">
+        <h2 class="text-base font-semibold text-ink mb-1">Welcome back</h2>
+        <p class="text-xs text-muted mb-5">Log in to your FixLink account.</p>
+        <form onsubmit="event.preventDefault();handleLogin()">
+          <div class="space-y-3">
+            <div><label class="input-label">Email</label><input type="email" id="login-email" class="input" placeholder="you@example.com" required/></div>
+            <div><label class="input-label">Password</label><input type="password" id="login-password" class="input" placeholder="••••••••" required/></div>
+            <div class="flex items-center justify-between text-sm pt-1">
+              <label class="flex items-center gap-2 text-muted"><input type="checkbox"/> Remember me</label>
+              <button type="button" onclick="toast('Password reset sent')" class="btn-link">Forgot?</button>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary w-full mt-5">Log in</button>
+        </form>
+        <div class="flex items-center gap-3 my-5"><div class="flex-1 h-px bg-line"></div><span class="text-xs text-muted">or</span><div class="flex-1 h-px bg-line"></div></div>
+        <button type="button" class="social-btn mb-2" onclick="toast('Google login')"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Continue with Google</button>
+        <button type="button" class="social-btn" onclick="toast('Apple login')"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>Continue with Apple</button>
+      </div>
+
+      <div id="auth-register" class="hidden">
+        <h2 class="text-base font-semibold text-ink mb-1">Create account</h2>
+        <p class="text-xs text-muted mb-5">Join FixLink as a customer or technician.</p>
+        <form onsubmit="event.preventDefault();handleRegister()">
+          <div class="space-y-3">
+            <div><label class="input-label">Full name</label><input type="text" id="reg-name" class="input" placeholder="Juan Dela Cruz" required/></div>
+            <div><label class="input-label">Email</label><input type="email" id="reg-email" class="input" placeholder="you@example.com" required/></div>
+            <div><label class="input-label">Mobile</label><input type="tel" id="reg-phone" class="input" placeholder="+63 9XX XXX XXXX" required/></div>
+            <div><label class="input-label">Password</label><input type="password" id="reg-password" class="input" placeholder="At least 8 characters" required minlength="8"/></div>
+            <div>
+              <label class="input-label">I am a…</label>
+              <div class="seg" id="reg-role">
+                <button type="button" class="active" onclick="setRegRole('customer')">Customer</button>
+                <button type="button" onclick="setRegRole('technician')">Technician</button>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary w-full mt-5">Create account</button>
+          <p class="text-xs text-muted mt-3 leading-relaxed text-center">By continuing, you agree to the Terms of Service and Privacy Policy.</p>
+        </form>
+      </div>
+
+      <p class="text-center text-sm text-muted mt-5" id="auth-switch">Don't have an account? <button onclick="setAuthMode('register')" class="btn-link">Sign up</button></p>
+    </div>
+    <p class="text-center text-sm text-muted mt-6">Want to look around first? <a href="#/demo" class="text-accent font-medium">Try the demo</a></p>
+  </div>
+</div>
+
+<div id="page-shell" class="hidden"></div>
+<div id="modal-root"></div>
+<div id="quote-modal-root"></div>
+<div id="map-modal-root"></div>
+<div id="map-explore-root"></div>
+<div id="dispute-modal-root"></div>
+<div id="review-detail-root"></div>
+<div id="estimate-modal-root"></div>
+<div id="toast-root" class="fixed bottom-6 right-6 z-[60] space-y-2"></div>
+<div id="notif-root" class="fixed top-14 right-4 z-[55] w-80 hidden">
+  <div class="card shadow-lg overflow-hidden">
+    <div class="p-3 border-b border-line flex items-center justify-between">
+      <p class="font-semibold text-sm text-ink">Notifications</p>
+      <button onclick="markAllRead()" class="btn-link text-xs">Mark all read</button>
+    </div>
+    <div id="notif-list" class="max-h-96 overflow-y-auto"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   FixLink — Commission model + multi-tech + three-stage pricing
+   ============================================================ */
+
+const COMMISSION_RATE = 0.12;   // 12% of final approved price
+function computeCommission(amount){ return Math.round((Number(amount)||0) * COMMISSION_RATE); }
+
+/* ---------- theme ---------- */
+function applyTheme(){
+  const t = localStorage.getItem('fixlink.theme') || 'light';
+  if(t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+  document.querySelectorAll('[data-theme-row]').forEach(el=>{
+    const cb = el.querySelector('input[type="checkbox"]');
+    if(cb) cb.checked = (t === 'dark');
+  });
+}
+function toggleTheme(){
+  const cur = localStorage.getItem('fixlink.theme') || 'light';
+  localStorage.setItem('fixlink.theme', cur === 'dark' ? 'light' : 'dark');
+  applyTheme();
+}
+
+/* ---------- auth ---------- */
+let _regRole = 'customer';
+function setAuthMode(mode){
+  document.querySelectorAll('#auth-seg button').forEach(b=>{ b.classList.toggle('active', b.textContent.toLowerCase().includes(mode === 'login' ? 'log' : 'sign')); });
+  document.getElementById('auth-login').classList.toggle('hidden', mode !== 'login');
+  document.getElementById('auth-register').classList.toggle('hidden', mode !== 'register');
+  const sw = document.getElementById('auth-switch');
+  if(sw){ sw.innerHTML = mode === 'login' ? 'Don\'t have an account? <button onclick="setAuthMode(\'register\')" class="btn-link">Sign up</button>' : 'Already have an account? <button onclick="setAuthMode(\'login\')" class="btn-link">Log in</button>'; }
+}
+function setRegRole(r){ _regRole = r; document.querySelectorAll('#reg-role button').forEach(b=>{ b.classList.toggle('active', b.textContent.toLowerCase() === r); }); }
+function handleLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  if(!email){ toast('Enter your email'); return; }
+  toast('Welcome back');
+  if(email.indexOf('admin') > -1) location.hash = '#/admin';
+  else if(email.indexOf('tech') > -1) location.hash = '#/tech';
+  else location.hash = '#/app';
+}
+function handleRegister(){
+  toast('Account created');
+  if(_regRole === 'technician') location.hash = '#/tech';
+  else location.hash = '#/app';
+}
+
+/* ---------- XSS escape ---------- */
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------- icons ---------- */
+const ICONS = {
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>',
+  users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  wrench:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  calendar:'<rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  dollar:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+  menu:'<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>',
+  x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  bell:'<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  shieldCheck:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>',
+  chevron:'<polyline points="9 18 15 12 9 6"/>',
+  tag:'<path d="M20.59 13.41 13.41 20.59a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+  alert:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  card:'<rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/>',
+  percent:'<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+  map:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>',
+  plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+};
+const APPLIANCE_ICONS = {
+  aircon: '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="8" rx="2"/><line x1="5" y1="9.5" x2="19" y2="9.5"/><line x1="6" y1="17" x2="5" y2="19"/><line x1="10" y1="17" x2="9" y2="20"/><line x1="14" y1="17" x2="13" y2="20"/><line x1="18" y1="17" x2="17" y2="19"/></svg>',
+  ref:    '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><line x1="6" y1="10" x2="18" y2="10"/><line x1="9" y1="5.5" x2="9" y2="7.5"/><line x1="9" y1="13" x2="9" y2="15"/></svg>',
+  washer: '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="7" x2="20" y2="7"/><circle cx="7" cy="4.5" r="0.6" fill="currentColor"/><circle cx="12" cy="14.5" r="4.5"/><path d="M8.5 14.5c1-1.5 2-1.5 3.5 0s2.5 1.5 3.5 0"/></svg>',
+  tv:     '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+  water:  '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="4"/><circle cx="12" cy="12" r="2.5"/><line x1="10" y1="4" x2="14" y2="4"/></svg>',
+  micro:  '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><rect x="5" y="8" width="11" height="8" rx="1"/><circle cx="19" cy="9" r="0.8" fill="currentColor"/><circle cx="19" cy="12" r="0.8" fill="currentColor"/><circle cx="19" cy="15" r="0.8" fill="currentColor"/></svg>',
+  fan:    '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><path d="M12 10.5c0-2 1-3.5 3-3.5s2 2.5 0 3.5-3 0-3 0z"/><path d="M13.5 12c2 0 3.5 1 3.5 3s-2.5 2-3.5 0 0-3 0-3z"/><path d="M10.5 12c-2 0-3.5-1-3.5-3s2.5-2 3.5 0 0 3 0 3z"/><path d="M12 13.5c0 2-1 3.5-3 3.5s-2-2.5 0-3.5 3 0 3 0z"/></svg>',
+  rice:   '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.5 12a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1z"/><path d="M8 8V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V8"/><line x1="9" y1="12" x2="9" y2="16"/></svg>',
+  kettle: '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14l-1 11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/><path d="M3 12h2"/><path d="M19 12h2"/></svg>',
+  stove:  '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><circle cx="16" cy="12" r="2.5"/><line x1="4" y1="18" x2="20" y2="18"/></svg>',
+};
+function appIcon(id, cls){ return (APPLIANCE_ICONS[id]||'').replace('class="appliance-icon"', 'class="'+(cls||'appliance-icon')+'"'); }
+function ic(name, cls){ return '<svg class="'+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[name]||'')+'</svg>'; }
+
+/* ---------- persistence ---------- */
+const STORE_KEY = 'fixlink.v3';
+function persist(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify({
+    USERS, TECHS, BOOKINGS, MESSAGES, TECH_PRICING, ESTIMATES, QUOTES, NOTIFICATIONS,
+    REVIEWS, DISPUTES, AVAILABILITY, LOCATIONS, TRANSACTIONS, AUDIT_LOG,
+    SAVED_ADDRESSES, REFERRALS, COMMISSIONS
+  })); }catch(e){}
+}
+function hydrate(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY); if(!raw) return false;
+    const d = JSON.parse(raw);
+    ['USERS','TECHS','BOOKINGS','MESSAGES','TECH_PRICING','ESTIMATES','QUOTES','NOTIFICATIONS',
+     'REVIEWS','DISPUTES','AVAILABILITY','LOCATIONS','TRANSACTIONS','AUDIT_LOG',
+     'SAVED_ADDRESSES','REFERRALS','COMMISSIONS'].forEach(k=>{ if(d[k]) window[k]=d[k]; });
+    return true;
+  }catch(e){ return false; }
+}
+function resetDemo(){ localStorage.removeItem(STORE_KEY); location.reload(); }
+
+/* ---------- audit ---------- */
+let AUDIT_LOG = [];
+function audit(actor, action, target, meta){
+  AUDIT_LOG.unshift({ at: Date.now(), actor, action, target, meta: meta||null });
+  if(AUDIT_LOG.length > 500) AUDIT_LOG.pop();
+  persist();
+}
+
+/* ---------- notifications ---------- */
+let NOTIFICATIONS = [];
+function notify(toRole, toName, title, body, link){
+  NOTIFICATIONS.unshift({ id: Date.now()+Math.random(), toRole, toName, title, body, link:link||null, at:Date.now(), read:false });
+  if(NOTIFICATIONS.length > 100) NOTIFICATIONS.pop();
+  persist(); updateNotifBadge();
+  if(state.role === toRole && (!toName || toName === SESSION[state.role].name)) toast(title);
+}
+function unreadCount(role, name){ return NOTIFICATIONS.filter(n => n.toRole===role && (!n.toName || n.toName===name) && !n.read).length; }
+function toggleNotifPanel(){ const el = document.getElementById('notif-root'); if(!el) return; const hidden = el.classList.contains('hidden'); el.classList.toggle('hidden'); if(hidden) renderNotifList(); }
+function renderNotifList(){
+  const me = SESSION[state.role];
+  const list = NOTIFICATIONS.filter(n => n.toRole===state.role && (!n.toName || n.toName===me.name));
+  document.getElementById('notif-list').innerHTML = list.length
+    ? list.map(n=>'<div class="p-4 border-b border-line '+(n.read?'':'bg-surface-2')+' cursor-pointer hover:bg-surface-2" onclick="openNotif('+n.id+')"><p class="text-sm font-medium text-ink">'+esc(n.title)+'</p><p class="text-xs text-muted mt-0.5">'+esc(n.body)+'</p><p class="text-[11px] text-muted mt-1">'+timeAgo(n.at)+'</p></div>').join('')
+    : '<p class="p-4 text-xs text-muted text-center">No notifications.</p>';
+}
+function openNotif(id){ const n = NOTIFICATIONS.find(x=>x.id===id); if(!n) return; n.read = true; persist(); updateNotifBadge(); renderNotifList(); if(n.link) location.hash = n.link; document.getElementById('notif-root').classList.add('hidden'); }
+function markAllRead(){ const me = SESSION[state.role]; NOTIFICATIONS.forEach(n=>{ if(n.toRole===state.role && (!n.toName || n.toName===me.name)) n.read = true; }); persist(); updateNotifBadge(); renderNotifList(); }
+function updateNotifBadge(){
+  const btn = document.getElementById('notif-btn'); if(!btn) return;
+  const me = SESSION[state.role];
+  const c = unreadCount(state.role, me.name);
+  let dot = btn.querySelector('.notif-dot');
+  if(c>0){ if(!dot){ dot = document.createElement('span'); dot.className='notif-dot absolute top-1 right-1 bg-[var(--danger)] text-white text-[9px] font-semibold rounded-full w-3.5 h-3.5 flex items-center justify-center'; btn.appendChild(dot); } dot.textContent = c>9?'9':c; }
+  else if(dot){ dot.remove(); }
+}
+function timeAgo(ts){ const s = Math.floor((Date.now()-ts)/1000); if(s<60) return s+'s ago'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+
+/* ---------- geolocation ---------- */
+let LOCATIONS = {};
+let _geoTimer = null;
+function startLocationSharing(key, onUpdate){
+  if(!navigator.geolocation){ toast('Geolocation not supported'); return false; }
+  const loc = LOCATIONS[key] || (LOCATIONS[key] = { sharing:false });
+  loc.sharing = true;
+  const tick = () => {
+    navigator.geolocation.getCurrentPosition(
+      pos => { loc.lat=pos.coords.latitude; loc.lng=pos.coords.longitude; loc.updatedAt=Date.now(); loc.verified=true; persist(); if(onUpdate) onUpdate(loc); },
+      () => { if(loc.lat == null){ const base = key.startsWith('tech:') ? {lat:10.3272,lng:123.9033} : {lat:10.3157,lng:123.9187}; loc.lat = base.lat; loc.lng = base.lng; loc.verified = false; } loc.updatedAt = Date.now(); persist(); if(onUpdate) onUpdate(loc); },
+      { enableHighAccuracy:true, maximumAge:5000, timeout:8000 }
+    );
+  };
+  tick();
+  if(_geoTimer) clearInterval(_geoTimer);
+  _geoTimer = setInterval(tick, 10000);
+  return true;
+}
+function isInCebu(lat, lng){ if(lat==null||lng==null) return false; return lat >= 10.20 && lat <= 10.50 && lng >= 123.80 && lng <= 124.05; }
+function nearestBarangay(lat, lng){
+  let best = null, bestD = Infinity;
+  BARANGAYS.forEach(b=>{ const d = distanceKm({lat,lng},{lat:b.lat,lng:b.lng}); if(d < bestD){ bestD = d; best = b; } });
+  return best;
+}
+function stopLocationSharing(key){ const loc = LOCATIONS[key]; if(loc){ loc.sharing = false; persist(); } if(_geoTimer){ clearInterval(_geoTimer); _geoTimer = null; } }
+function getLoc(key){ return LOCATIONS[key] || null; }
+function haversineKm(a,b){
+  if(!a||!b||a.lat==null||b.lat==null) return null;
+  const R=6371, toRad=d=>d*Math.PI/180;
+  const dLat=toRad(b.lat-a.lat), dLng=toRad(b.lng-a.lng);
+  const h=Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
+}
+function distanceKm(a,b){
+  const R=6371, toRad=d=>d*Math.PI/180;
+  const dLat=toRad(b.lat-a.lat), dLng=toRad(b.lng-a.lng);
+  const h=Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
+}
+function barangayOf(name){ return BARANGAYS.find(b=>b.name===name) || BARANGAYS[0]; }
+const BARANGAYS = [
+  {name:'Lahug', lat:10.3272, lng:123.9033},
+  {name:'Mabolo', lat:10.3157, lng:123.9187},
+  {name:'Talamban', lat:10.3639, lng:123.9153},
+  {name:'Banilad', lat:10.3391, lng:123.9115},
+  {name:'IT Park / Apas', lat:10.3298, lng:123.9057},
+  {name:'Guadalupe', lat:10.3115, lng:123.8886},
+  {name:'Capitol Site', lat:10.3145, lng:123.8925},
+  {name:'Mandaue Centro', lat:10.3237, lng:123.9224},
+];
+
+/* ---------- maps ---------- */
+let _map = null, _mapMarkers = {}, _mapTimer = null;
+function openLiveMapModal(bookingId){
+  const b = BOOKINGS.find(x=>x.id===bookingId); if(!b) return;
+  const isTech = state.role==='tech';
+  document.getElementById('map-modal-root').innerHTML =
+    '<div class="fixed inset-0 bg-black/40 z-[70] flex items-center justify-center p-3" onclick="if(event.target===this)closeMapModal()">'
+    +'<div class="bg-surface rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col" style="height:min(640px,90vh)">'
+      +'<div class="p-4 border-b border-line flex items-center justify-between shrink-0"><div><p class="font-semibold text-sm text-ink">Live location</p><p class="text-xs text-muted">'+esc(b.service)+' · '+(isTech?esc(b.customer):esc(b.tech))+'</p></div><button onclick="closeMapModal()" class="icon-btn">'+ic('x','w-4 h-4')+'</button></div>'
+      +'<div id="map" class="flex-1"></div>'
+      +'<div class="p-4 border-t border-line shrink-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">'
+        +'<div id="map-status" class="text-xs text-muted"></div>'
+        +'<div class="flex gap-2"><button onclick="toggleMyLiveSharing(\''+(isTech?'tech:'+b.tech:'customer:'+b.customer)+'\','+bookingId+')" id="share-btn" class="btn-secondary text-xs py-2 px-3"></button><button onclick="closeMapModal();openChatModal('+bookingId+')" class="btn-primary text-xs py-2 px-3">Message</button></div>'
+      +'</div>'
+    +'</div></div>';
+  setTimeout(()=>{
+    if(_map){ _map.remove(); _map = null; }
+    _map = L.map('map', { zoomControl:true }).setView([10.3157, 123.9187], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'&copy; OpenStreetMap' }).addTo(_map);
+    _mapMarkers = {}; redrawMapMarkers(bookingId);
+    if(_mapTimer) clearInterval(_mapTimer);
+    _mapTimer = setInterval(()=>redrawMapMarkers(bookingId), 5000);
+  }, 60);
+}
+function closeMapModal(){ document.getElementById('map-modal-root').innerHTML = ''; if(_map){ _map.remove(); _map = null; } if(_mapTimer){ clearInterval(_mapTimer); _mapTimer = null; } }
+function toggleMyLiveSharing(meKey, bookingId){
+  const loc = LOCATIONS[meKey] || (LOCATIONS[meKey] = {});
+  if(loc.sharing){ stopLocationSharing(meKey); toast('Sharing off'); }
+  else { const ok = startLocationSharing(meKey, ()=>redrawMapMarkers(bookingId)); if(ok) toast('Sharing on'); }
+  redrawMapMarkers(bookingId);
+}
+function redrawMapMarkers(bookingId){
+  if(!_map) return;
+  const b = BOOKINGS.find(x=>x.id===bookingId); if(!b) return;
+  const techLoc = getLoc('tech:'+b.tech); const custLoc = getLoc('customer:'+b.customer);
+  Object.values(_mapMarkers).forEach(m=>_map.removeLayer(m)); _mapMarkers = {};
+  if(techLoc && techLoc.lat){ _mapMarkers.tech = L.marker([techLoc.lat, techLoc.lng], { icon: L.divIcon({ className:'', html:'<div class="tech-marker">'+ic('wrench','w-3.5 h-3.5')+'</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(_map).bindPopup('<b>'+esc(b.tech)+'</b>'); }
+  if(custLoc && custLoc.lat){ _mapMarkers.cust = L.marker([custLoc.lat, custLoc.lng], { icon: L.divIcon({ className:'', html:'<div class="cust-marker">'+ic('pin','w-3.5 h-3.5')+'</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(_map).bindPopup('<b>'+esc(b.customer)+'</b>'); }
+  if(techLoc && custLoc && techLoc.lat && custLoc.lat){
+    const km = haversineKm(techLoc, custLoc);
+    const line = L.polyline([[techLoc.lat,techLoc.lng],[custLoc.lat,custLoc.lng]], {color:'#007AFF', weight:2, dashArray:'6 6'}).addTo(_map);
+    _mapMarkers.line = line; _map.fitBounds(line.getBounds().pad(0.35));
+    const mins = Math.max(3, Math.round(km/22*60));
+    const st = document.getElementById('map-status'); if(st) st.innerHTML = '<b>'+km.toFixed(1)+' km</b> apart · ~'+mins+' min';
+  } else { const st = document.getElementById('map-status'); if(st) st.innerHTML = 'Waiting for location…'; }
+  const isTech = state.role==='tech';
+  const meKey = isTech ? ('tech:'+b.tech) : ('customer:'+b.customer);
+  const loc = LOCATIONS[meKey] || {};
+  const btn = document.getElementById('share-btn'); if(btn) btn.innerHTML = loc.sharing ? 'Sharing on' : 'Share location';
+}
+let _exploreMap = null;
+function openExploreMap(){
+  const filter = techFilterVal === 'All' ? null : techFilterVal;
+  const matches = TECHS.filter(t => t.status === 'Active' && (!filter || t.services.includes(filter)));
+  const custLoc = getLoc('customer:Marki Santos');
+  const custBase = custLoc && custLoc.lat ? custLoc : barangayOf('Lahug');
+  document.getElementById('map-explore-root').innerHTML =
+    '<div class="fixed inset-0 bg-black/40 z-[75] flex items-center justify-center p-0 sm:p-3" onclick="if(event.target===this)closeExploreMap()">'
+    +'<div class="bg-surface rounded-none sm:rounded-2xl w-full max-w-3xl overflow-hidden flex flex-col" style="height:min(92vh,760px)">'
+      +'<div class="p-4 border-b border-line flex items-center justify-between shrink-0"><p class="font-semibold text-sm text-ink">'+matches.length+' technicians</p><button onclick="closeExploreMap()" class="icon-btn">'+ic('x','w-4 h-4')+'</button></div>'
+      +'<div id="explore-map" class="flex-1"></div>'
+      +'<div class="p-3 border-t border-line shrink-0 flex flex-wrap items-center gap-2 overflow-x-auto">'
+        +['All'].concat([...new Set(TECHS.flatMap(t=>t.services))]).map(s=>'<button onclick="techFilterVal=\''+s+'\';closeExploreMap();openExploreMap()" class="chip '+(techFilterVal===s?'chip-active':'')+'">'+s+'</button>').join('')
+      +'</div>'
+    +'</div></div>';
+  setTimeout(()=>{
+    if(_exploreMap){ _exploreMap.remove(); _exploreMap = null; }
+    _exploreMap = L.map('explore-map', { zoomControl:true }).setView([custBase.lat, custBase.lng], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'&copy; OpenStreetMap' }).addTo(_exploreMap);
+    L.marker([custBase.lat, custBase.lng], { icon: L.divIcon({ className:'', html:'<div class="cust-marker">'+ic('pin','w-3.5 h-3.5')+'</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(_exploreMap).bindPopup('You');
+    matches.forEach(t=>{
+      const km = haversineKm(custBase, {lat:t.lat, lng:t.lng});
+      const html = '<div style="min-width:160px"><p style="font-weight:600;font-size:14px;margin:0 0 4px;color:var(--ink)">'+esc(t.name)+'</p><p style="font-size:12px;color:var(--muted);margin:0 0 8px">'+(km!=null?km.toFixed(1)+' km':'')+'</p><button onclick="closeExploreMap();openBookingModal('+t.id+')" style="font-size:13px;padding:6px 12px;border-radius:8px;background:var(--accent);border:none;cursor:pointer;color:#fff;font-weight:600;font-family:inherit">Book</button></div>';
+      L.marker([t.lat, t.lng], { icon: L.divIcon({ className:'', html:'<div class="tech-marker">'+ic('wrench','w-3.5 h-3.5')+'</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(_exploreMap).bindPopup(html);
+    });
+    const pts = [[custBase.lat, custBase.lng]].concat(matches.map(t=>[t.lat, t.lng]));
+    if(pts.length > 1) _exploreMap.fitBounds(L.latLngBounds(pts).pad(0.15));
+  }, 60);
+}
+function closeExploreMap(){ document.getElementById('map-explore-root').innerHTML = ''; if(_exploreMap){ _exploreMap.remove(); _exploreMap = null; } }
+let _inlineMap = null, _inlineMarkers = {};
+function initInlineMap(){
+  const el = document.getElementById('inline-map'); if(!el) return;
+  if(_inlineMap){ _inlineMap.remove(); _inlineMap = null; }
+  const custLoc = getLoc('customer:Marki Santos');
+  const custBase = custLoc && custLoc.lat ? custLoc : barangayOf('Lahug');
+  _inlineMap = L.map('inline-map', { zoomControl:true }).setView([custBase.lat, custBase.lng], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'&copy; OpenStreetMap' }).addTo(_inlineMap);
+  _inlineMarkers = {};
+  L.marker([custBase.lat, custBase.lng], { icon: L.divIcon({ className:'', html:'<div class="cust-marker">'+ic('pin','w-3.5 h-3.5')+'</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(_inlineMap).bindPopup('You');
+  const filter = techFilterVal === 'All' ? null : techFilterVal;
+  const matches = TECHS.filter(t=>t.status==='Active' && (!filter || t.services.includes(filter)));
+  matches.forEach(t=>{
+    const km = haversineKm(custBase, {lat:t.lat, lng:t.lng});
+    const html = '<div style="min-width:160px"><p style="font-weight:600;font-size:14px;margin:0 0 8px;color:var(--ink)">'+esc(t.name)+'</p><button onclick="openBookingModal('+t.id+')" style="font-size:13px;padding:6px 12px;border-radius:8px;background:var(--accent);border:none;cursor:pointer;color:#fff;font-weight:600;font-family:inherit">Book</button></div>';
+    const m = L.marker([t.lat, t.lng], { icon: L.divIcon({ className:'', html:'<div class="tech-marker">'+ic('wrench','w-3.5 h-3.5')+'</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(_inlineMap).bindPopup(html);
+    _inlineMarkers[t.name] = m;
+  });
+  const pts = [[custBase.lat, custBase.lng]].concat(matches.map(t=>[t.lat,t.lng]));
+  if(pts.length > 1) _inlineMap.fitBounds(L.latLngBounds(pts).pad(0.15));
+}
+function focusOnTech(name){ if(!_inlineMap || !_inlineMarkers[name]) return; const m = _inlineMarkers[name]; _inlineMap.setView(m.getLatLng(), 15, { animate:true }); m.openPopup(); }
+
+/* ============================================================
+   LIFECYCLE — extended with estimate / quotation / final stages
+   ============================================================
+   Pending  → awaiting technician accept (multi-tech: each tech accepts separately)
+   Estimated → technician has posted their estimated price (pre-inspection)
+   Confirmed → customer chose this tech as the primary visit
+   EnRoute / Arrived / InProgress → on-site
+   QuotePending → technician has submitted the formal quotation
+   AwaitingApproval → customer is reviewing the quote
+   Completed → customer approved final price and paid tech directly
+   */
+const LIFECYCLE = ['Pending','Estimated','Confirmed','EnRoute','Arrived','InProgress','QuotePending','Completed'];
+const TERMINAL = ['Completed','Cancelled','NoShow','Unmatched','Disputed'];
+function lifecycleIndex(s){ return LIFECYCLE.indexOf(s); }
+
+function advanceLifecycle(id, toState, actor){
+  const b = BOOKINGS.find(x=>x.id===id); if(!b) return;
+  b.status = toState;
+  b.history = b.history || [];
+  b.history.push({ at:Date.now(), actor, event:'Status → '+toState });
+  audit(actor, 'status:'+toState, 'booking:'+id);
+  if(toState==='EnRoute') notify('customer', b.customer, 'Technician on the way', b.tech+' is heading to your job.', '#/app/bookings/'+id);
+  else if(toState==='Arrived') notify('customer', b.customer, 'Technician arrived', b.tech+' has arrived.', '#/app/bookings/'+id);
+  else if(toState==='Completed'){
+    notify('customer', b.customer, 'Job completed', 'Please rate '+b.tech+'.', '#/app/bookings/'+id);
+    notify('admin', null, 'Job completed', b.customer+' → '+b.tech+' · ₱'+(b.finalAmount||0).toLocaleString(), '#/admin/bookings');
+  }
+  persist(); renderShellContent(location.hash);
+}
+
+/* ============================================================
+   ESTIMATES — pre-inspection price per technician per service
+   ============================================================
+   Multiple technicians can hold estimates for the same booking.
+   The customer compares them before deciding.
+   ============================================================ */
+let ESTIMATES = [];
+
+function postEstimate(bookingId, techName, amount, note){
+  const b = BOOKINGS.find(x=>x.id===bookingId); if(!b) return;
+  // remove any existing estimate by this tech for this booking
+  ESTIMATES = ESTIMATES.filter(e => !(e.bookingId === bookingId && e.tech === techName));
+  ESTIMATES.push({
+    id: Date.now() + Math.random(),
+    bookingId, tech: techName,
+    amount: Number(amount) || 0,
+    note: note || '',
+    postedAt: Date.now()
+  });
+  // The booking moves into "Estimated" if it was Pending and at least one tech has posted
+  if(b.status === 'Pending' || b.status === 'Estimated'){
+    b.status = 'Estimated';
+  }
+  b.history = b.history || [];
+  b.history.push({ at:Date.now(), actor:'tech:'+techName, event:'Estimate posted — ₱'+Number(amount).toLocaleString() });
+  persist();
+}
+
+function getEstimatesFor(bookingId){ return ESTIMATES.filter(e => e.bookingId === bookingId); }
+
+/* ---------- quotation (post-inspection) ---------- */
+let QUOTES = [];
+let _quoteDraft = { items:[] };
+function openQuoteComposer(bookingId){
+  const b = BOOKINGS.find(x=>x.id===bookingId); if(!b) return;
+  const est = ESTIMATES.find(e => e.bookingId === bookingId && e.tech === b.tech);
+  const base = est ? est.amount : 500;
+  _quoteDraft = { items:[
+    { label:'Labor', amount: Math.round(base * 0.6) },
+    { label:'Parts', amount: Math.round(base * 0.35) },
+    { label:'Diagnostic', amount: 0 }
+  ]};
+  renderQuoteComposer(bookingId);
+}
+function renderQuoteComposer(bookingId){
+  const total = _quoteDraft.items.reduce((s,i)=>s+(Number(i.amount)||0),0);
+  const commission = computeCommission(total);
+  const b = BOOKINGS.find(x=>x.id===bookingId);
+  document.getElementById('quote-modal-root').innerHTML =
+    '<div class="fixed inset-0 bg-black/40 z-[70] flex items-center justify-center p-4" onclick="if(event.target===this)closeQuoteComposer()">'
+    +'<div class="bg-surface rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">'
+      +'<h3 class="text-lg font-semibold mb-1 text-ink">Send quotation</h3>'
+      +'<p class="text-sm text-muted mb-5">You\'ve inspected the unit. Itemize the actual cost. The customer approves before work begins.</p>'
+      +'<div class="space-y-2 mb-4">'
+        +_quoteDraft.items.map((it,i)=>'<div class="flex gap-2 items-center"><input value="'+esc(it.label)+'" onchange="_quoteDraft.items['+i+'].label=this.value" class="input flex-1 text-sm"/><span class="text-sm text-muted">₱</span><input type="number" value="'+it.amount+'" onchange="_quoteDraft.items['+i+'].amount=this.value;renderQuoteComposer('+bookingId+')" class="input max-w-[90px]"/><button onclick="_quoteDraft.items.splice('+i+',1);renderQuoteComposer('+bookingId+')" class="text-muted">'+ic('x','w-4 h-4')+'</button></div>').join('')
+      +'</div>'
+      +'<button onclick="_quoteDraft.items.push({label:\'New item\',amount:0});renderQuoteComposer('+bookingId+')" class="btn-link mb-5 text-sm">+ Add item</button>'
+      +'<div class="quote-line font-semibold text-ink"><span>Total</span><span>₱'+total.toLocaleString()+'</span></div>'
+      +'<div class="quote-line text-muted text-sm"><span>FixLink commission (12%)</span><span>₱'+commission.toLocaleString()+'</span></div>'
+      +'<div class="quote-line font-semibold text-ink pt-3 border-t border-line-2 border-t"><span>You receive</span><span>₱'+(total-commission).toLocaleString()+'</span></div>'
+      +'<p class="text-xs text-muted my-5 leading-relaxed">You collect ₱'+total.toLocaleString()+' directly from the customer (cash or GCash). Your 12% commission to FixLink is ₱'+commission.toLocaleString()+' — remit after the job.</p>'
+      +'<div class="flex gap-2"><button onclick="closeQuoteComposer()" class="btn-secondary flex-1">Cancel</button><button onclick="sendQuote('+bookingId+')" class="btn-primary flex-1">Send quotation</button></div>'
+    +'</div></div>';
+}
+function closeQuoteComposer(){ document.getElementById('quote-modal-root').innerHTML=''; }
+function sendQuote(bookingId){
+  const b = BOOKINGS.find(x=>x.id===bookingId);
+  const total = _quoteDraft.items.reduce((s,i)=>s+(Number(i.amount)||0),0);
+  const commission = computeCommission(total);
+  QUOTES.unshift({ id:Date.now(), bookingId, items:_quoteDraft.items.slice(), total, commission, status:'Pending', sentAt:Date.now(), decidedAt:null });
+  b.status = 'QuotePending';
+  b.history = b.history || [];
+  b.history.push({ at:Date.now(), actor:'tech', event:'Quotation sent — ₱'+total.toLocaleString() });
+  notify('customer', b.customer, 'New quotation', '₱'+total.toLocaleString()+' from '+b.tech+'. Tap to review.', '#/app/bookings/'+bookingId);
+  audit('tech:'+b.tech, 'quote:sent', 'booking:'+bookingId, { total, commission });
+  closeQuoteComposer(); persist(); renderShellContent(location.hash);
+}
+function decideQuote(quoteId, decision){
+  const q = QUOTES.find(x=>x.id===quoteId); if(!q) return;
+  const b = BOOKINGS.find(x=>x.id===q.bookingId);
+  q.status = decision === 'approve' ? 'Approved' : 'Declined';
+  q.decidedAt = Date.now();
+  b.history = b.history || [];
+  b.history.push({ at:Date.now(), actor:'customer', event:'Quotation '+q.status.toLowerCase()+' — ₱'+q.total.toLocaleString() });
+  if(decision==='approve'){
+    b.status = 'InProgress';
+    b.finalAmount = q.total;
+    b.finalCommission = q.commission;
+    // Record the commission owed
+    COMMISSIONS.unshift({
+      id: Date.now(), bookingId: b.id, tech: b.tech,
+      finalAmount: q.total, rate: COMMISSION_RATE, commission: q.commission,
+      status: 'Owed', at: Date.now()
+    });
+    notify('tech', b.tech, 'Quotation approved', b.customer+' approved ₱'+q.total.toLocaleString()+'. Work can begin.', '#/tech/schedule');
+    notify('customer', b.customer, 'Quotation approved', 'Work will proceed. Final price ₱'+q.total.toLocaleString()+' — paid directly to '+b.tech+'.', '#/app/bookings/'+b.id);
+  } else {
+    b.status = 'Cancelled';
+    notify('tech', b.tech, 'Quotation declined', b.customer+' declined your quotation.', '#/tech/schedule');
+  }
+  audit('customer:'+b.customer, 'quote:'+q.status, 'booking:'+b.id, { total:q.total });
+  persist(); renderShellContent(location.hash);
+}
+
+/* ---------- commissions ---------- */
+let COMMISSIONS = [];
+function markCommissionPaid(id){
+  const c = COMMISSIONS.find(x=>x.id===id); if(!c) return;
+  c.status = 'Paid'; c.paidAt = Date.now();
+  audit('tech:'+c.tech, 'commission:paid', 'commission:'+c.id, { amount: c.commission });
+  persist(); toast('Commission marked paid'); renderShellContent(location.hash);
+}
+function techOwed(name){ return COMMISSIONS.filter(c => c.tech === name && c.status === 'Owed').reduce((s,c)=>s+c.commission, 0); }
+function techPaid(name){ return COMMISSIONS.filter(c => c.tech === name && c.status === 'Paid').reduce((s,c)=>s+c.commission, 0); }
+
+/* ---------- reviews ---------- */
+let REVIEWS = [];
+function openReviewModal(bookingId){
+  const b = BOOKINGS.find(x=>x.id===bookingId);
+  document.getElementById('modal-root').innerHTML =
+    '<div class="fixed inset-0 bg-black/40 z-[70] flex items-center justify-center p-4" onclick="if(event.target===this)closeModal()">'
+    +'<div class="bg-surface rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">'
+      +'<h3 class="text-lg font-semibold mb-1 text-ink">Rate '+esc(b.tech)+'</h3>'
+      +'<p class="text-sm text-muted mb-5">'+esc(b.service)+' · '+esc(b.date)+'</p>'
+      +'<div class="space-y-3 mb-5">'
+        +['Workmanship','Punctuality','Cleanliness','Price fairness'].map(cat=>'<div class="flex items-center justify-between"><span class="text-sm text-ink">'+cat+'</span><div class="flex gap-1">'+[1,2,3,4,5].map(n=>'<button onclick="setReviewStar(\''+cat+'\','+n+')" data-cat="'+cat+'" data-n="'+n+'" class="review-star text-xl" style="color:var(--line)">★</button>').join('')+'</div></div>').join('')
+      +'</div>'
+      +'<div class="mb-4"><label class="input-label">Review</label><textarea id="rv-text" rows="3" class="input" placeholder="How was the job?"></textarea></div>'
+      +'<label class="flex items-center gap-2 text-sm text-ink mb-5"><input type="checkbox" id="rv-warranty" checked/> Offer 30-day labor warranty</label>'
+      +'<div class="flex gap-2"><button onclick="closeModal()" class="btn-secondary flex-1">Skip</button><button onclick="submitReview('+bookingId+')" class="btn-primary flex-1">Submit</button></div>'
+    +'</div></div>';
+  window._reviewDraft = { stars:{}, text:'', photo:null, warranty:true };
+}
+function setReviewStar(cat, n){
+  window._reviewDraft.stars[cat] = n;
+  document.querySelectorAll('.review-star').forEach(el=>{ if(el.dataset.cat===cat){ el.style.color = Number(el.dataset.n)<=n ? 'var(--accent)' : 'var(--line)'; } });
+}
+function submitReview(bookingId){
+  const b = BOOKINGS.find(x=>x.id===bookingId);
+  const d = window._reviewDraft;
+  const vals = Object.values(d.stars);
+  const avg = vals.length ? vals.reduce((a,c)=>a+c,0)/vals.length : 5;
+  REVIEWS.unshift({ id:Date.now(), bookingId, customer:b.customer, tech:b.tech, service:b.service, stars:d.stars, avg:Math.round(avg*10)/10, text:document.getElementById('rv-text').value.trim(), photo:null, warranty:document.getElementById('rv-warranty').checked, at:Date.now() });
+  const t = TECHS.find(t=>t.name===b.tech);
+  if(t){ const all = REVIEWS.filter(r=>r.tech===t.name); t.rating = Math.round((all.reduce((s,r)=>s+r.avg,0)/all.length)*10)/10; }
+  b.history = b.history || [];
+  b.history.push({ at:Date.now(), actor:'customer', event:'Reviewed ('+avg.toFixed(1)+'★)' });
+  notify('tech', b.tech, 'New review', b.customer+' rated you '+avg.toFixed(1)+'★', '#/tech/profile');
+  persist(); closeModal(); toast('Thanks'); renderShellContent(location.hash);
+}
+function renderStars(avg, size){
+  const full = Math.round(avg);
+  let s = '';
+  for(let i=1;i<=5;i++){ s += '<svg viewBox="0 0 24 24" width="'+(size||14)+'" height="'+(size||14)+'" '+(i<=full?'fill="currentColor" stroke="none"':'fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"')+'><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'; }
+  return s;
+}
+function openTechReviews(techName){
+  const t = TECHS.find(x=>x.name===techName); if(!t) return;
+  const list = REVIEWS.filter(r=>r.tech===techName).sort((a,b)=>b.at-a.at);
+  const avg = list.length ? list.reduce((s,r)=>s+r.avg,0)/list.length : t.rating;
+  const cats = ['Workmanship','Punctuality','Cleanliness','Price fairness'];
+  const catAvg = {};
+  cats.forEach(c=>{ const vals = list.map(r=>r.stars?.[c]).filter(v=>v); catAvg[c] = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0; });
+  document.getElementById('review-detail-root').innerHTML =
+    '<div class="fixed inset-0 bg-black/40 z-[75] flex items-center justify-center p-3" onclick="if(event.target===this)closeTechReviews()">'
+    +'<div class="bg-surface rounded-2xl w-full max-w-lg overflow-hidden flex flex-col" style="max-height:90vh">'
+      +'<div class="p-4 border-b border-line flex items-center justify-between shrink-0"><div><p class="font-semibold text-sm text-ink">'+esc(t.name)+'</p><p class="text-xs text-muted">'+esc(t.services.join(', '))+'</p></div><button onclick="closeTechReviews()" class="icon-btn">'+ic('x','w-4 h-4')+'</button></div>'
+      +'<div class="overflow-y-auto flex-1 p-6">'
+        +'<div class="flex items-center gap-6 mb-6 pb-6 border-b border-line">'
+          +'<div><p class="text-4xl font-semibold text-ink tracking-tight">'+avg.toFixed(1)+'</p><p class="star-row mt-1">'+renderStars(avg,14)+'</p><p class="text-xs text-muted mt-1">'+list.length+' review'+(list.length===1?'':'s')+'</p></div>'
+          +'<div class="flex-1 grid grid-cols-2 gap-3">'+cats.map(c=>'<div><p class="text-xs text-muted">'+c+'</p><p class="text-sm font-semibold text-ink">'+catAvg[c].toFixed(1)+'</p></div>').join('')+'</div>'
+        +'</div>'
+        +(list.length?list.map(r=>'<div class="pb-5 mb-5 border-b border-line last:border-0"><div class="flex items-center justify-between mb-1"><p class="text-sm font-medium text-ink">'+esc(r.customer)+'</p><p class="star-row">'+renderStars(r.avg,12)+'</p></div><p class="text-xs text-muted mb-2">'+esc(r.service)+' · '+timeAgo(r.at)+'</p>'+(r.text?'<p class="text-sm text-ink">'+esc(r.text)+'</p>':'')+'</div>').join(''):'<p class="text-sm text-muted text-center py-6">No reviews yet.</p>')
+      +'</div>'
+      +'<div class="p-4 border-t border-line shrink-0 flex gap-2"><button onclick="closeTechReviews();openChatWithTech(\''+esc(t.name).replace(/'/g,"\\'")+'\')" class="btn-secondary flex-1">Message</button><button onclick="closeTechReviews();openBookingModal('+t.id+')" class="btn-primary flex-1">Book</button></div>'
+    +'</div></div>';
+}
+function closeTechReviews(){ document.getElementById('review-detail-root').innerHTML=''; }
+
+/* ---------- disputes ---------- */
+let DISPUTES = [];
+function openDisputeModal(bookingId){
+  const b = BOOKINGS.find(x=>x.id===bookingId);
+  document.getElementById('dispute-modal-root').innerHTML =
+    '<div class="fixed inset-0 bg-black/40 z-[70] flex items-center justify-center p-4" onclick="if(event.target===this)closeDisputeModal()">'
+    +'<div class="bg-surface rounded-2xl max-w-md w-full p-6">'
+      +'<h3 class="text-lg font-semibold mb-1 text-ink">Report a problem</h3>'
+      +'<p class="text-sm text-muted mb-5">'+esc(b.service)+' with '+esc(b.tech)+'</p>'
+      +'<label class="input-label">Reason</label>'
+      +'<select id="dp-reason" class="input mb-3"><option>Work not completed</option><option>Overcharged vs. quote</option><option>Damage to appliance</option><option>Rude behavior</option><option>No-show</option><option>Other</option></select>'
+      +'<label class="input-label">Details</label>'
+      +'<textarea id="dp-text" rows="3" class="input mb-5" placeholder="Describe what happened"></textarea>'
+      +'<div class="flex gap-2"><button onclick="closeDisputeModal()" class="btn-secondary flex-1">Cancel</button><button onclick="submitDispute('+bookingId+')" class="btn-danger flex-1">Submit</button></div>'
+    +'</div></div>';
+}
+function closeDisputeModal(){ document.getElementById('dispute-modal-root').innerHTML=''; }
+function submitDispute(bookingId){
+  const b = BOOKINGS.find(x=>x.id===bookingId);
+  DISPUTES.unshift({ id:Date.now(), bookingId, customer:b.customer, tech:b.tech, reason:document.getElementById('dp-reason').value, text:document.getElementById('dp-text').value.trim(), status:'Open', at:Date.now() });
+  b.history = b.history || [];
+  b.history.push({ at:Date.now(), actor:'customer', event:'Dispute filed' });
+  notify('admin', null, 'New dispute', b.customer+' vs '+b.tech, '#/admin/disputes');
+  notify('tech', b.tech, 'Dispute filed', b.customer+' filed a dispute.', '#/tech/schedule');
+  persist(); closeDisputeModal(); toast('Submitted');
+}
+function resolveDispute(id, resolution){
+  const d = DISPUTES.find(x=>x.id===id); if(!d) return;
+  d.status = 'Resolved'; d.resolution = resolution; d.resolvedAt = Date.now();
+  notify('customer', d.customer, 'Dispute resolved', 'Admin: '+resolution, '#/app/bookings/'+d.bookingId);
+  notify('tech', d.tech, 'Dispute resolved', 'Admin: '+resolution, '#/tech/schedule');
+  audit('admin', 'dispute:resolved', 'dispute:'+id, { resolution });
+  persist(); renderShellContent(location.hash);
+}
+
+/* ---------- availability ---------- */
+let AVAILABILITY = {};
+function addAvailabilityBlock(name, day, from, to, off){ if(!AVAILABILITY[name]) AVAILABILITY[name] = []; AVAILABILITY[name].push({ day, from, to, off }); persist(); }
+function removeAvailabilityBlock(name, idx){ if(AVAILABILITY[name]) AVAILABILITY[name].splice(idx,1); persist(); renderShellContent(location.hash); }
+function availableAt(techName, date, time){
+  const blocks = AVAILABILITY[techName] || [];
+  if(!blocks.length) return true;
+  const d = new Date(date+' '+time);
+  const day = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+  const t = time.slice(0,5);
+  const offHit = blocks.some(b=>b.off && b.day===day && t>=b.from && t<=b.to);
+  if(offHit) return false;
+  const onBlocks = blocks.filter(b=>!b.off);
+  if(!onBlocks.length) return true;
+  return onBlocks.some(b=>b.day===day && t>=b.from && t<=b.to);
+}
+
+/* ---------- transactions (payment log, no escrow) ---------- */
+let TRANSACTIONS = [];
+function recordTransaction(bookingId, kind, method, amount, recordedBy, ref){
+  TRANSACTIONS.unshift({ id:Date.now(), bookingId, kind, method, amount, ref:ref||'', recordedBy, confirmedBy:null, at:Date.now() });
+  persist();
+}
+
+/* ---------- saved addresses / referrals ---------- */
+let SAVED_ADDRESSES = { 'Marki Santos': [ { label:'Home', barangay:'Lahug', landmark:'Near JY Square', isDefault:true } ] };
+let REFERRALS = [];
+function makeReferralCode(name){ return name.split(' ').map(s=>s[0]).join('').toUpperCase() + Math.floor(Math.random()*900+100); }
+function customerReferralCode(name){ let r = REFERRALS.find(x=>x.owner===name); if(!r){ r = { owner:name, code:makeReferralCode(name), uses:0, discount:100 }; REFERRALS.push(r); persist(); } return r; }
+
+/* ---------- services + problems ---------- */
+const SERVICES = [
+  {id:'aircon', label:'Aircon'},{id:'ref', label:'Refrigerator'},{id:'washer', label:'Washing Machine'},
+  {id:'tv', label:'TV'},{id:'water', label:'Water Heater'},{id:'micro', label:'Microwave'},
+  {id:'fan', label:'Electric Fan'},{id:'rice', label:'Rice Cooker'},{id:'kettle', label:'Electric Kettle'},{id:'stove', label:'Induction Stove'},
+];
+const COMMON_PROBLEMS = {
+  aircon: ['Not cooling / weak air','Water leaking','Strange noise','Needs cleaning','Won\'t turn on','Remote not working','Bad smell'],
+  ref: ['Not cooling','Freezer works but fridge doesn\'t','Leaking','Strange noise','Ice buildup','Won\'t turn on'],
+  washer: ['Not spinning','Won\'t drain','Leaking','Won\'t start','Strange noise','Door or lid issue'],
+  tv: ['No picture','No sound','Screen lines or spots','Won\'t turn on','Remote issue','HDMI or port issue'],
+  water: ['No hot water','Leaking','Pilot won\'t light','Strange noise'],
+  micro: ['Not heating','Sparking','Turntable not spinning','Won\'t start'],
+  fan: ['Not spinning','Weak airflow','Strange noise','Won\'t turn on'],
+  rice: ['Not heating','Doesn\'t switch to warm','Leaking'],
+  kettle: ['Not boiling','Auto-off too early','Leaking'],
+  stove: ['Not heating','Error code showing','Won\'t turn on'],
+};
+
+/* ---------- demo data ---------- */
+let USERS = [
+  {id:1,name:'Marki Santos',email:'marki@example.com',role:'Customer',status:'Active',joined:'Jan 2026'},
+  {id:2,name:'Jun Alvarez',email:'jun.alvarez@example.com',role:'Technician',status:'Active',joined:'Feb 2026'},
+  {id:3,name:'Ronnie Cabatingan',email:'ronnie.c@example.com',role:'Technician',status:'Active',joined:'Feb 2026'},
+  {id:4,name:'Ben Quijano',email:'ben.q@example.com',role:'Technician',status:'Active',joined:'Mar 2026'},
+  {id:5,name:'Angela Reyes',email:'angela.reyes@example.com',role:'Customer',status:'Active',joined:'Mar 2026'},
+  {id:6,name:'Carlo Dizon',email:'carlo.dizon@example.com',role:'Customer',status:'Suspended',joined:'Apr 2026'},
+  {id:7,name:'Mikko Bacus',email:'mikko.bacus@example.com',role:'Technician',status:'Pending',joined:'Apr 2026'},
+  {id:8,name:'Patricia Uy',email:'patricia.uy@example.com',role:'Customer',status:'Active',joined:'May 2026'},
+];
+function seededRandomFromString(s){
+  let h = 2166136261 >>> 0;
+  for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 10000) / 10000; };
+}
+function randomNear(base, seed, spreadKm=2.2){
+  const rand = seededRandomFromString(seed);
+  const dLat = (rand()*2-1) * (spreadKm/111);
+  const dLng = (rand()*2-1) * (spreadKm/(111*Math.cos(base.lat*Math.PI/180)));
+  return { lat: base.lat + dLat, lng: base.lng + dLng };
+}
+let TECHS = [
+  {id:1, name:'Jun Alvarez',        services:['Aircon'],                                    rating:4.9, jobs:212, verified:true,  status:'Active',    home:'Lahug',          radiusKm:8, bio:'Split-type specialist.', responseMin:4,  onTimeRate:94, repeatCustomers:38, specialty:'Split-type · Inverter'},
+  {id:2, name:'Ronnie Cabatingan',  services:['Aircon'],                                    rating:4.7, jobs:98,  verified:true,  status:'Active',    home:'Talamban',       radiusKm:6, bio:'Fast and clean.', responseMin:11, onTimeRate:88, repeatCustomers:12, specialty:'Window-type · Repair'},
+  {id:3, name:'Edgar Salig',        services:['Aircon','Electric Fan'],                     rating:4.4, jobs:41,  verified:false, status:'Active',    home:'Mabolo',         radiusKm:5, bio:'Window and fans.', responseMin:22, onTimeRate:82, repeatCustomers:6,  specialty:'Window-type · Fans'},
+  {id:4, name:'Mikko Bacus',        services:['Washing Machine'],                           rating:4.8, jobs:150, verified:true,  status:'Active',    home:'Banilad',        radiusKm:7, bio:'Front and top load.', responseMin:6,  onTimeRate:92, repeatCustomers:24, specialty:'Front-load · Top-load'},
+  {id:5, name:'Ariel Dungog',       services:['Washing Machine','Refrigerator'],            rating:4.5, jobs:64,  verified:true,  status:'Active',    home:'Guadalupe',      radiusKm:6, bio:'Two appliances.', responseMin:14, onTimeRate:85, repeatCustomers:9,  specialty:'Washer · Ref'},
+  {id:6, name:'Ben Quijano',        services:['Refrigerator','Aircon'],                     rating:4.9, jobs:180, verified:true,  status:'Active',    home:'IT Park / Apas', radiusKm:9, bio:'Inverter diagnostics.', responseMin:5,  onTimeRate:96, repeatCustomers:41, specialty:'Inverter ref · Compressor'},
+  {id:7, name:'Toto Lim',           services:['Refrigerator'],                              rating:4.3, jobs:37,  verified:false, status:'Suspended', home:'Capitol Site',   radiusKm:5, bio:'', responseMin:35, onTimeRate:74, repeatCustomers:3,  specialty:'Ref'},
+  {id:8, name:'Dondon Velasco',     services:['TV','Microwave','Induction Stove'],          rating:4.6, jobs:88,  verified:true,  status:'Active',    home:'Mandaue Centro', radiusKm:7, bio:'Board-level repair.', responseMin:9,  onTimeRate:90, repeatCustomers:17, specialty:'TV · Microwave · Induction'},
+  {id:9, name:'Rey Tumulak',        services:['Water Heater','Rice Cooker','Electric Kettle'], rating:4.5, jobs:52, verified:true, status:'Active',   home:'Talamban',       radiusKm:6, bio:'Small appliances.', responseMin:12, onTimeRate:87, repeatCustomers:11, specialty:'Water heater · Small appliances'},
+  {id:10,name:'Nilo Abella',        services:['Aircon','Refrigerator','Washing Machine'],   rating:4.6, jobs:126, verified:true,  status:'Active',    home:'Guadalupe',      radiusKm:8, bio:'Full coverage.', responseMin:8,  onTimeRate:91, repeatCustomers:22, specialty:'Full white-goods'},
+];
+TECHS.forEach(t=>{
+  const base = barangayOf(t.home);
+  const pos = randomNear(base, t.name);
+  t.lat = pos.lat; t.lng = pos.lng;
+  LOCATIONS['tech:'+t.name] = { role:'tech', name:t.name, lat:pos.lat, lng:pos.lng, updatedAt:Date.now(), sharing:false, verified:true };
+});
+LOCATIONS['customer:Marki Santos'] = { role:'customer', name:'Marki Santos', lat:barangayOf('Lahug').lat, lng:barangayOf('Lahug').lng, updatedAt:Date.now(), sharing:false, verified:true };
+
+let BOOKINGS = [
+  {id:101,customer:'Marki Santos',tech:'Jun Alvarez',service:'Aircon',problems:['Not cooling / weak air'],date:'Sep 24, 2026',time:'14:00',barangay:'Lahug',address:'Lahug, Cebu City',lat:10.3272,lng:123.9033,status:'Confirmed',declined:[],history:[],respondDeadline:null},
+  {id:102,customer:'Angela Reyes',tech:'Ben Quijano',service:'Refrigerator',problems:['Not cooling'],date:'Sep 25, 2026',time:'10:00',barangay:'Mabolo',address:'Mabolo, Cebu City',lat:10.3157,lng:123.9187,status:'Pending',declined:[],history:[],respondDeadline:Date.now()+20000},
+  {id:103,customer:'Patricia Uy',tech:'Mikko Bacus',service:'Washing Machine',problems:['Not spinning','Strange noise'],date:'Sep 20, 2026',time:'15:00',barangay:'Talamban',address:'Talamban, Cebu City',lat:10.3639,lng:123.9153,status:'Completed',declined:[],history:[],finalAmount:700,finalCommission:84},
+  {id:104,customer:'Carlo Dizon',tech:'Ronnie Cabatingan',service:'Aircon',problems:['Needs cleaning'],date:'Sep 18, 2026',time:'09:00',barangay:'Banilad',address:'Banilad, Cebu City',lat:10.3391,lng:123.9115,status:'Completed',declined:[],history:[],finalAmount:480,finalCommission:58},
+  {id:105,customer:'Marki Santos',tech:'Jun Alvarez',service:'Aircon',problems:['Water leaking'],date:'Sep 15, 2026',time:'16:30',barangay:'IT Park / Apas',address:'IT Park, Cebu City',lat:10.3298,lng:123.9057,status:'Cancelled',declined:[],history:[]},
+];
+let MESSAGES = {
+  101:[
+    {from:'customer',text:"It's a Carrier split-type, hasn't been cleaned in a while.",photo:null,time:'Mon 6:12 PM'},
+    {from:'tech',text:"Thanks. I'll bring a top-up freon canister just in case.",photo:null,time:'Mon 6:20 PM'},
+  ],
+};
+let TECH_PRICING = [
+  {id:1, service:'Aircon cleaning', base:450, unit:'per unit', factors:[{label:'Split-type', amount:100},{label:'Above 1.5HP', amount:80}]},
+  {id:2, service:'Aircon freon recharge', base:900, unit:'per unit', factors:[{label:'Leak detection', amount:250}]},
+  {id:3, service:'Aircon compressor replacement', base:4500, unit:'flat', factors:[{label:'Rush same-day', amount:200}]},
+];
+ESTIMATES = [
+  { id:9101, bookingId:101, tech:'Jun Alvarez', amount:550, note:'Standard cleaning if split-type, no freon needed.', postedAt:Date.now()-2*86400000 },
+  { id:9102, bookingId:101, tech:'Ronnie Cabatingan', amount:500, note:'Can do same day, will confirm after inspection.', postedAt:Date.now()-1.5*86400000 },
+  { id:9103, bookingId:102, tech:'Ben Quijano', amount:900, note:'Compressor check, likely inverter board.', postedAt:Date.now()-3600000 },
+];
+REVIEWS = [
+  { id:9001, bookingId:104, customer:'Carlo Dizon',  tech:'Ronnie Cabatingan', service:'Aircon', stars:{Workmanship:5,Punctuality:4,Cleanliness:5,'Price fairness':4}, avg:4.5, text:'Clean work, arrived on time. Would book again.', photo:null, warranty:true, at:Date.now()-3*86400000 },
+  { id:9002, bookingId:103, customer:'Patricia Uy',  tech:'Mikko Bacus', service:'Washing Machine', stars:{Workmanship:5,Punctuality:5,Cleanliness:5,'Price fairness':5}, avg:5.0, text:'Replaced the belt quickly, explained what was wrong.', photo:null, warranty:true, at:Date.now()-8*86400000 },
+  { id:9003, bookingId:101, customer:'Marki Santos', tech:'Jun Alvarez', service:'Aircon', stars:{Workmanship:5,Punctuality:5,Cleanliness:4,'Price fairness':5}, avg:4.8, text:'Jun is my go-to for aircon. Reasonable and tidy.', photo:null, warranty:true, at:Date.now()-12*86400000 },
+  { id:9004, bookingId:99,  customer:'Angela Reyes', tech:'Ben Quijano', service:'Refrigerator', stars:{Workmanship:5,Punctuality:5,Cleanliness:5,'Price fairness':4}, avg:4.8, text:'Diagnosed an inverter board issue others missed.', photo:null, warranty:true, at:Date.now()-15*86400000 },
+  { id:9005, bookingId:98,  customer:'Patricia Uy',  tech:'Dondon Velasco', service:'TV', stars:{Workmanship:5,Punctuality:4,Cleanliness:5,'Price fairness':5}, avg:4.8, text:'Revived my old TV backlight.', photo:null, warranty:true, at:Date.now()-18*86400000 },
+  { id:9006, bookingId:97,  customer:'Carlo Dizon',  tech:'Nilo Abella', service:'Refrigerator', stars:{Workmanship:5,Punctuality:4,Cleanliness:4,'Price fairness':4}, avg:4.3, text:'Good service. Took a while to arrive.', photo:null, warranty:false, at:Date.now()-20*86400000 },
+  { id:9007, bookingId:96,  customer:'Marki Santos', tech:'Rey Tumulak', service:'Water Heater', stars:{Workmanship:5,Punctuality:5,Cleanliness:5,'Price fairness':5}, avg:5.0, text:'Fast and cheap.', photo:null, warranty:true, at:Date.now()-22*86400000 },
+  { id:9008, bookingId:95,  customer:'Angela Reyes', tech:'Jun Alvarez', service:'Aircon', stars:{Workmanship:4,Punctuality:5,Cleanliness:5,'Price fairness':4}, avg:4.5, text:'Cleaned two units quickly.', photo:null, warranty:true, at:Date.now()-25*86400000 },
+];
+COMMISSIONS = [
+  { id:9201, bookingId:103, tech:'Mikko Bacus', finalAmount:700, rate:COMMISSION_RATE, commission:84, status:'Paid', at:Date.now()-8*86400000, paidAt:Date.now()-7*86400000 },
+  { id:9202, bookingId:104, tech:'Ronnie Cabatingan', finalAmount:480, rate:COMMISSION_RATE, commission:58, status:'Paid', at:Date.now()-3*86400000, paidAt:Date.now()-2*86400000 },
+  { id:9203, bookingId:100, tech:'Nilo Abella', finalAmount:1200, rate:COMMISSION_RATE, commission:144, status:'Owed', at:Date.now()-2*86400000 },
+];
+
+const SESSION = { customer:{name:'Marki Santos', initials:'MS'}, admin:{name:'Admin User', initials:'AU'}, tech:{name:'Jun Alvarez', initials:'JA'} };
+const NAV = {
+  customer:[
+    {path:'#/app',label:'Home',icon:'grid'},
+    {path:'#/app/book',label:'Book a service',icon:'plus'},
+    {path:'#/app/bookings',label:'My bookings',icon:'calendar'},
+    {path:'#/app/reviews',label:'Ratings',icon:'star'},
+    {path:'#/app/profile',label:'Profile',icon:'user'},
+  ],
+  admin:[
+    {path:'#/admin',label:'Dashboard',icon:'grid'},
+    {path:'#/admin/users',label:'Users',icon:'users'},
+    {path:'#/admin/technicians',label:'Technicians',icon:'shield'},
+    {path:'#/admin/bookings',label:'Bookings',icon:'calendar'},
+    {path:'#/admin/commissions',label:'Commissions',icon:'percent'},
+    {path:'#/admin/disputes',label:'Disputes',icon:'alert'},
+    {path:'#/admin/audit',label:'Audit log',icon:'doc'},
+  ],
+  tech:[
+    {path:'#/tech',label:'Dashboard',icon:'grid'},
+    {path:'#/tech/schedule',label:'Jobs',icon:'calendar'},
+    {path:'#/tech/estimates',label:'Estimates',icon:'tag'},
+    {path:'#/tech/earnings',label:'Earnings',icon:'dollar'},
+    {path:'#/tech/commissions',label:'Commissions',icon:'percent'},
+    {path:'#/tech/profile',label:'Profile',icon:'user'},
+  ],
+};
+function badgeClass(s){ return {
+  Active:'badge-active',Confirmed:'badge-active',Estimated:'badge-info',EnRoute:'badge-info',Arrived:'badge-info',
+  InProgress:'badge-warn',QuotePending:'badge-warn',Pending:'badge-pending',
+  Suspended:'badge-suspended',Completed:'badge-completed',Cancelled:'badge-cancelled',
+  Unmatched:'badge-suspended',NoShow:'badge-suspended',Disputed:'badge-suspended',
+  Open:'badge-warn',Resolved:'badge-active',Owed:'badge-pending',Paid:'badge-active',
+}[s]||'badge-completed'; }
+function badge(s){ return '<span class="badge '+badgeClass(s)+'">'+s+'</span>'; }
+function toast(msg){
+  const el=document.createElement('div'); el.className='toast-item';
+  el.innerHTML='<span>'+esc(msg)+'</span>';
+  document.getElementById('toast-root').appendChild(el);
+  const root = document.getElementById('toast-root');
+  while(root.children.length > 3) root.firstChild.remove();
+  setTimeout(()=>{ el.style.transition='opacity .25s'; el.style.opacity='0'; setTimeout(()=>el.remove(),250); },2600);
+}
+
+/* ---------- dispatch (multi-tech offers) ---------- */
+function timeLeft(deadline){ const s=Math.max(0,Math.ceil((deadline-Date.now())/1000)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function todayJobCount(name){ return BOOKINGS.filter(b=>b.tech===name && !TERMINAL.includes(b.status)).length; }
+function scoreTech(t, job){
+  let score = 0;
+  score += t.rating * 10;
+  const km = distanceKm(barangayOf(t.home), barangayOf(job.barangay));
+  score -= km * 5;
+  score -= todayJobCount(t.name) * 5;
+  score += availableAt(t.name, job.date, job.time) ? 20 : -100;
+  return score;
+}
+function scheduleConflicts(techName){
+  const mine=BOOKINGS.filter(b=>b.tech===techName && ['Confirmed','Estimated','Pending','EnRoute'].includes(b.status) && b.barangay);
+  const flags={};
+  for(let i=0;i<mine.length;i++) for(let j=i+1;j<mine.length;j++){
+    const a=mine[i], c=mine[j];
+    const dtA=new Date(a.date+' '+a.time), dtC=new Date(c.date+' '+c.time);
+    if(isNaN(dtA)||isNaN(dtC)) continue;
+    if(Math.abs(dtA-dtC)/3600000<=3){
+      const km=distanceKm(barangayOf(a.barangay),barangayOf(c.barangay));
+      if(km>4){ flags[a.id]={other:c,km}; flags[c.id]={other:a,km}; }
+    }
+  }
+  return flags;
+}
+
+/* ---------- chat ---------- */
+function openChatModal(bookingId){
+  const b=BOOKINGS.find(x=>x.id===bookingId); if(!b) return;
+  const msgs=MESSAGES[bookingId]||[];
+  const me = state.role==='tech' ? 'tech' : 'customer';
+  document.getElementById('modal-root').innerHTML='<div class="fixed inset-0 bg-black/30 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if(event.target===this)closeModal()">'
+    +'<div class="bg-surface rounded-t-2xl sm:rounded-2xl max-w-sm w-full flex flex-col" style="height:min(560px,85vh)">'
+    +'<div class="p-4 border-b border-line flex items-center justify-between shrink-0"><div><p class="font-semibold text-sm text-ink">'+esc(me==='tech'?b.customer:b.tech)+'</p><p class="text-xs text-muted">'+esc(b.service)+' · '+esc(b.status)+'</p></div><button onclick="closeModal()" class="icon-btn">'+ic('x','w-4 h-4')+'</button></div>'
+    +'<div id="chat-scroll" class="flex-1 overflow-y-auto p-4 space-y-2">'
+      +(msgs.length?msgs.map(m=>'<div class="flex '+(m.from===me?'justify-end':'justify-start')+'"><div class="max-w-[75%] rounded-2xl px-3.5 py-2 text-sm '+(m.from===me?'bg-accent text-white':'bg-surface-2 text-ink')+'"><p>'+esc(m.text)+'</p><p class="text-[10px] mt-1 opacity-70">'+esc(m.time)+'</p></div></div>').join(''):'<p class="text-xs text-muted text-center pt-10">No messages yet.</p>')
+    +'</div>'
+    +'<div class="p-3 border-t border-line shrink-0 flex gap-2"><input id="chat-input" placeholder="Message..." class="input flex-1" onkeydown="if(event.key===\'Enter\')sendMessage('+bookingId+')"/><button onclick="sendMessage('+bookingId+')" class="btn-primary px-4">Send</button></div>'
+    +'</div></div>';
+  const sc=document.getElementById('chat-scroll'); if(sc) sc.scrollTop=sc.scrollHeight;
+}
+function sendMessage(bookingId){
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim(); if(!text) return;
+  const from=state.role==='tech'?'tech':'customer';
+  if(!MESSAGES[bookingId]) MESSAGES[bookingId]=[];
+  MESSAGES[bookingId].push({from,text,photo:null,time:'Just now'});
+  const b=BOOKINGS.find(x=>x.id===bookingId);
+  if(b){ const other = from==='tech' ? b.customer : b.tech; const otherRole = from==='tech' ? 'customer' : 'tech'; notify(otherRole, other, 'New message', text.slice(0,40), '#/app/bookings/'+bookingId); }
+  persist(); openChatModal(bookingId); input.value='';
+}
+
+/* ---------- state ---------- */
+const state = { role:null };
+let userFilter={search:'',role:'All'}, addUserOpen=false, techFilterVal='All', bookingFilterVal='All';
+let reviewsFilterVal='All';
+let wizard = { step:1, service:null, problems:[], notes:'', date:'', time:'', landmark:'', selectedTechIds:[] };
+
+/* ---------- router ---------- */
+function render(){
+  const h = location.hash || '#/';
+  ['page-landing','page-demo','page-login','page-shell'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  if(h==='#/'||h===''){ document.getElementById('page-landing').classList.remove('hidden'); return; }
+  if(h==='#/login'){ document.getElementById('page-login').classList.remove('hidden'); return; }
+  if(h==='#/demo'){ document.getElementById('page-demo').classList.remove('hidden'); return; }
+  if(h.indexOf('#/admin')===0){ state.role='admin'; renderShell(h); return; }
+  if(h.indexOf('#/tech')===0){ state.role='tech'; renderShell(h); return; }
+  if(h.indexOf('#/app')===0){ state.role='customer'; renderShell(h); return; }
+  document.getElementById('page-landing').classList.remove('hidden');
+}
+window.addEventListener('hashchange', ()=>{ render(); closeMobileNav(); document.getElementById('notif-root')?.classList.add('hidden'); updateNotifBadge(); });
+window.addEventListener('storage', e => { if(e.key === STORE_KEY){ hydrate(); applyTheme(); if(state.role) renderShellContent(location.hash); } });
+window.addEventListener('DOMContentLoaded', ()=>{ hydrate(); applyTheme(); render(); });
+setInterval(()=>{
+  const liveViews=['#/app/bookings','#/app','#/tech','#/tech/schedule','#/admin/bookings','#/admin'];
+  const modalOpen = document.getElementById('modal-root') && document.getElementById('modal-root').innerHTML.trim()!=='';
+  const notifOpen = document.getElementById('notif-root') && !document.getElementById('notif-root').classList.contains('hidden');
+  const active = document.activeElement;
+  const typing = active && (active.tagName==='INPUT'||active.tagName==='TEXTAREA'||active.tagName==='SELECT');
+  if(!modalOpen && !notifOpen && !typing && state.role && liveViews.includes(location.hash||'#/')) renderShellContent(location.hash);
+},1500);
+
+function renderShell(h){
+  const shell = document.getElementById('page-shell');
+  shell.classList.remove('hidden');
+  const nav = NAV[state.role], session = SESSION[state.role];
+  const roleLabel = {customer:'Customer', admin:'Admin', tech:'Technician'}[state.role];
+  const navHtml = items => items.map(n=>'<a href="'+n.path+'" onclick="closeMobileNav()" class="sidenav-link '+(h===n.path?'active':'')+'">'+ic(n.icon,'w-[17px] h-[17px]')+'<span>'+n.label+'</span></a>').join('');
+  const themeRow = '<div class="flex items-center justify-between px-3 py-2" data-theme-row><div class="flex items-center gap-2 text-sm text-muted"><span>'+ic('moon','w-[16px] h-[16px]')+'</span><span>Dark mode</span></div><label class="ios-toggle"><input type="checkbox" '+(localStorage.getItem('fixlink.theme')==='dark'?'checked':'')+' onchange="toggleTheme()"/><span class="slider"></span></label></div>';
+  shell.innerHTML = ''
+    +'<div class="min-h-screen flex">'
+    +'<aside class="hidden md:flex md:flex-col w-60 shrink-0 bg-surface border-r border-line">'
+      +'<div class="h-11 flex items-center px-5 border-b border-line"><a href="#/" class="display text-base font-semibold text-ink tracking-tight">FixLink</a></div>'
+      +'<div class="px-5 pt-4"><span class="badge badge-demo">'+roleLabel+'</span></div>'
+      +'<nav class="flex-1 px-2 py-4 space-y-0.5">'+navHtml(nav)+'</nav>'
+      +'<div class="p-2 border-t border-line space-y-0.5">'+themeRow
+        +'<a href="#/demo" class="sidenav-link">'+ic('back','w-[17px] h-[17px]')+'<span>Switch role</span></a>'
+        +'<a href="#/" class="sidenav-link">'+ic('logout','w-[17px] h-[17px]')+'<span>Exit</span></a>'
+        +'<button onclick="resetDemo()" class="sidenav-link">'+ic('alert','w-[17px] h-[17px]')+'<span>Reset data</span></button>'
+      +'</div>'
+    +'</aside>'
+    +'<div id="mobile-overlay" class="fixed inset-0 bg-black/30 z-40 hidden md:hidden" onclick="closeMobileNav()"></div>'
+    +'<aside id="mobile-drawer" class="fixed inset-y-0 left-0 w-60 bg-surface z-50 -translate-x-full transition-transform duration-200 md:hidden flex flex-col">'
+      +'<div class="h-11 flex items-center justify-between px-5 border-b border-line"><a href="#/" class="display text-base font-semibold text-ink tracking-tight">FixLink</a><button onclick="closeMobileNav()" class="icon-btn">'+ic('x','w-4 h-4')+'</button></div>'
+      +'<nav class="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">'+navHtml(nav)+'</nav>'
+      +'<div class="p-2 border-t border-line space-y-0.5">'+themeRow
+        +'<a href="#/demo" class="sidenav-link">'+ic('back','w-[17px] h-[17px]')+'<span>Switch role</span></a>'
+        +'<a href="#/" class="sidenav-link">'+ic('logout','w-[17px] h-[17px]')+'<span>Exit</span></a>'
+      +'</div>'
+    +'</aside>'
+    +'<div class="flex-1 min-w-0 flex flex-col">'
+      +'<header class="h-11 shrink-0 flex items-center justify-between px-4 topnav sticky top-0 z-30">'
+        +'<div class="flex items-center gap-2"><button class="md:hidden text-ink" onclick="openMobileNav()">'+ic('menu','w-5 h-5')+'</button></div>'
+        +'<div class="flex items-center gap-1">'
+          +'<button id="notif-btn" class="relative icon-btn" onclick="toggleNotifPanel()">'+ic('bell','w-5 h-5')+'</button>'
+          +'<div class="w-7 h-7 rounded-full bg-surface-2 text-ink flex items-center justify-center text-[11px] font-semibold">'+session.initials+'</div>'
+        +'</div>'
+      +'</header>'
+      +'<main id="shell-content" class="flex-1 p-4 sm:p-6 lg:p-8"></main>'
+    +'</div></div>';
+  renderShellContent(h);
+  updateNotifBadge();
+  applyTheme();
+}
+function openMobileNav(){ document.getElementById('mobile-drawer').classList.remove('-translate-x-full'); document.getElementById('mobile-overlay').classList.remove('hidden'); }
+function closeMobileNav(){ const d=document.getElementById('mobile-drawer'), o=document.getElementById('mobile-overlay'); if(d)d.classList.add('-translate-x-full'); if(o)o.classList.add('hidden'); }
+
+function renderShellContent(h){
+  let html='';
+  if(state.role==='customer'){
+    if(h==='#/app/book') html=customerBookWizard();
+    else if(h.indexOf('#/app/bookings/')===0){ const id=Number(h.split('/').pop()); html=customerBookingDetail(id); }
+    else if(h==='#/app/bookings') html=customerBookings();
+    else if(h==='#/app/reviews') html=customerReviews();
+    else if(h==='#/app/profile') html=customerProfile();
+    else html=customerHome();
+  } else if(state.role==='admin'){
+    if(h==='#/admin/users') html=adminUsers();
+    else if(h==='#/admin/technicians') html=adminTechnicians();
+    else if(h==='#/admin/bookings') html=adminBookings();
+    else if(h==='#/admin/commissions') html=adminCommissions();
+    else if(h==='#/admin/disputes') html=adminDisputes();
+    else if(h==='#/admin/audit') html=adminAudit();
+    else html=adminDashboard();
+  } else if(state.role==='tech'){
+    if(h==='#/tech/schedule') html=techSchedule();
+    else if(h==='#/tech/estimates') html=techEstimates();
+    else if(h==='#/tech/earnings') html=techEarnings();
+    else if(h==='#/tech/commissions') html=techCommissions();
+    else if(h==='#/tech/profile') html=techProfile();
+    else html=techDashboard();
+  }
+  const sc = document.getElementById('shell-content');
+  if(sc) sc.innerHTML = html;
+}
+function bookingRow(b){
+  const link = state.role==='customer' ? '#/app/bookings/'+b.id : (state.role==='tech' ? '#/tech/schedule' : '#/admin/bookings');
+  return '<a href="'+link+'" class="py-3 flex items-center justify-between gap-3 hover:bg-surface-2 -mx-2 px-2 rounded"><div><p class="text-sm font-medium text-ink">'+esc(b.service)+' · '+esc(b.tech)+'</p><p class="text-xs text-muted mt-0.5">'+esc(b.date)+' · '+esc(b.time)+'</p></div>'+badge(b.status)+'</a>';
+}
+
+/* ============================================================
+   CUSTOMER
+   ============================================================ */
+function customerHome(){
+  const mine = BOOKINGS.filter(b=>b.customer==='Marki Santos' && b.status!=='Inquiry');
+  const active = mine.filter(b=>!TERMINAL.includes(b.status));
+  const recent = mine.filter(b=>TERMINAL.includes(b.status)).slice(0,3);
+  const rc = customerReferralCode('Marki Santos');
+  return '<div class="max-w-3xl">'
+    +'<h1 class="text-3xl font-semibold mb-1 text-ink tracking-tight">Hi, Marki.</h1><p class="text-muted mb-10">Here\'s what\'s happening.</p>'
+    +'<a href="#/app/book" class="card p-6 mb-10 block hover:bg-surface-2 transition flex items-center justify-between gap-4">'
+      +'<div><p class="text-base font-medium text-ink mb-1">Need something fixed?</p><p class="text-sm text-muted">Describe the issue and pick from multiple technicians.</p></div>'
+      +'<div class="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center flex-shrink-0">'+ic('plus','w-5 h-5')+'</div>'
+    +'</a>'
+    +(active.length?'<div class="mb-10"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Active</h2><div class="card divide-y divide-line">'+active.map(bookingCard).join('')+'</div></div>':'')
+    +(recent.length?'<div class="mb-10"><div class="flex items-center justify-between mb-3"><h2 class="text-xs uppercase tracking-wider text-muted font-medium">Recent</h2><a href="#/app/bookings" class="btn-link text-xs">View all</a></div><div class="card divide-y divide-line">'+recent.map(bookingRow).join('')+'</div></div>':'')
+    +'<div class="card p-5"><div class="flex items-center justify-between gap-4"><div><p class="text-sm font-medium text-ink mb-1">Refer a technician</p><p class="text-xs text-muted">Code: <b class="text-accent">'+rc.code+'</b></p></div></div></div>'
+  +'</div>';
+}
+
+/* ---- Book wizard — 4 steps: appliance → problems → location/time → pick techs ---- */
+function customerBookWizard(){
+  const step = wizard.step;
+  const steps = [1,2,3,4].map(n=>{
+    const cls = step===n ? 'active' : (step>n?'done':'');
+    return '<div class="dot '+cls+'">'+(step>n?ic('check','w-3 h-3'):n)+'</div>';
+  }).join('<div class="bar '+(step>1?'done':'')+'"></div>');
+
+  let body = '';
+  if(step === 1){
+    body = '<h2 class="text-3xl font-semibold text-ink mb-2 tracking-tight">What needs fixing?</h2>'
+      +'<p class="text-muted mb-8">Pick the appliance.</p>'
+      +'<div class="grid grid-cols-3 sm:grid-cols-4 gap-2">'
+        +SERVICES.map(s=>'<button onclick="wizard.service=\''+s.label+'\';wizard.problems=[];wizard.step=2;renderShellContent(location.hash)" class="appliance-tile '+(wizard.service===s.label?'selected':'')+'"><div class="icon-wrap">'+appIcon(s.id)+'</div><p class="label">'+s.label+'</p></button>').join('')
+      +'</div>';
+  }
+  else if(step === 2){
+    const svc = SERVICES.find(s=>s.label===wizard.service);
+    const problems = svc ? (COMMON_PROBLEMS[svc.id]||[]) : [];
+    body = '<h2 class="text-3xl font-semibold text-ink mb-2 tracking-tight">What\'s the issue?</h2>'
+      +'<p class="text-muted mb-8">Select all that apply.</p>'
+      +'<div class="card card-bordered overflow-hidden mb-4">'
+        +problems.map(p=>'<button onclick="toggleProblem(\''+esc(p).replace(/'/g,"\\'")+'\')" class="problem-checkbox '+(wizard.problems.includes(p)?'selected':'')+'"><span class="box">'+(wizard.problems.includes(p)?ic('check','w-3 h-3'):'')+'</span><span>'+esc(p)+'</span></button>').join('')
+      +'</div>'
+      +'<div><label class="input-label">Anything else? (optional)</label><textarea id="wiz-notes" rows="3" class="input" oninput="wizard.notes=this.value" placeholder="e.g. Unit is a split-type, 2 years old.">'+esc(wizard.notes)+'</textarea></div>';
+  }
+  else if(step === 3){
+    const loc = getLoc('customer:Marki Santos');
+    const verified = loc && loc.verified && loc.lat && isInCebu(loc.lat, loc.lng);
+    const bar = verified ? nearestBarangay(loc.lat, loc.lng) : null;
+    body = '<h2 class="text-3xl font-semibold text-ink mb-2 tracking-tight">Where and when?</h2>'
+      +'<p class="text-muted mb-8">We use your GPS so technicians know where to go.</p>'
+      +'<div class="space-y-4">'
+        +'<div>'+(verified
+          ? '<div class="location-verified"><div class="dot"></div><span>Verified — near '+esc(bar.name)+' ('+loc.lat.toFixed(4)+', '+loc.lng.toFixed(4)+')</span></div>'
+          : '<label class="input-label">Location</label><button onclick="verifyLocation()" class="btn-secondary w-full">Detect my location</button>')+'</div>'
+        +(verified?'<div><label class="input-label">Landmark or unit (optional)</label><input class="input" value="'+esc(wizard.landmark)+'" oninput="wizard.landmark=this.value" placeholder="e.g. Unit 4B, near SM Seaside"/></div>':'')
+        +'<div><label class="input-label">Date</label><input id="wiz-date" type="date" class="input" value="'+esc(wizard.date)+'" oninput="wizard.date=this.value"/></div>'
+        +'<div><label class="input-label">Time</label><input id="wiz-time" type="time" class="input" value="'+esc(wizard.time)+'" oninput="wizard.time=this.value"/></div>'
+      +'</div>'
+      +'<p class="text-xs text-muted mt-5 leading-relaxed">Your GPS location is verified so technicians know you\'re a real customer.</p>';
+  }
+  else {
+    // Step 4 — pick one or more technicians
+    const matches = TECHS.filter(t => t.status === 'Active' && t.services.includes(wizard.service));
+    const custLoc = getLoc('customer:Marki Santos');
+    const custBase = custLoc && custLoc.lat ? custLoc : barangayOf('Lahug');
+    const withDist = matches.map(t => ({ t, km: haversineKm(custBase, {lat:t.lat, lng:t.lng}) || 999 }))
+      .filter(x => x.km <= x.t.radiusKm)
+      .sort((a,b)=> a.km - b.km || b.t.rating - a.t.rating);
+    body = '<h2 class="text-3xl font-semibold text-ink mb-2 tracking-tight">Pick technicians</h2>'
+      +'<p class="text-muted mb-8">Select one or more. Each will send their own estimated price for the issue you described.</p>'
+      +(withDist.length?'<div class="space-y-3">'+withDist.map(({t,km})=>{
+        const sel = wizard.selectedTechIds.includes(t.id);
+        const est = t.estimateHint || null;
+        return '<button onclick="toggleTechSelection('+t.id+')" class="tech-select-card w-full text-left '+(sel?'selected':'')+'">'
+          +'<div class="flex items-start gap-3">'
+            +'<div class="check-circle mt-0.5">'+(sel?ic('check','w-3.5 h-3.5'):'')+'</div>'
+            +'<div class="flex-1 min-w-0">'
+              +'<p class="text-base font-medium text-ink flex items-center gap-1.5">'+esc(t.name)+(t.verified?'<span class="text-[var(--success)]">'+ic('shieldCheck','w-4 h-4')+'</span>':'')+'</p>'
+              +'<p class="text-xs text-muted mt-0.5">'+esc(t.specialty||t.services.join(', '))+'</p>'
+              +'<div class="flex items-center gap-3 mt-2 text-xs">'
+                +'<span class="text-ink">★ '+t.rating.toFixed(1)+'</span>'
+                +'<span class="text-muted">'+t.jobs+' jobs</span>'
+                +'<span class="text-muted">'+km.toFixed(1)+' km</span>'
+              +'</div>'
+            +'</div>'
+          +'</div>'
+        +'</button>';
+      }).join('')+'</div>':'<div class="card p-8 text-center text-sm text-muted">No technicians available for this service near you.</div>')
+      +'<p class="text-xs text-muted mt-5 leading-relaxed">Selected technicians will be asked to post their estimated price. You then pick one to visit based on their estimate, rating, and distance.</p>';
+  }
+
+  const canNext = (step===1 && wizard.service) || (step===2 && wizard.problems.length>0) || (step===3 && wizard.date && wizard.time) || (step===4 && wizard.selectedTechIds.length>0);
+  const nextLabel = step===4 ? 'Request estimates' : 'Next';
+
+  return '<div class="max-w-2xl">'
+    +'<a href="#/app" class="btn-back mb-8">'+ic('chevron','w-4 h-4 rotate-180')+'<span>Home</span></a>'
+    +'<div class="wizard-steps">'+steps+'</div>'
+    +body
+    +'<div class="flex gap-3 mt-10">'
+      +(step>1?'<button onclick="wizard.step='+(step-1)+';renderShellContent(location.hash)" class="btn-secondary flex-1">Back</button>':'')
+      +'<button onclick="wizardNext()" '+(canNext?'':'disabled')+' class="btn-primary flex-1">'+nextLabel+'</button>'
+    +'</div>'
+  +'</div>';
+}
+function toggleProblem(p){ const i = wizard.problems.indexOf(p); if(i > -1) wizard.problems.splice(i, 1); else wizard.problems.push(p); renderShellContent(location.hash); }
+function toggleTechSelection(id){
+  const i = wizard.selectedTechIds.indexOf(id);
+  if(i > -1) wizard.selectedTechIds.splice(i, 1);
+  else wizard.selectedTechIds.push(id);
+  renderShellContent(location.hash);
+}
+function verifyLocation(){
+  const key = 'customer:Marki Santos';
+  if(!navigator.geolocation){ toast('Geolocation not supported'); return; }
+  toast('Getting location...');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude, lng = pos.coords.longitude;
+      if(!isInCebu(lat, lng)){ toast('Outside Cebu — FixLink serves Cebu only'); return; }
+      const loc = LOCATIONS[key] || (LOCATIONS[key] = {});
+      loc.lat = lat; loc.lng = lng; loc.verified = true; loc.updatedAt = Date.now(); loc.sharing = true;
+      wizard.verifiedLoc = { lat, lng };
+      persist(); renderShellContent(location.hash); toast('Location verified');
+    },
+    () => {
+      const base = barangayOf('Lahug');
+      const loc = LOCATIONS[key] || (LOCATIONS[key] = {});
+      loc.lat = base.lat; loc.lng = base.lng; loc.verified = true; loc.updatedAt = Date.now(); loc.sharing = true;
+      wizard.verifiedLoc = { lat: base.lat, lng: base.lng };
+      persist(); renderShellContent(location.hash); toast('Using default Cebu location (demo)');
+    },
+    { enableHighAccuracy:true, timeout:8000 }
+  );
+}
+function wizardNext(){
+  if(wizard.step < 4){ wizard.step++; renderShellContent(location.hash); }
+  else { submitBookingRequest(); }
+}
+function submitBookingRequest(){
+  if(!wizard.service || !wizard.problems.length || !wizard.selectedTechIds.length) return;
+  const custLoc = getLoc('customer:Marki Santos');
+  const bar = custLoc && custLoc.lat ? nearestBarangay(custLoc.lat, custLoc.lng) : barangayOf('Lahug');
+  const bookingId = Date.now();
+  const techsPicked = wizard.selectedTechIds.map(id => TECHS.find(t=>t.id===id)).filter(Boolean);
+  BOOKINGS.unshift({
+    id: bookingId, customer:'Marki Santos', tech:techsPicked[0].name,
+    requestedTechs: techsPicked.map(t=>t.name),
+    service: wizard.service,
+    problems: wizard.problems.slice(),
+    notes: wizard.notes,
+    date: wizard.date, time: wizard.time,
+    barangay: bar.name,
+    address: (wizard.landmark?wizard.landmark+', ':'') + bar.name + ', Cebu City',
+    lat: custLoc && custLoc.lat, lng: custLoc && custLoc.lng,
+    status:'Pending', declined:[],
+    history:[{at:Date.now(), actor:'customer', event:'Request sent to '+techsPicked.length+' technician'+(techsPicked.length===1?'':'s')}],
+    respondDeadline: Date.now()+25000
+  });
+  techsPicked.forEach(t => notify('tech', t.name, 'New estimate request', wizard.service+' in '+bar.name, '#/tech/estimates'));
+  audit('customer:Marki Santos', 'booking:created', 'booking:'+bookingId, { techs: techsPicked.map(t=>t.name) });
+  persist();
+  wizard = { step:1, service:null, problems:[], notes:'', date:'', time:'', landmark:'', selectedTechIds:[] };
+  toast('Request sent to '+techsPicked.length+' technician'+(techsPicked.length===1?'':'s'));
+  location.hash = '#/app/bookings';
+}
+
+/* ---- Bookings list ---- */
+function customerBookings(){
+  const mine = BOOKINGS.filter(b=>b.customer==='Marki Santos' && b.status!=='Inquiry');
+  return '<div class="max-w-3xl"><h1 class="text-3xl font-semibold mb-8 text-ink tracking-tight">Bookings</h1><div class="card overflow-hidden"><div class="divide-y divide-line">'
+    +(mine.length?mine.map(bookingCard).join(''):'<p class="p-8 text-sm text-muted text-center">No bookings yet.</p>')
+    +'</div></div></div>';
+}
+function bookingCard(b){
+  const amountLine = b.status==='Completed' && b.finalAmount ? '<span class="text-sm font-medium text-ink">₱'+b.finalAmount.toLocaleString()+'</span>' : '';
+  const probs = (b.problems||[]).join(', ');
+  return '<div class="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">'
+    +'<a href="#/app/bookings/'+b.id+'" class="flex-1 min-w-0"><p class="text-sm font-medium text-ink">'+esc(b.service)+' · '+esc(b.tech)+'</p><p class="text-xs text-muted mt-0.5 truncate">'+esc(probs||'—')+'</p><p class="text-xs text-muted mt-0.5">'+esc(b.date)+' · '+esc(b.time)+'</p></a>'
+    +'<div class="flex items-center gap-3 shrink-0">'+amountLine+badge(b.status)+'<button onclick="openChatModal('+b.id+')" class="btn-ghost p-2">'+ic('chat','w-4 h-4')+'</button></div>'
+  +'</div>';
+}
+function lifecycleBar(b){
+  const idx = lifecycleIndex(b.status);
+  return '<div class="step-bar mb-2">'+LIFECYCLE.map((s,i)=>{ let cls='step'; if(idx>=0 && i<idx) cls+=' done'; else if(idx>=0 && i===idx) cls+=' current'; return '<div class="'+cls+'"></div>'; }).join('')+'</div>'
+    +'<div class="flex justify-between text-[10px] text-muted mb-6">'+LIFECYCLE.map(s=>'<span>'+s+'</span>').join('')+'</div>';
+}
+
+/* ---- Booking detail (customer) ---- */
+function customerBookingDetail(id){
+  const b = BOOKINGS.find(x=>x.id===id); if(!b) return '<p class="text-muted">Not found.</p>';
+  const estimates = getEstimatesFor(id);
+  const activeQuote = QUOTES.find(q=>q.bookingId===id && q.status==='Pending');
+  const approvedQuote = QUOTES.find(q=>q.bookingId===id && q.status==='Approved');
+  const myReview = REVIEWS.find(r=>r.bookingId===id);
+  const dispute = DISPUTES.find(d=>d.bookingId===id);
+  const probs = (b.problems||[]).join(', ');
+  const isMulti = (b.requestedTechs||[]).length > 1;
+
+  return '<div class="max-w-2xl">'
+    +'<a href="#/app/bookings" class="btn-back mb-6">'+ic('chevron','w-4 h-4 rotate-180')+'<span>Bookings</span></a>'
+
+    /* Header card */
+    +'<div class="card p-6 mb-4">'
+      +'<div class="flex items-center justify-between mb-5"><h1 class="text-2xl font-semibold text-ink tracking-tight">'+esc(b.service)+'</h1>'+badge(b.status)+'</div>'
+      +lifecycleBar(b)
+      +'<div class="space-y-3 text-sm">'
+        +(probs?'<div class="flex justify-between gap-4"><span class="text-muted">Issue</span><span class="text-ink text-right">'+esc(probs)+'</span></div>':'')
+        +'<div class="flex justify-between gap-4"><span class="text-muted">Technicians requested</span><span class="text-ink">'+((b.requestedTechs||[b.tech]).join(', '))+'</span></div>'
+        +'<div class="flex justify-between gap-4"><span class="text-muted">When</span><span class="text-ink">'+esc(b.date)+' · '+esc(b.time)+'</span></div>'
+        +'<div class="flex justify-between gap-4"><span class="text-muted">Where</span><span class="text-ink text-right">'+esc(b.address||b.barangay)+'</span></div>'
+      +'</div>'
+      +'<div class="flex flex-wrap gap-2 mt-6">'
+        +'<button onclick="openChatModal('+b.id+')" class="btn-secondary text-sm py-2 px-4">Message</button>'
+        +'<button onclick="openLiveMapModal('+b.id+')" class="btn-secondary text-sm py-2 px-4">Map</button>'
+        +(b.status==='Confirmed'||b.status==='EnRoute'?'<button onclick="advanceLifecycle('+b.id+',\'Cancelled\',\'customer\')" class="btn-danger text-sm py-2 px-4">Cancel</button>':'')
+      +'</div>'
+    +'</div>'
+
+    /* Price journey — three stages */
+    +'<div class="card p-6 mb-4">'
+      +'<p class="text-xs uppercase tracking-wider text-muted font-medium mb-5">Price journey</p>'
+      +'<div class="space-y-4">'
+        +'<div>'
+          +'<div class="flex items-center gap-2 mb-2"><span class="price-stage stage-estimated">Estimated</span><span class="text-xs text-muted">Before inspection</span></div>'
+          +(estimates.length?'<div class="space-y-2">'+estimates.map(e=>{
+            const t = TECHS.find(x=>x.name===e.tech);
+            const chosen = b.tech === e.tech;
+            return '<div class="flex items-center justify-between gap-3 px-3 py-2 rounded-lg '+(chosen?'bg-accent-soft':'bg-surface-2')+'"><div class="min-w-0 flex-1"><p class="text-sm text-ink font-medium truncate">'+esc(e.tech)+(chosen?' · selected':'')+'</p>'+(e.note?'<p class="text-xs text-muted mt-0.5 truncate">'+esc(e.note)+'</p>':'')+'</div><p class="text-sm font-semibold text-ink shrink-0">₱'+e.amount.toLocaleString()+'</p>'+(chosen?'':'<button onclick="chooseTechForBooking('+b.id+',\''+esc(e.tech).replace(/'/g,"\\'")+'\')" class="btn-link text-xs shrink-0">Select</button>')+'</div>';
+          }).join('')+'</div>':'<p class="text-sm text-muted">Waiting for technicians to post their estimates.</p>')
+        +'</div>'
+        +'<div>'
+          +'<div class="flex items-center gap-2 mb-2"><span class="price-stage stage-quotation">Quotation</span><span class="text-xs text-muted">After inspection</span></div>'
+          +(activeQuote
+            ? '<div class="card card-bordered p-4"><div class="space-y-0">'+activeQuote.items.map(i=>'<div class="quote-line text-ink"><span>'+esc(i.label)+'</span><span>₱'+Number(i.amount).toLocaleString()+'</span></div>').join('')+'</div><div class="quote-line font-semibold pt-3 text-ink border-t border-line"><span>Total</span><span>₱'+activeQuote.total.toLocaleString()+'</span></div><div class="flex gap-2 mt-4"><button onclick="decideQuote('+activeQuote.id+',\'approve\')" class="btn-primary flex-1">Approve</button><button onclick="decideQuote('+activeQuote.id+',\'decline\')" class="btn-secondary flex-1">Decline</button></div></div>'
+            : approvedQuote
+              ? '<div class="px-3 py-2 rounded-lg bg-surface-2"><div class="flex items-center justify-between"><span class="text-sm text-ink">Approved by you</span><span class="text-sm font-semibold text-ink">₱'+approvedQuote.total.toLocaleString()+'</span></div></div>'
+              : '<p class="text-sm text-muted">Waiting for the technician to inspect and submit a quotation.</p>')
+        +'</div>'
+        +'<div>'
+          +'<div class="flex items-center gap-2 mb-2"><span class="price-stage stage-final">Final price</span><span class="text-xs text-muted">Approved &amp; paid</span></div>'
+          +(b.finalAmount
+            ? '<div class="px-3 py-2 rounded-lg bg-surface-2"><div class="flex items-center justify-between"><span class="text-sm text-ink">Final amount</span><span class="text-sm font-semibold text-ink">₱'+b.finalAmount.toLocaleString()+'</span></div><p class="text-xs text-muted mt-1">Paid directly to '+esc(b.tech)+' in cash or GCash.</p></div>'
+            : '<p class="text-sm text-muted">Not yet agreed.</p>')
+        +'</div>'
+      +'</div>'
+    +'</div>'
+
+    +(myReview?'<div class="card p-6 mb-4"><p class="text-sm font-medium mb-2 text-ink">Your review</p><p class="star-row mb-2">'+renderStars(myReview.avg,14)+'</p><p class="text-sm text-ink">'+esc(myReview.text)+'</p></div>':'')
+    +(b.status==='Completed'&&!myReview?'<div class="card p-6 mb-4"><button onclick="openReviewModal('+b.id+')" class="btn-primary w-full">Rate '+esc(b.tech)+'</button></div>':'')
+    +(dispute?'<div class="card p-6 mb-4"><p class="text-sm font-medium mb-1 text-ink">Dispute — '+esc(dispute.status)+'</p><p class="text-sm text-muted">'+esc(dispute.text)+'</p></div>':'')
+    +(b.status==='Completed'&&!dispute?'<div class="card p-6 mb-4"><button onclick="openDisputeModal('+b.id+')" class="btn-link text-sm">Report a problem</button></div>':'')
+
+    +'<div class="card p-6"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Timeline</p>'
+      +((b.history||[]).length?(b.history||[]).slice().reverse().map(hh=>'<div class="flex gap-3 text-xs mb-3"><div class="timeline-dot"></div><div><p class="text-ink">'+esc(hh.event)+'</p><p class="text-muted mt-0.5">'+timeAgo(hh.at)+'</p></div></div>').join(''):'<p class="text-xs text-muted">No activity.</p>')
+    +'</div>'
+  +'</div>';
+}
+
+function chooseTechForBooking(bookingId, techName){
+  const b = BOOKINGS.find(x=>x.id===bookingId); if(!b) return;
+  b.tech = techName;
+  b.status = 'Confirmed';
+  delete b.respondDeadline;
+  b.history = b.history || [];
+  b.history.push({ at:Date.now(), actor:'customer', event:'Selected '+techName+' for the visit' });
+  notify('tech', techName, 'You were selected', b.customer+' chose you for the '+b.service+' job.', '#/tech/schedule');
+  audit('customer:'+b.customer, 'booking:selected-tech', 'booking:'+b.id, { tech:techName });
+  persist(); toast('Selected '+techName); renderShellContent(location.hash);
+}
+
+function setReviewsFilter(v){ reviewsFilterVal = v; renderShellContent(location.hash); }
+function customerReviews(){
+  const techs = TECHS.filter(t=>t.status==='Active').map(t=>{
+    const rv = REVIEWS.filter(r=>r.tech===t.name);
+    const avg = rv.length ? (rv.reduce((s,r)=>s+r.avg,0)/rv.length) : t.rating;
+    return { t, rv, avg };
+  }).sort((a,b)=> b.avg - a.avg || b.rv.length - a.rv.length);
+  let filteredRecent = REVIEWS.slice().sort((a,b)=>b.at-a.at);
+  if(reviewsFilterVal === '5') filteredRecent = filteredRecent.filter(r=>Math.round(r.avg)===5);
+  else if(reviewsFilterVal === '4') filteredRecent = filteredRecent.filter(r=>r.avg>=4);
+  const totalReviews = REVIEWS.length;
+  const overallAvg = totalReviews ? (REVIEWS.reduce((s,r)=>s+r.avg,0)/totalReviews) : 5;
+  return '<div class="max-w-4xl">'
+    +'<h1 class="text-3xl font-semibold mb-2 text-ink tracking-tight">Ratings</h1><p class="text-muted mb-8">What other customers say.</p>'
+    +'<div class="card p-6 mb-6"><div class="grid grid-cols-3 gap-6">'
+      +'<div><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Average</p><p class="text-4xl font-semibold text-ink tracking-tight">'+overallAvg.toFixed(1)+'</p><p class="star-row mt-1">'+renderStars(overallAvg,14)+'</p></div>'
+      +'<div><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Reviews</p><p class="text-4xl font-semibold text-ink tracking-tight">'+totalReviews+'</p></div>'
+      +'<div><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Top rated</p><p class="text-base font-medium text-ink truncate">'+esc(techs[0]?.t.name||'—')+'</p><p class="star-row mt-1">'+renderStars(techs[0]?.avg||5,14)+'</p></div>'
+    +'</div></div>'
+    +'<div class="seg max-w-xs mb-6">'
+      +'<button class="'+(reviewsFilterVal==='All'?'active':'')+'" onclick="setReviewsFilter(\'All\')">All</button>'
+      +'<button class="'+(reviewsFilterVal==='5'?'active':'')+'" onclick="setReviewsFilter(\'5\')">5★</button>'
+      +'<button class="'+(reviewsFilterVal==='4'?'active':'')+'" onclick="setReviewsFilter(\'4\')">4★+</button>'
+    +'</div>'
+    +'<h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-3">By technician</h2>'
+    +'<div class="grid sm:grid-cols-2 gap-3 mb-10">'
+      +techs.map(({t,rv,avg})=>'<button onclick="openTechReviews(\''+esc(t.name).replace(/'/g,"\\'")+'\')" class="card p-5 text-left hover:bg-surface-2 transition">'
+        +'<div class="flex items-start justify-between gap-2 mb-2"><div class="min-w-0"><p class="text-base font-medium text-ink truncate">'+esc(t.name)+(t.verified?' <span class="text-[var(--success)]">✓</span>':'')+'</p><p class="text-xs text-muted mt-0.5 truncate">'+esc(t.services.join(', '))+'</p></div><p class="text-xl font-semibold text-ink tracking-tight">'+avg.toFixed(1)+'</p></div>'
+        +'<div class="flex items-center gap-2"><p class="star-row">'+renderStars(avg,12)+'</p><p class="text-xs text-muted">'+rv.length+'</p></div>'
+      +'</button>').join('')
+    +'</div>'
+    +'<h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Recent</h2>'
+    +(filteredRecent.length?filteredRecent.map(r=>'<div class="card p-5 mb-3"><div class="flex items-start justify-between mb-2 gap-4"><div class="min-w-0"><p class="text-sm font-medium text-ink">'+esc(r.customer)+'</p><p class="text-xs text-muted mt-0.5">'+esc(r.service)+' with '+esc(r.tech)+'</p></div><div class="text-right shrink-0"><p class="star-row">'+renderStars(r.avg,12)+'</p><p class="text-[10px] text-muted mt-1">'+timeAgo(r.at)+'</p></div></div>'+(r.text?'<p class="text-sm text-ink mt-2">'+esc(r.text)+'</p>':'')+'</div>').join(''):'<div class="card p-10 text-center text-sm text-muted">No reviews.</div>')
+  +'</div>';
+}
+function customerProfile(){
+  const rc = customerReferralCode('Marki Santos');
+  return '<div class="max-w-md"><h1 class="text-3xl font-semibold mb-8 text-ink tracking-tight">Profile</h1>'
+    +'<div class="card p-6 mb-4"><div class="space-y-4">'
+      +'<div><label class="input-label">Full name</label><input class="input" value="Marki Santos"/></div>'
+      +'<div><label class="input-label">Email</label><input class="input" value="marki@example.com"/></div>'
+      +'<div><label class="input-label">Phone</label><input class="input" value="+63 917 000 0000"/></div>'
+      +'<button onclick="toast(\'Saved\')" class="btn-primary w-full">Save</button>'
+    +'</div></div>'
+    +'<div class="card p-6"><p class="input-label">Referral code</p><p class="text-xl font-semibold text-accent mb-2 tracking-tight">'+rc.code+'</p><p class="text-xs text-muted mb-4">Share with a technician you know.</p></div>'
+  +'</div>';
+}
+function closeModal(){ ['modal-root','quote-modal-root','map-modal-root','dispute-modal-root','review-detail-root','estimate-modal-root'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; }); if(_map){ _map.remove(); _map=null; } if(_mapTimer){ clearInterval(_mapTimer); _mapTimer=null; } if(_exploreMap){ _exploreMap.remove(); _exploreMap=null; } }
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+function adminDashboard(){
+  const totalCommissions = COMMISSIONS.reduce((s,c)=>s+c.commission, 0);
+  const owed = COMMISSIONS.filter(c=>c.status==='Owed').reduce((s,c)=>s+c.commission, 0);
+  const paid = COMMISSIONS.filter(c=>c.status==='Paid').reduce((s,c)=>s+c.commission, 0);
+  const stats=[
+    {label:'Users',value:USERS.length},
+    {label:'Active techs',value:TECHS.filter(t=>t.status==='Active').length},
+    {label:'Bookings',value:BOOKINGS.filter(b=>b.status!=='Inquiry').length},
+    {label:'Commission',value:'₱'+totalCommissions.toLocaleString()},
+  ];
+  const recent = BOOKINGS.filter(b=>b.status!=='Inquiry').slice(0,5);
+  return '<div><h1 class="text-3xl font-semibold mb-8 text-ink tracking-tight">Dashboard</h1><div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">'
+    +stats.map(s=>'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">'+s.label+'</p><p class="text-3xl font-semibold text-ink tracking-tight">'+s.value+'</p></div>').join('')
+    +'</div><div class="grid sm:grid-cols-2 gap-4">'
+    +'<div class="card p-6"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Recent bookings</h2><div class="divide-y divide-line">'
+    +recent.map(b=>'<div class="py-3 flex items-center justify-between gap-3"><div><p class="text-sm font-medium text-ink">'+esc(b.customer)+' → '+esc(b.tech)+'</p><p class="text-xs text-muted mt-0.5">'+esc(b.service)+'</p></div>'+badge(b.status)+'</div>').join('')
+    +'</div></div>'
+    +'<div class="card p-6"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Commission (12%)</h2>'
+      +'<div class="space-y-3 text-sm">'
+        +'<div class="flex justify-between"><span class="text-muted">Total earned</span><span class="font-medium text-ink">₱'+totalCommissions.toLocaleString()+'</span></div>'
+        +'<div class="flex justify-between"><span class="text-muted">Paid</span><span class="text-ink">₱'+paid.toLocaleString()+'</span></div>'
+        +'<div class="flex justify-between"><span class="text-muted">Owed by techs</span><span class="text-ink">₱'+owed.toLocaleString()+'</span></div>'
+      +'</div>'
+      +'<p class="text-xs text-muted mt-5 leading-relaxed">Customers pay technicians directly. FixLink charges 12% of the final approved price — remitted by the technician after each job.</p>'
+    +'</div></div></div>';
+}
+function setUserSearch(v){ userFilter.search=v; renderShellContent(location.hash); }
+function setUserRole(r){ userFilter.role=r; renderShellContent(location.hash); }
+function toggleUserStatus(id){ const u=USERS.find(u=>u.id===id); u.status=u.status==='Active'?'Suspended':'Active'; audit('admin','user:'+u.status,'user:'+u.name); persist(); renderShellContent(location.hash); }
+function removeUser(id){ const u=USERS.find(u=>u.id===id); USERS=USERS.filter(u=>u.id!==id); audit('admin','user:removed','user:'+u.name); persist(); renderShellContent(location.hash); }
+function toggleAddUser(){ addUserOpen=!addUserOpen; renderShellContent(location.hash); }
+function addUser(){
+  const name=document.getElementById('nu-name').value.trim();
+  const email=document.getElementById('nu-email').value.trim();
+  const role=document.getElementById('nu-role').value;
+  if(!name||!email) return;
+  USERS.unshift({id:Date.now(),name,email,role,status:'Active',joined:'Sep 2026'});
+  audit('admin','user:created','user:'+name); addUserOpen=false; persist(); renderShellContent(location.hash);
+}
+function adminUsers(){
+  const roles=['All','Customer','Technician','Admin'];
+  const filtered = USERS.filter(u=>(userFilter.role==='All'||u.role===userFilter.role) && u.name.toLowerCase().indexOf(userFilter.search.toLowerCase())>-1);
+  return '<div><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6"><h1 class="text-3xl font-semibold text-ink tracking-tight">Users</h1><button onclick="toggleAddUser()" class="btn-primary text-sm py-2 px-4">+ Add</button></div>'
+    +(addUserOpen?'<div class="card p-4 mb-4 grid sm:grid-cols-3 gap-3"><input id="nu-name" placeholder="Name" class="input"/><input id="nu-email" placeholder="Email" class="input"/><select id="nu-role" class="input"><option>Customer</option><option>Technician</option><option>Admin</option></select><div class="sm:col-span-3 flex gap-2"><button onclick="addUser()" class="btn-primary text-sm py-2 px-4">Create</button><button onclick="toggleAddUser()" class="btn-secondary text-sm py-2 px-4">Cancel</button></div></div>':'')
+    +'<div class="flex flex-col sm:flex-row gap-3 mb-4"><input oninput="setUserSearch(this.value)" placeholder="Search..." class="input sm:max-w-xs"/><div class="flex gap-2 overflow-x-auto">'+roles.map(r=>'<button onclick="setUserRole(\''+r+'\')" class="chip '+(userFilter.role===r?'chip-active':'')+'">'+r+'</button>').join('')+'</div></div>'
+    +'<div class="card overflow-x-auto"><table class="w-full text-sm min-w-[500px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Name</th><th class="p-4 font-medium">Email</th><th class="p-4 font-medium">Role</th><th class="p-4 font-medium">Status</th><th class="p-4"></th></tr></thead><tbody>'
+    +filtered.map(u=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">'+esc(u.name)+'</td><td class="p-4 text-muted">'+esc(u.email)+'</td><td class="p-4 text-ink">'+esc(u.role)+'</td><td class="p-4">'+badge(u.status)+'</td><td class="p-4 text-right whitespace-nowrap"><button onclick="toggleUserStatus('+u.id+')" class="btn-link text-xs mr-4">'+(u.status==='Active'?'Suspend':'Activate')+'</button><button onclick="removeUser('+u.id+')" class="btn-link text-xs" style="color:var(--danger)">Remove</button></td></tr>').join('')
+    +'</tbody></table></div></div>';
+}
+function toggleVerify(id){ const t=TECHS.find(t=>t.id===id); t.verified=!t.verified; audit('admin','tech:'+(t.verified?'verified':'unverified'),'tech:'+t.name); persist(); renderShellContent(location.hash); }
+function adminTechnicians(){
+  return '<div><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Technicians</h1><div class="card overflow-x-auto"><table class="w-full text-sm min-w-[650px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Name</th><th class="p-4 font-medium">Services</th><th class="p-4 font-medium">Rating</th><th class="p-4 font-medium">Jobs</th><th class="p-4 font-medium">Owed</th><th class="p-4 font-medium">Verified</th><th class="p-4"></th></tr></thead><tbody>'
+    +TECHS.map(t=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">'+esc(t.name)+'</td><td class="p-4 text-ink">'+esc(t.services.join(', '))+'</td><td class="p-4 text-ink">'+t.rating+'</td><td class="p-4 text-ink">'+t.jobs+'</td><td class="p-4 text-ink">₱'+techOwed(t.name).toLocaleString()+'</td><td class="p-4">'+(t.verified?badge('Active'):badge('Pending'))+'</td><td class="p-4 text-right"><button onclick="toggleVerify('+t.id+')" class="btn-link text-xs">'+(t.verified?'Unverify':'Verify')+'</button></td></tr>').join('')
+    +'</tbody></table></div></div>';
+}
+function setBookingFilter(s){ bookingFilterVal=s; renderShellContent(location.hash); }
+function adminBookings(){
+  const statuses=['All','Pending','Estimated','Confirmed','EnRoute','Arrived','InProgress','QuotePending','Completed','Cancelled','Unmatched'];
+  const list = (bookingFilterVal==='All'?BOOKINGS:BOOKINGS.filter(b=>b.status===bookingFilterVal)).filter(b=>b.status!=='Inquiry');
+  return '<div><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Bookings</h1><div class="flex gap-2 mb-4 overflow-x-auto">'+statuses.map(s=>'<button onclick="setBookingFilter(\''+s+'\')" class="chip '+(bookingFilterVal===s?'chip-active':'')+'">'+s+'</button>').join('')+'</div>'
+    +'<div class="card overflow-x-auto"><table class="w-full text-sm min-w-[750px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Customer</th><th class="p-4 font-medium">Tech</th><th class="p-4 font-medium">Service</th><th class="p-4 font-medium">Est</th><th class="p-4 font-medium">Quote</th><th class="p-4 font-medium">Final</th><th class="p-4 font-medium">Comm</th><th class="p-4 font-medium">Status</th></tr></thead><tbody>'
+    +(list.length?list.map(b=>{
+      const est = ESTIMATES.find(e=>e.bookingId===b.id && e.tech===b.tech);
+      const q = QUOTES.find(q=>q.bookingId===b.id && q.status==='Approved');
+      const comm = COMMISSIONS.find(c=>c.bookingId===b.id);
+      return '<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">'+esc(b.customer)+'</td><td class="p-4 text-ink">'+esc(b.tech)+'</td><td class="p-4 text-ink">'+esc(b.service)+'</td><td class="p-4 text-muted">'+(est?'₱'+est.amount.toLocaleString():'—')+'</td><td class="p-4 text-muted">'+(q?'₱'+q.total.toLocaleString():'—')+'</td><td class="p-4 text-ink">'+(b.finalAmount?'₱'+b.finalAmount.toLocaleString():'—')+'</td><td class="p-4 text-ink">'+(comm?'₱'+comm.commission.toLocaleString():'—')+'</td><td class="p-4">'+badge(b.status)+'</td></tr>';
+    }).join(''):'<tr><td class="p-6 text-muted text-center" colspan="8">No bookings.</td></tr>')
+    +'</tbody></table></div></div>';
+}
+function adminCommissions(){
+  const total = COMMISSIONS.reduce((s,c)=>s+c.commission, 0);
+  const owed = COMMISSIONS.filter(c=>c.status==='Owed').reduce((s,c)=>s+c.commission, 0);
+  const paid = COMMISSIONS.filter(c=>c.status==='Paid').reduce((s,c)=>s+c.commission, 0);
+  return '<div><h1 class="text-3xl font-semibold mb-2 text-ink tracking-tight">Commissions</h1><p class="text-muted mb-6">12% of the final approved price on completed jobs.</p>'
+    +'<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Total</p><p class="text-3xl font-semibold text-ink tracking-tight">₱'+total.toLocaleString()+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Paid</p><p class="text-3xl font-semibold text-[var(--success)] tracking-tight">₱'+paid.toLocaleString()+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Owed</p><p class="text-3xl font-semibold text-[var(--warn)] tracking-tight">₱'+owed.toLocaleString()+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Rate</p><p class="text-3xl font-semibold text-ink tracking-tight">12%</p></div>'
+    +'</div>'
+    +'<div class="card overflow-x-auto"><table class="w-full text-sm min-w-[650px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Technician</th><th class="p-4 font-medium">Booking</th><th class="p-4 font-medium">Final amount</th><th class="p-4 font-medium">Rate</th><th class="p-4 font-medium">Commission</th><th class="p-4 font-medium">Status</th><th class="p-4"></th></tr></thead><tbody>'
+    +COMMISSIONS.map(c=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">'+esc(c.tech)+'</td><td class="p-4 text-muted">#'+c.bookingId+'</td><td class="p-4 text-ink">₱'+c.finalAmount.toLocaleString()+'</td><td class="p-4 text-muted">'+(c.rate*100).toFixed(0)+'%</td><td class="p-4 font-medium text-ink">₱'+c.commission.toLocaleString()+'</td><td class="p-4">'+badge(c.status)+'</td><td class="p-4 text-right">'+(c.status==='Owed'?'<button onclick="markCommissionPaid('+c.id+')" class="btn-link text-xs">Mark paid</button>':'')+'</td></tr>').join('')
+    +'</tbody></table></div></div>';
+}
+function adminDisputes(){
+  return '<div><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Disputes</h1>'
+    +(DISPUTES.length?DISPUTES.map(d=>'<div class="card p-6 mb-3"><div class="flex items-center justify-between mb-2"><p class="text-sm font-medium text-ink">'+esc(d.customer)+' vs '+esc(d.tech)+'</p>'+badge(d.status)+'</div><p class="text-xs text-muted mb-2">'+esc(d.reason)+'</p><p class="text-sm mb-5 text-ink">'+esc(d.text)+'</p>'
+      +(d.status==='Open'?'<div class="flex gap-2"><button onclick="resolveDispute('+d.id+',\'Refund issued\')" class="btn-secondary text-sm py-2 px-4">Refund</button><button onclick="resolveDispute('+d.id+',\'Warning issued\')" class="btn-secondary text-sm py-2 px-4">Warn</button><button onclick="resolveDispute('+d.id+',\'Dismissed\')" class="btn-secondary text-sm py-2 px-4">Dismiss</button></div>':'<p class="text-xs text-[var(--success)]">Resolved: '+esc(d.resolution)+'</p>')
+    +'</div>').join(''):'<p class="text-muted text-sm">No disputes.</p>')
+  +'</div>';
+}
+function adminAudit(){
+  return '<div><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Audit log</h1><div class="card overflow-x-auto"><table class="w-full text-sm min-w-[500px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">When</th><th class="p-4 font-medium">Actor</th><th class="p-4 font-medium">Action</th><th class="p-4 font-medium">Target</th></tr></thead><tbody>'
+    +(AUDIT_LOG.length?AUDIT_LOG.map(a=>'<tr class="border-b border-line last:border-0"><td class="p-4 text-muted">'+timeAgo(a.at)+'</td><td class="p-4 font-medium text-ink">'+esc(a.actor)+'</td><td class="p-4 text-ink">'+esc(a.action)+'</td><td class="p-4 text-muted">'+esc(a.target)+'</td></tr>').join(''):'<tr><td class="p-6 text-muted text-center" colspan="4">No activity.</td></tr>')
+    +'</tbody></table></div></div>';
+}
+
+/* ============================================================
+   TECH
+   ============================================================ */
+function techDashboard(){
+  const mine = BOOKINGS.filter(b=>b.tech==='Jun Alvarez' && b.status!=='Inquiry');
+  const active = mine.filter(b=>!TERMINAL.includes(b.status));
+  const estimateRequests = BOOKINGS.filter(b => b.status==='Pending' && (b.requestedTechs||[]).includes('Jun Alvarez'));
+  const owed = techOwed('Jun Alvarez');
+  return '<div><h1 class="text-3xl font-semibold mb-8 text-ink tracking-tight">Dashboard</h1>'
+    +'<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Active jobs</p><p class="text-3xl font-semibold text-ink tracking-tight">'+active.length+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Estimate requests</p><p class="text-3xl font-semibold text-ink tracking-tight">'+estimateRequests.length+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Rating</p><p class="text-3xl font-semibold text-ink tracking-tight">'+(TECHS.find(t=>t.name==='Jun Alvarez')?.rating||4.9)+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Owed</p><p class="text-3xl font-semibold text-[var(--warn)] tracking-tight">₱'+owed.toLocaleString()+'</p></div>'
+    +'</div>'
+    +(estimateRequests.length?'<div class="card p-6 mb-6"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Pending estimate requests</h2><div class="divide-y divide-line">'+estimateRequests.map(b=>'<div class="py-4 flex items-center justify-between gap-3"><div><p class="text-sm font-medium text-ink">'+esc(b.service)+' · '+esc(b.customer)+'</p><p class="text-xs text-muted mt-0.5">'+esc((b.problems||[]).join(', '))+' · '+esc(b.barangay)+'</p></div><button onclick="openEstimateComposer('+b.id+')" class="btn-primary text-xs py-2 px-3">Post estimate</button></div>').join('')+'</div></div>':'')
+    +'<div class="card p-6"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Upcoming</h2><div class="divide-y divide-line">'
+    +(active.length?active.map(b=>'<div class="py-4 flex items-center justify-between gap-3"><div><p class="text-sm font-medium text-ink">'+esc(b.customer)+'</p><p class="text-xs text-muted mt-0.5">'+esc(b.service)+' · '+esc((b.problems||[]).join(', '))+'</p><p class="text-xs text-muted mt-0.5">'+esc(b.date)+' · '+esc(b.time)+'</p></div><div class="flex items-center gap-2">'+badge(b.status)
+      +(b.status==='Confirmed'?'<button onclick="advanceLifecycle('+b.id+',\'EnRoute\',\'tech\')" class="btn-primary text-xs py-2 px-3">Drive</button>':'')
+      +(b.status==='Arrived'?'<button onclick="advanceLifecycle('+b.id+',\'InProgress\',\'tech\')" class="btn-primary text-xs py-2 px-3">Start</button>':'')
+      +(b.status==='InProgress'?'<button onclick="openQuoteComposer('+b.id+')" class="btn-primary text-xs py-2 px-3">Quote</button>':'')
+      +(b.status==='QuotePending'?'<span class="text-xs text-muted">Waiting for approval</span>':'')
+    +'</div></div>').join(''):'<p class="text-sm text-muted py-3">No upcoming jobs.</p>')
+    +'</div></div></div>';
+}
+function acceptJob(id){ advanceLifecycle(id, 'Confirmed', 'tech'); }
+function completeJob(id){ advanceLifecycle(id, 'Completed', 'tech'); }
+
+/* ---- Estimate composer (tech posts price pre-inspection) ---- */
+function openEstimateComposer(bookingId){
+  const b = BOOKINGS.find(x=>x.id===bookingId); if(!b) return;
+  const existing = ESTIMATES.find(e => e.bookingId === bookingId && e.tech === 'Jun Alvarez');
+  document.getElementById('estimate-modal-root').innerHTML =
+    '<div class="fixed inset-0 bg-black/40 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if(event.target===this)closeEstimateModal()">'
+      +'<div class="bg-surface rounded-t-2xl sm:rounded-2xl max-w-sm w-full p-6 sheet sm:!static">'
+        +'<h3 class="text-lg font-semibold mb-1 text-ink">Estimated price</h3>'
+        +'<p class="text-sm text-muted mb-5">'+esc(b.service)+' · '+esc(b.customer)+' · '+esc(b.barangay)+'</p>'
+        +'<div class="card-quiet p-4 mb-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-1">Reported issue</p><p class="text-sm text-ink">'+esc((b.problems||[]).join(', '))+'</p></div>'
+        +'<div class="space-y-4 mb-5">'
+          +'<div><label class="input-label">Estimate (₱)</label><input id="est-amount" type="number" class="input" value="'+(existing?existing.amount:'')+'" placeholder="e.g. 800"/></div>'
+          +'<div><label class="input-label">Note to customer</label><textarea id="est-note" rows="3" class="input" placeholder="Brief explanation">'+(existing?esc(existing.note):'')+'</textarea></div>'
+        +'</div>'
+        +'<p class="text-xs text-muted mb-5 leading-relaxed">This is an <b>estimate</b> based on the reported issue. Not binding. The customer will choose a technician based on estimates, then you inspect on-site and send the actual quotation.</p>'
+        +'<div class="flex gap-2"><button onclick="closeEstimateModal()" class="btn-secondary flex-1">Cancel</button><button onclick="submitEstimate('+bookingId+')" class="btn-primary flex-1">Post estimate</button></div>'
+      +'</div>'
+    +'</div>';
+}
+function closeEstimateModal(){ document.getElementById('estimate-modal-root').innerHTML=''; }
+function submitEstimate(bookingId){
+  const amt = Number(document.getElementById('est-amount').value);
+  if(!amt || amt <= 0){ toast('Enter a valid amount'); return; }
+  const note = document.getElementById('est-note').value.trim();
+  postEstimate(bookingId, 'Jun Alvarez', amt, note);
+  const b = BOOKINGS.find(x=>x.id===bookingId);
+  notify('customer', b.customer, 'New estimate', '₱'+amt.toLocaleString()+' from Jun Alvarez.', '#/app/bookings/'+bookingId);
+  closeEstimateModal(); toast('Estimate posted'); renderShellContent(location.hash);
+}
+
+function techSchedule(){
+  const mine = BOOKINGS.filter(b=>b.tech==='Jun Alvarez' && b.status!=='Inquiry');
+  return '<div><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Jobs</h1><div class="card divide-y divide-line">'
+    +mine.map(b=>'<div class="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">'
+      +'<div><p class="text-sm font-medium text-ink">'+esc(b.customer)+'</p><p class="text-xs text-muted mt-0.5">'+esc(b.service)+' · '+esc((b.problems||[]).join(', '))+'</p><p class="text-xs text-muted mt-0.5">'+esc(b.date)+' · '+esc(b.time)+' · '+esc(b.barangay||'')+'</p></div>'
+      +'<div class="flex items-center gap-2 flex-wrap">'+badge(b.status)
+        +(b.status==='Confirmed'?'<button onclick="advanceLifecycle('+b.id+',\'EnRoute\',\'tech\')" class="btn-primary text-xs py-2 px-3">Drive</button>':'')
+        +(b.status==='EnRoute'?'<button onclick="advanceLifecycle('+b.id+',\'Arrived\',\'tech\')" class="btn-primary text-xs py-2 px-3">Arrived</button>':'')
+        +(b.status==='Arrived'?'<button onclick="advanceLifecycle('+b.id+',\'InProgress\',\'tech\')" class="btn-primary text-xs py-2 px-3">Start</button>':'')
+        +(b.status==='InProgress'?'<button onclick="openQuoteComposer('+b.id+')" class="btn-secondary text-xs py-2 px-3">Send quote</button>':'')
+        +(b.status==='QuotePending'?'<span class="text-xs text-muted">Waiting for customer</span>':'')
+        +(b.status==='InProgress'?'<button onclick="completeJob('+b.id+')" class="btn-primary text-xs py-2 px-3">Complete</button>':'')
+        +'<button onclick="openChatModal('+b.id+')" class="btn-ghost p-2">'+ic('chat','w-4 h-4')+'</button>'
+      +'</div>'
+    +'</div>').join('')
+    +'</div></div>';
+}
+function techEstimates(){
+  const requests = BOOKINGS.filter(b => b.status==='Pending' && (b.requestedTechs||[]).includes('Jun Alvarez'));
+  const posted = ESTIMATES.filter(e => e.tech === 'Jun Alvarez').sort((a,b)=>b.postedAt-a.postedAt);
+  return '<div><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Estimates</h1>'
+    +(requests.length?'<div class="card p-6 mb-6"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Pending requests</h2><div class="divide-y divide-line">'+requests.map(b=>'<div class="py-4 flex items-center justify-between gap-3"><div><p class="text-sm font-medium text-ink">'+esc(b.service)+' · '+esc(b.customer)+'</p><p class="text-xs text-muted mt-0.5">'+esc((b.problems||[]).join(', '))+' · '+esc(b.barangay)+'</p></div><button onclick="openEstimateComposer('+b.id+')" class="btn-primary text-xs py-2 px-3">Post estimate</button></div>').join('')+'</div></div>':'')
+    +'<div class="card p-6"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Posted estimates</h2>'
+    +(posted.length?'<div class="divide-y divide-line">'+posted.map(e=>{
+      const b = BOOKINGS.find(x=>x.id===e.bookingId);
+      return '<div class="py-4 flex items-center justify-between gap-3"><div class="min-w-0 flex-1"><p class="text-sm font-medium text-ink truncate">'+esc(b?b.service:'—')+' · '+esc(b?b.customer:'—')+'</p><p class="text-xs text-muted mt-0.5 truncate">'+esc(e.note||'No note')+'</p></div><div class="text-right shrink-0"><p class="text-sm font-semibold text-ink">₱'+e.amount.toLocaleString()+'</p><p class="text-xs text-muted mt-0.5">'+timeAgo(e.postedAt)+'</p></div></div>';
+    }).join('')+'</div>':'<p class="text-sm text-muted">No estimates posted yet.</p>')
+    +'</div></div>';
+}
+function techEarnings(){
+  const mine = BOOKINGS.filter(b=>b.tech==='Jun Alvarez' && b.status==='Completed');
+  const gross = mine.reduce((s,b)=>s+(b.finalAmount||0),0);
+  const commissionPaid = techPaid('Jun Alvarez');
+  const commissionOwed = techOwed('Jun Alvarez');
+  return '<div><h1 class="text-3xl font-semibold mb-8 text-ink tracking-tight">Earnings</h1>'
+    +'<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Jobs done</p><p class="text-3xl font-semibold text-ink tracking-tight">'+mine.length+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Gross collected</p><p class="text-3xl font-semibold text-accent tracking-tight">₱'+gross.toLocaleString()+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Net after 12%</p><p class="text-3xl font-semibold text-[var(--success)] tracking-tight">₱'+(gross - commissionPaid - commissionOwed).toLocaleString()+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Commission owed</p><p class="text-3xl font-semibold text-[var(--warn)] tracking-tight">₱'+commissionOwed.toLocaleString()+'</p></div>'
+    +'</div>'
+    +'<div class="card p-6 mb-4"><p class="text-sm font-medium text-ink mb-1">You collect directly from customers</p><p class="text-xs text-muted leading-relaxed">Cash or GCash, at the door. FixLink never touches the money. You keep 88% of the final approved price and remit 12% to FixLink after each completed job.</p></div>'
+    +'<div class="card overflow-x-auto"><table class="w-full text-sm min-w-[520px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Customer</th><th class="p-4 font-medium">Service</th><th class="p-4 font-medium">Date</th><th class="p-4 font-medium">Final</th><th class="p-4 font-medium">Commission</th></tr></thead><tbody>'
+    +(mine.length?mine.map(b=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">'+esc(b.customer)+'</td><td class="p-4 text-ink">'+esc(b.service)+'</td><td class="p-4 text-muted">'+esc(b.date)+'</td><td class="p-4 font-medium text-ink">'+(b.finalAmount?'₱'+b.finalAmount.toLocaleString():'—')+'</td><td class="p-4 text-ink">'+(b.finalCommission?'₱'+b.finalCommission.toLocaleString():'—')+'</td></tr>').join(''):'<tr><td class="p-4 text-muted" colspan="5">No completed jobs.</td></tr>')
+    +'</tbody></table></div></div>';
+}
+function techCommissions(){
+  const mine = COMMISSIONS.filter(c=>c.tech==='Jun Alvarez');
+  const owed = techOwed('Jun Alvarez');
+  const paid = techPaid('Jun Alvarez');
+  return '<div><h1 class="text-3xl font-semibold mb-2 text-ink tracking-tight">Commissions</h1><p class="text-muted mb-6">12% of each completed job. Remit to FixLink after the customer pays you.</p>'
+    +'<div class="grid grid-cols-3 gap-3 mb-6">'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Total</p><p class="text-2xl font-semibold text-ink tracking-tight">₱'+(owed+paid).toLocaleString()+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Owed</p><p class="text-2xl font-semibold text-[var(--warn)] tracking-tight">₱'+owed.toLocaleString()+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Paid</p><p class="text-2xl font-semibold text-[var(--success)] tracking-tight">₱'+paid.toLocaleString()+'</p></div>'
+    +'</div>'
+    +'<div class="card overflow-x-auto"><table class="w-full text-sm min-w-[520px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Booking</th><th class="p-4 font-medium">Final</th><th class="p-4 font-medium">Commission (12%)</th><th class="p-4 font-medium">Status</th><th class="p-4"></th></tr></thead><tbody>'
+    +(mine.length?mine.map(c=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">#'+c.bookingId+'</td><td class="p-4 text-ink">₱'+c.finalAmount.toLocaleString()+'</td><td class="p-4 font-medium text-ink">₱'+c.commission.toLocaleString()+'</td><td class="p-4">'+badge(c.status)+'</td><td class="p-4 text-right">'+(c.status==='Owed'?'<button onclick="markCommissionPaid('+c.id+')" class="btn-link text-xs">Mark paid</button>':'')+'</td></tr>').join(''):'<tr><td class="p-4 text-muted" colspan="5">No commission records.</td></tr>')
+    +'</tbody></table></div></div>';
+}
+function toggleMyService(label){
+  const me=TECHS.find(t=>t.id===1);
+  if(me.services.includes(label)){ if(me.services.length===1){ toast('Keep at least one'); return; } me.services=me.services.filter(s=>s!==label); }
+  else me.services.push(label);
+  persist(); renderShellContent(location.hash);
+}
+function techProfile(){
+  const me=TECHS.find(t=>t.id===1);
+  const myReviews = REVIEWS.filter(r=>r.tech===me.name);
+  return '<div class="max-w-md"><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Profile</h1><div class="card p-6 space-y-5">'
+    +'<div><label class="input-label">Name</label><input class="input" value="Jun Alvarez"/></div>'
+    +'<div><label class="input-label block mb-3">Appliances</label>'
+      +'<div class="grid grid-cols-2 gap-2">'+SERVICES.map(s=>'<label class="flex items-center gap-2 text-sm border border-line rounded-lg px-3 py-2 cursor-pointer text-ink '+(me.services.includes(s.label)?'border-[var(--accent)] bg-[var(--accent-soft)]':'')+'"><input type="checkbox" '+(me.services.includes(s.label)?'checked':'')+' onchange="toggleMyService(\''+s.label+'\')"/> '+s.label+'</label>').join('')+'</div>'
+    +'</div>'
+    +'<button onclick="toast(\'Saved\')" class="btn-primary w-full">Save</button>'
+    +'</div>'
+    +(myReviews.length?'<div class="card p-6 mt-4"><p class="text-sm font-medium mb-5 text-ink">Reviews</p>'+myReviews.map(r=>'<div class="pb-5 mb-5 border-b border-line last:border-0 last:pb-0 last:mb-0"><p class="star-row mb-2">'+renderStars(r.avg,12)+'</p><p class="text-sm text-ink">'+esc(r.text)+'</p><p class="text-xs text-muted mt-2">'+esc(r.customer)+' · '+timeAgo(r.at)+'</p></div>').join('')+'</div>':'')
+  +'</div>';
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{ hydrate(); applyTheme(); render(); });
+</script>
+</body>
+</html>
