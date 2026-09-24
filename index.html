@@ -9,8 +9,8 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
 :root{
   --ink:#000000; --ink-2:#3C3C43;
@@ -127,10 +127,11 @@ body{font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans
 .appliance-tile:hover{background:var(--surface-2);}
 .appliance-tile:active{transform:scale(.97);}
 .appliance-tile.selected{background:var(--accent-soft);}
-.appliance-tile .icon-wrap{width:52px;height:52px;border-radius:14px;background:var(--surface-2);color:var(--ink);display:flex;align-items:center;justify-content:center;}
+.appliance-tile .icon-wrap{width:52px;height:52px;border-radius:14px;background:var(--surface-2);color:var(--ink);display:flex;align-items:center;justify-content:center;position:relative;}
 .appliance-tile.selected .icon-wrap{background:var(--accent);color:#fff;}
 .appliance-tile .icon-wrap svg{width:26px;height:26px;}
 .appliance-tile .label{font-size:12px;font-weight:500;color:var(--ink);line-height:1.2;}
+.appliance-tile .sel-check{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface);}
 
 .appliance-icon{width:22px;height:22px;}
 .star-row{display:inline-flex;gap:1px;color:var(--warn);}
@@ -278,8 +279,8 @@ body{font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
         <div>
           <p class="text-accent font-medium text-sm mb-3">For technicians</p>
-          <h2 class="display text-3xl font-semibold text-ink mb-3 tracking-tight">Free to join. 12% commission per completed job.</h2>
-          <p class="text-muted max-w-xl text-sm leading-relaxed">No monthly fees. No upfront cost. You only pay when you get paid. FixLink charges 12% of the final approved price — the customer pays you directly, and you remit the commission to FixLink.</p>
+          <h2 class="display text-3xl font-semibold text-ink mb-3 tracking-tight">Free to join. 10% commission per completed job.</h2>
+          <p class="text-muted max-w-xl text-sm leading-relaxed">No monthly fees. No upfront cost. You only pay when you get paid. FixLink charges 10% of the final approved price — the customer pays you directly, and you remit the commission to FixLink.</p>
         </div>
         <a href="#/login" class="btn-primary whitespace-nowrap">Apply as a technician</a>
       </div>
@@ -291,21 +292,21 @@ body{font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans
         </div>
         <div class="card p-6">
           <p class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Commission</p>
-          <p class="text-2xl font-semibold text-ink mb-2 tracking-tight">12% per job</p>
+          <p class="text-2xl font-semibold text-ink mb-2 tracking-tight">10% per job</p>
           <p class="text-sm text-muted leading-relaxed">Charged only on completed jobs, on the final approved price. If you don't get paid, FixLink doesn't either.</p>
         </div>
         <div class="card p-6">
           <p class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Payment</p>
           <p class="text-2xl font-semibold text-ink mb-2 tracking-tight">Direct to you</p>
-          <p class="text-sm text-muted leading-relaxed">The customer pays you directly. Remit your 12% to FixLink after each completed job — cash, GCash, or auto-deducted from your wallet.</p>
+          <p class="text-sm text-muted leading-relaxed">The customer pays you directly. Remit your 10% to FixLink after each completed job — cash, GCash, or auto-deducted from your wallet.</p>
         </div>
       </div>
       <div class="card p-6 mt-6 max-w-2xl">
         <p class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Example</p>
         <div class="space-y-2 text-sm">
           <div class="flex justify-between"><span class="text-muted">Customer approves final price</span><span class="text-ink font-medium">₱1,000</span></div>
-          <div class="flex justify-between"><span class="text-muted">FixLink commission (12%)</span><span class="text-ink">₱120</span></div>
-          <div class="flex justify-between pt-2 border-t border-line"><span class="text-muted">Technician keeps</span><span class="text-ink font-medium">₱880</span></div>
+          <div class="flex justify-between"><span class="text-muted">FixLink commission (10%)</span><span class="text-ink">₱100</span></div>
+          <div class="flex justify-between pt-2 border-t border-line"><span class="text-muted">Technician keeps</span><span class="text-ink font-medium">₱900</span></div>
         </div>
       </div>
     </div>
@@ -391,6 +392,16 @@ body{font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans
                 <button type="button" onclick="setRegRole('technician')">Technician</button>
               </div>
             </div>
+            <div id="reg-tech-fields" class="hidden space-y-3 pt-1">
+              <div class="card-bordered rounded-xl p-3" style="border:1px dashed var(--line);">
+                <p class="text-xs font-medium text-ink mb-1">Skills verification</p>
+                <p class="text-xs text-muted leading-relaxed mb-3">To protect customers, technicians must pass ID and skills verification before taking jobs. A TESDA National Certificate II (NC2) in your trade is the fastest path — admin can also accept equivalent training certificates or manufacturer certifications, reviewed manually.</p>
+                <label class="input-label">TESDA NC2 certificate number (optional now)</label>
+                <input type="text" id="reg-nc2" class="input mb-2" placeholder="e.g. NC2-AIRCON-2024-00123"/>
+                <label class="input-label">Trade / specialization</label>
+                <input type="text" id="reg-trade" class="input" placeholder="e.g. RAC Servicing NC2 (Aircon &amp; Ref)"/>
+              </div>
+            </div>
           </div>
           <button type="submit" class="btn-primary w-full mt-5">Create account</button>
           <p class="text-xs text-muted mt-3 leading-relaxed text-center">By continuing, you agree to the Terms of Service and Privacy Policy.</p>
@@ -427,7 +438,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans
    FixLink — Commission model + multi-tech + three-stage pricing
    ============================================================ */
 
-const COMMISSION_RATE = 0.12;   // 12% of final approved price
+const COMMISSION_RATE = 0.10;   // 10% of final approved price
 function computeCommission(amount){ return Math.round((Number(amount)||0) * COMMISSION_RATE); }
 
 /* ---------- theme ---------- */
@@ -455,7 +466,12 @@ function setAuthMode(mode){
   const sw = document.getElementById('auth-switch');
   if(sw){ sw.innerHTML = mode === 'login' ? 'Don\'t have an account? <button onclick="setAuthMode(\'register\')" class="btn-link">Sign up</button>' : 'Already have an account? <button onclick="setAuthMode(\'login\')" class="btn-link">Log in</button>'; }
 }
-function setRegRole(r){ _regRole = r; document.querySelectorAll('#reg-role button').forEach(b=>{ b.classList.toggle('active', b.textContent.toLowerCase() === r); }); }
+function setRegRole(r){
+  _regRole = r;
+  document.querySelectorAll('#reg-role button').forEach(b=>{ b.classList.toggle('active', b.textContent.toLowerCase() === r); });
+  const techFields = document.getElementById('reg-tech-fields');
+  if(techFields) techFields.classList.toggle('hidden', r !== 'technician');
+}
 function handleLogin(){
   const email = document.getElementById('login-email').value.trim();
   if(!email){ toast('Enter your email'); return; }
@@ -465,7 +481,14 @@ function handleLogin(){
   else location.hash = '#/app';
 }
 function handleRegister(){
-  toast('Account created');
+  if(_regRole === 'technician'){
+    const nc2 = (document.getElementById('reg-nc2')?.value || '').trim();
+    const trade = (document.getElementById('reg-trade')?.value || '').trim();
+    audit('system', 'tech:registered', 'user:new', { nc2: nc2 || null, trade: trade || null });
+    toast(nc2 ? 'Account created — NC2 submitted for review' : 'Account created — verify your NC2/skills to start accepting jobs');
+  } else {
+    toast('Account created');
+  }
   if(_regRole === 'technician') location.hash = '#/tech';
   else location.hash = '#/app';
 }
@@ -502,6 +525,8 @@ const ICONS = {
   map:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>',
   plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
   info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+  back:'<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  fileCheck:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/>',
 };
 const APPLIANCE_ICONS = {
   aircon: '<svg class="appliance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="8" rx="2"/><line x1="5" y1="9.5" x2="19" y2="9.5"/><line x1="6" y1="17" x2="5" y2="19"/><line x1="10" y1="17" x2="9" y2="20"/><line x1="14" y1="17" x2="13" y2="20"/><line x1="18" y1="17" x2="17" y2="19"/></svg>',
@@ -681,13 +706,14 @@ function redrawMapMarkers(bookingId){
 let _exploreMap = null;
 function openExploreMap(){
   const filter = techFilterVal === 'All' ? null : techFilterVal;
-  const matches = TECHS.filter(t => t.status === 'Active' && (!filter || t.services.includes(filter)));
+  const wizServices = (wizard.services && wizard.services.length) ? wizard.services : null;
+  const matches = TECHS.filter(t => t.status === 'Active' && (!filter || t.services.includes(filter)) && (!wizServices || wizServices.some(s=>t.services.includes(s))));
   const custLoc = getLoc('customer:Marki Santos');
   const custBase = custLoc && custLoc.lat ? custLoc : barangayOf('Lahug');
   document.getElementById('map-explore-root').innerHTML =
     '<div class="fixed inset-0 bg-black/40 z-[75] flex items-center justify-center p-0 sm:p-3" onclick="if(event.target===this)closeExploreMap()">'
     +'<div class="bg-surface rounded-none sm:rounded-2xl w-full max-w-3xl overflow-hidden flex flex-col" style="height:min(92vh,760px)">'
-      +'<div class="p-4 border-b border-line flex items-center justify-between shrink-0"><p class="font-semibold text-sm text-ink">'+matches.length+' technicians</p><button onclick="closeExploreMap()" class="icon-btn">'+ic('x','w-4 h-4')+'</button></div>'
+      +'<div class="p-4 border-b border-line flex items-center justify-between shrink-0"><div><p class="font-semibold text-sm text-ink">'+matches.length+' technicians nearby</p><p class="text-xs text-muted mt-0.5">Tap a pin, then "Add to request" — pick as many as you like.</p></div><button onclick="closeExploreMap()" class="icon-btn">'+ic('x','w-4 h-4')+'</button></div>'
       +'<div id="explore-map" class="flex-1"></div>'
       +'<div class="p-3 border-t border-line shrink-0 flex flex-wrap items-center gap-2 overflow-x-auto">'
         +['All'].concat([...new Set(TECHS.flatMap(t=>t.services))]).map(s=>'<button onclick="techFilterVal=\''+s+'\';closeExploreMap();openExploreMap()" class="chip '+(techFilterVal===s?'chip-active':'')+'">'+s+'</button>').join('')
@@ -700,14 +726,22 @@ function openExploreMap(){
     L.marker([custBase.lat, custBase.lng], { icon: L.divIcon({ className:'', html:'<div class="cust-marker">'+ic('pin','w-3.5 h-3.5')+'</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(_exploreMap).bindPopup('You');
     matches.forEach(t=>{
       const km = haversineKm(custBase, {lat:t.lat, lng:t.lng});
-      const html = '<div style="min-width:160px"><p style="font-weight:600;font-size:14px;margin:0 0 4px;color:var(--ink)">'+esc(t.name)+'</p><p style="font-size:12px;color:var(--muted);margin:0 0 8px">'+(km!=null?km.toFixed(1)+' km':'')+'</p><button onclick="closeExploreMap();openBookingModal('+t.id+')" style="font-size:13px;padding:6px 12px;border-radius:8px;background:var(--accent);border:none;cursor:pointer;color:#fff;font-weight:600;font-family:inherit">Book</button></div>';
-      L.marker([t.lat, t.lng], { icon: L.divIcon({ className:'', html:'<div class="tech-marker">'+ic('wrench','w-3.5 h-3.5')+'</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(_exploreMap).bindPopup(html);
+      const already = wizard.selectedTechIds && wizard.selectedTechIds.includes(t.id);
+      const html = '<div style="min-width:170px"><p style="font-weight:600;font-size:14px;margin:0 0 2px;color:var(--ink)">'+esc(t.name)+'</p><p style="font-size:12px;color:var(--warn);margin:0 0 6px">★ '+t.rating.toFixed(1)+' · '+(km!=null?km.toFixed(1)+' km':'')+'</p><button onclick="toggleTechSelection('+t.id+');toast(\''+(already?'Removed':'Added')+' '+esc(t.name).replace(/\'/g,"\\\\'")+'\')" style="font-size:13px;padding:6px 12px;border-radius:8px;background:'+(already?'var(--surface-3)':'var(--accent)')+';border:none;cursor:pointer;color:'+(already?'var(--ink)':'#fff')+';font-weight:600;font-family:inherit">'+(already?'Remove':'Add to request')+'</button></div>';
+      L.marker([t.lat, t.lng], { icon: L.divIcon({ className:'', html:'<div class="tech-marker" style="'+(already?'outline:2px solid var(--accent);':'')+'">'+ic('wrench','w-3.5 h-3.5')+'</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(_exploreMap).bindPopup(html);
     });
     const pts = [[custBase.lat, custBase.lng]].concat(matches.map(t=>[t.lat, t.lng]));
     if(pts.length > 1) _exploreMap.fitBounds(L.latLngBounds(pts).pad(0.15));
   }, 60);
 }
 function closeExploreMap(){ document.getElementById('map-explore-root').innerHTML = ''; if(_exploreMap){ _exploreMap.remove(); _exploreMap = null; } }
+function startBookingWithTech(techId){
+  const t = TECHS.find(x=>x.id===techId); if(!t) return;
+  wizard = { step:1, services:[], applianceIssues:{}, date:'', time:'', landmark:'', selectedTechIds:[], preferredTechId:techId };
+  closeTechReviews(); closeExploreMap(); closeModal();
+  location.hash = '#/app/book';
+  toast('Pick the appliance to continue booking '+t.name);
+}
 let _inlineMap = null, _inlineMarkers = {};
 function initInlineMap(){
   const el = document.getElementById('inline-map'); if(!el) return;
@@ -722,7 +756,7 @@ function initInlineMap(){
   const matches = TECHS.filter(t=>t.status==='Active' && (!filter || t.services.includes(filter)));
   matches.forEach(t=>{
     const km = haversineKm(custBase, {lat:t.lat, lng:t.lng});
-    const html = '<div style="min-width:160px"><p style="font-weight:600;font-size:14px;margin:0 0 8px;color:var(--ink)">'+esc(t.name)+'</p><button onclick="openBookingModal('+t.id+')" style="font-size:13px;padding:6px 12px;border-radius:8px;background:var(--accent);border:none;cursor:pointer;color:#fff;font-weight:600;font-family:inherit">Book</button></div>';
+    const html = '<div style="min-width:160px"><p style="font-weight:600;font-size:14px;margin:0 0 8px;color:var(--ink)">'+esc(t.name)+'</p><button onclick="startBookingWithTech('+t.id+')" style="font-size:13px;padding:6px 12px;border-radius:8px;background:var(--accent);border:none;cursor:pointer;color:#fff;font-weight:600;font-family:inherit">Book</button></div>';
     const m = L.marker([t.lat, t.lng], { icon: L.divIcon({ className:'', html:'<div class="tech-marker">'+ic('wrench','w-3.5 h-3.5')+'</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(_inlineMap).bindPopup(html);
     _inlineMarkers[t.name] = m;
   });
@@ -733,15 +767,7 @@ function focusOnTech(name){ if(!_inlineMap || !_inlineMarkers[name]) return; con
 
 /* ============================================================
    LIFECYCLE — extended with estimate / quotation / final stages
-   ============================================================
-   Pending  → awaiting technician accept (multi-tech: each tech accepts separately)
-   Estimated → technician has posted their estimated price (pre-inspection)
-   Confirmed → customer chose this tech as the primary visit
-   EnRoute / Arrived / InProgress → on-site
-   QuotePending → technician has submitted the formal quotation
-   AwaitingApproval → customer is reviewing the quote
-   Completed → customer approved final price and paid tech directly
-   */
+   ============================================================ */
 const LIFECYCLE = ['Pending','Estimated','Confirmed','EnRoute','Arrived','InProgress','QuotePending','Completed'];
 const TERMINAL = ['Completed','Cancelled','NoShow','Unmatched','Disputed'];
 function lifecycleIndex(s){ return LIFECYCLE.indexOf(s); }
@@ -762,16 +788,12 @@ function advanceLifecycle(id, toState, actor){
 }
 
 /* ============================================================
-   ESTIMATES — pre-inspection price per technician per service
-   ============================================================
-   Multiple technicians can hold estimates for the same booking.
-   The customer compares them before deciding.
+   ESTIMATES
    ============================================================ */
 let ESTIMATES = [];
 
 function postEstimate(bookingId, techName, amount, note){
   const b = BOOKINGS.find(x=>x.id===bookingId); if(!b) return;
-  // remove any existing estimate by this tech for this booking
   ESTIMATES = ESTIMATES.filter(e => !(e.bookingId === bookingId && e.tech === techName));
   ESTIMATES.push({
     id: Date.now() + Math.random(),
@@ -780,7 +802,6 @@ function postEstimate(bookingId, techName, amount, note){
     note: note || '',
     postedAt: Date.now()
   });
-  // The booking moves into "Estimated" if it was Pending and at least one tech has posted
   if(b.status === 'Pending' || b.status === 'Estimated'){
     b.status = 'Estimated';
   }
@@ -819,9 +840,9 @@ function renderQuoteComposer(bookingId){
       +'</div>'
       +'<button onclick="_quoteDraft.items.push({label:\'New item\',amount:0});renderQuoteComposer('+bookingId+')" class="btn-link mb-5 text-sm">+ Add item</button>'
       +'<div class="quote-line font-semibold text-ink"><span>Total</span><span>₱'+total.toLocaleString()+'</span></div>'
-      +'<div class="quote-line text-muted text-sm"><span>FixLink commission (12%)</span><span>₱'+commission.toLocaleString()+'</span></div>'
+      +'<div class="quote-line text-muted text-sm"><span>FixLink commission (10%)</span><span>₱'+commission.toLocaleString()+'</span></div>'
       +'<div class="quote-line font-semibold text-ink pt-3 border-t border-line-2 border-t"><span>You receive</span><span>₱'+(total-commission).toLocaleString()+'</span></div>'
-      +'<p class="text-xs text-muted my-5 leading-relaxed">You collect ₱'+total.toLocaleString()+' directly from the customer (cash or GCash). Your 12% commission to FixLink is ₱'+commission.toLocaleString()+' — remit after the job.</p>'
+      +'<p class="text-xs text-muted my-5 leading-relaxed">You collect ₱'+total.toLocaleString()+' directly from the customer (cash or GCash). Your 10% commission to FixLink is ₱'+commission.toLocaleString()+' — remit after the job.</p>'
       +'<div class="flex gap-2"><button onclick="closeQuoteComposer()" class="btn-secondary flex-1">Cancel</button><button onclick="sendQuote('+bookingId+')" class="btn-primary flex-1">Send quotation</button></div>'
     +'</div></div>';
 }
@@ -849,7 +870,6 @@ function decideQuote(quoteId, decision){
     b.status = 'InProgress';
     b.finalAmount = q.total;
     b.finalCommission = q.commission;
-    // Record the commission owed
     COMMISSIONS.unshift({
       id: Date.now(), bookingId: b.id, tech: b.tech,
       finalAmount: q.total, rate: COMMISSION_RATE, commission: q.commission,
@@ -935,7 +955,7 @@ function openTechReviews(techName){
         +'</div>'
         +(list.length?list.map(r=>'<div class="pb-5 mb-5 border-b border-line last:border-0"><div class="flex items-center justify-between mb-1"><p class="text-sm font-medium text-ink">'+esc(r.customer)+'</p><p class="star-row">'+renderStars(r.avg,12)+'</p></div><p class="text-xs text-muted mb-2">'+esc(r.service)+' · '+timeAgo(r.at)+'</p>'+(r.text?'<p class="text-sm text-ink">'+esc(r.text)+'</p>':'')+'</div>').join(''):'<p class="text-sm text-muted text-center py-6">No reviews yet.</p>')
       +'</div>'
-      +'<div class="p-4 border-t border-line shrink-0 flex gap-2"><button onclick="closeTechReviews();openChatWithTech(\''+esc(t.name).replace(/'/g,"\\'")+'\')" class="btn-secondary flex-1">Message</button><button onclick="closeTechReviews();openBookingModal('+t.id+')" class="btn-primary flex-1">Book</button></div>'
+      +'<div class="p-4 border-t border-line shrink-0 flex gap-2"><button onclick="closeTechReviews();openChatWithTech(\''+esc(t.name).replace(/'/g,"\\'")+'\')" class="btn-secondary flex-1">Message</button><button onclick="startBookingWithTech('+t.id+')" class="btn-primary flex-1">Book</button></div>'
     +'</div></div>';
 }
 function closeTechReviews(){ document.getElementById('review-detail-root').innerHTML=''; }
@@ -1047,16 +1067,16 @@ function randomNear(base, seed, spreadKm=2.2){
   return { lat: base.lat + dLat, lng: base.lng + dLng };
 }
 let TECHS = [
-  {id:1, name:'Jun Alvarez',        services:['Aircon'],                                    rating:4.9, jobs:212, verified:true,  status:'Active',    home:'Lahug',          radiusKm:8, bio:'Split-type specialist.', responseMin:4,  onTimeRate:94, repeatCustomers:38, specialty:'Split-type · Inverter'},
-  {id:2, name:'Ronnie Cabatingan',  services:['Aircon'],                                    rating:4.7, jobs:98,  verified:true,  status:'Active',    home:'Talamban',       radiusKm:6, bio:'Fast and clean.', responseMin:11, onTimeRate:88, repeatCustomers:12, specialty:'Window-type · Repair'},
-  {id:3, name:'Edgar Salig',        services:['Aircon','Electric Fan'],                     rating:4.4, jobs:41,  verified:false, status:'Active',    home:'Mabolo',         radiusKm:5, bio:'Window and fans.', responseMin:22, onTimeRate:82, repeatCustomers:6,  specialty:'Window-type · Fans'},
-  {id:4, name:'Mikko Bacus',        services:['Washing Machine'],                           rating:4.8, jobs:150, verified:true,  status:'Active',    home:'Banilad',        radiusKm:7, bio:'Front and top load.', responseMin:6,  onTimeRate:92, repeatCustomers:24, specialty:'Front-load · Top-load'},
-  {id:5, name:'Ariel Dungog',       services:['Washing Machine','Refrigerator'],            rating:4.5, jobs:64,  verified:true,  status:'Active',    home:'Guadalupe',      radiusKm:6, bio:'Two appliances.', responseMin:14, onTimeRate:85, repeatCustomers:9,  specialty:'Washer · Ref'},
-  {id:6, name:'Ben Quijano',        services:['Refrigerator','Aircon'],                     rating:4.9, jobs:180, verified:true,  status:'Active',    home:'IT Park / Apas', radiusKm:9, bio:'Inverter diagnostics.', responseMin:5,  onTimeRate:96, repeatCustomers:41, specialty:'Inverter ref · Compressor'},
-  {id:7, name:'Toto Lim',           services:['Refrigerator'],                              rating:4.3, jobs:37,  verified:false, status:'Suspended', home:'Capitol Site',   radiusKm:5, bio:'', responseMin:35, onTimeRate:74, repeatCustomers:3,  specialty:'Ref'},
-  {id:8, name:'Dondon Velasco',     services:['TV','Microwave','Induction Stove'],          rating:4.6, jobs:88,  verified:true,  status:'Active',    home:'Mandaue Centro', radiusKm:7, bio:'Board-level repair.', responseMin:9,  onTimeRate:90, repeatCustomers:17, specialty:'TV · Microwave · Induction'},
-  {id:9, name:'Rey Tumulak',        services:['Water Heater','Rice Cooker','Electric Kettle'], rating:4.5, jobs:52, verified:true, status:'Active',   home:'Talamban',       radiusKm:6, bio:'Small appliances.', responseMin:12, onTimeRate:87, repeatCustomers:11, specialty:'Water heater · Small appliances'},
-  {id:10,name:'Nilo Abella',        services:['Aircon','Refrigerator','Washing Machine'],   rating:4.6, jobs:126, verified:true,  status:'Active',    home:'Guadalupe',      radiusKm:8, bio:'Full coverage.', responseMin:8,  onTimeRate:91, repeatCustomers:22, specialty:'Full white-goods'},
+  {id:1, name:'Jun Alvarez',        services:['Aircon'],                                    rating:4.9, jobs:212, verified:true,  status:'Active',    home:'Lahug',          radiusKm:8, bio:'Split-type specialist.', responseMin:4,  onTimeRate:94, repeatCustomers:38, specialty:'Split-type · Inverter', cert:'TESDA NC2 — RAC Servicing', certStatus:'Verified'},
+  {id:2, name:'Ronnie Cabatingan',  services:['Aircon'],                                    rating:4.7, jobs:98,  verified:true,  status:'Active',    home:'Talamban',       radiusKm:6, bio:'Fast and clean.', responseMin:11, onTimeRate:88, repeatCustomers:12, specialty:'Window-type · Repair', cert:'TESDA NC2 — RAC Servicing', certStatus:'Verified'},
+  {id:3, name:'Edgar Salig',        services:['Aircon','Electric Fan'],                     rating:4.4, jobs:41,  verified:false, status:'Active',    home:'Mabolo',         radiusKm:5, bio:'Window and fans.', responseMin:22, onTimeRate:82, repeatCustomers:6,  specialty:'Window-type · Fans', cert:'Submitted, not yet reviewed', certStatus:'Pending'},
+  {id:4, name:'Mikko Bacus',        services:['Washing Machine'],                           rating:4.8, jobs:150, verified:true,  status:'Active',    home:'Banilad',        radiusKm:7, bio:'Front and top load.', responseMin:6,  onTimeRate:92, repeatCustomers:24, specialty:'Front-load · Top-load', cert:'TESDA NC2 — Consumer Electronics', certStatus:'Verified'},
+  {id:5, name:'Ariel Dungog',       services:['Washing Machine','Refrigerator'],            rating:4.5, jobs:64,  verified:true,  status:'Active',    home:'Guadalupe',      radiusKm:6, bio:'Two appliances.', responseMin:14, onTimeRate:85, repeatCustomers:9,  specialty:'Washer · Ref', cert:'TESDA NC2 — RAC Servicing', certStatus:'Verified'},
+  {id:6, name:'Ben Quijano',        services:['Refrigerator','Aircon'],                     rating:4.9, jobs:180, verified:true,  status:'Active',    home:'IT Park / Apas', radiusKm:9, bio:'Inverter diagnostics.', responseMin:5,  onTimeRate:96, repeatCustomers:41, specialty:'Inverter ref · Compressor', cert:'TESDA NC2 — RAC Servicing', certStatus:'Verified'},
+  {id:7, name:'Toto Lim',           services:['Refrigerator'],                              rating:4.3, jobs:37,  verified:false, status:'Suspended', home:'Capitol Site',   radiusKm:5, bio:'', responseMin:35, onTimeRate:74, repeatCustomers:3,  specialty:'Ref', cert:'No certificate on file', certStatus:'Unverified'},
+  {id:8, name:'Dondon Velasco',     services:['TV','Microwave','Induction Stove'],          rating:4.6, jobs:88,  verified:true,  status:'Active',    home:'Mandaue Centro', radiusKm:7, bio:'Board-level repair.', responseMin:9,  onTimeRate:90, repeatCustomers:17, specialty:'TV · Microwave · Induction', cert:'TESDA NC2 — Consumer Electronics', certStatus:'Verified'},
+  {id:9, name:'Rey Tumulak',        services:['Water Heater','Rice Cooker','Electric Kettle'], rating:4.5, jobs:52, verified:true, status:'Active',   home:'Talamban',       radiusKm:6, bio:'Small appliances.', responseMin:12, onTimeRate:87, repeatCustomers:11, specialty:'Water heater · Small appliances', cert:'TESDA NC2 — Consumer Electronics', certStatus:'Verified'},
+  {id:10,name:'Nilo Abella',        services:['Aircon','Refrigerator','Washing Machine'],   rating:4.6, jobs:126, verified:true,  status:'Active',    home:'Guadalupe',      radiusKm:8, bio:'Full coverage.', responseMin:8,  onTimeRate:91, repeatCustomers:22, specialty:'Full white-goods', cert:'TESDA NC2 — RAC Servicing', certStatus:'Verified'},
 ];
 TECHS.forEach(t=>{
   const base = barangayOf(t.home);
@@ -1069,8 +1089,8 @@ LOCATIONS['customer:Marki Santos'] = { role:'customer', name:'Marki Santos', lat
 let BOOKINGS = [
   {id:101,customer:'Marki Santos',tech:'Jun Alvarez',service:'Aircon',problems:['Not cooling / weak air'],date:'Sep 24, 2026',time:'14:00',barangay:'Lahug',address:'Lahug, Cebu City',lat:10.3272,lng:123.9033,status:'Confirmed',declined:[],history:[],respondDeadline:null},
   {id:102,customer:'Angela Reyes',tech:'Ben Quijano',service:'Refrigerator',problems:['Not cooling'],date:'Sep 25, 2026',time:'10:00',barangay:'Mabolo',address:'Mabolo, Cebu City',lat:10.3157,lng:123.9187,status:'Pending',declined:[],history:[],respondDeadline:Date.now()+20000},
-  {id:103,customer:'Patricia Uy',tech:'Mikko Bacus',service:'Washing Machine',problems:['Not spinning','Strange noise'],date:'Sep 20, 2026',time:'15:00',barangay:'Talamban',address:'Talamban, Cebu City',lat:10.3639,lng:123.9153,status:'Completed',declined:[],history:[],finalAmount:700,finalCommission:84},
-  {id:104,customer:'Carlo Dizon',tech:'Ronnie Cabatingan',service:'Aircon',problems:['Needs cleaning'],date:'Sep 18, 2026',time:'09:00',barangay:'Banilad',address:'Banilad, Cebu City',lat:10.3391,lng:123.9115,status:'Completed',declined:[],history:[],finalAmount:480,finalCommission:58},
+  {id:103,customer:'Patricia Uy',tech:'Mikko Bacus',service:'Washing Machine',problems:['Not spinning','Strange noise'],date:'Sep 20, 2026',time:'15:00',barangay:'Talamban',address:'Talamban, Cebu City',lat:10.3639,lng:123.9153,status:'Completed',declined:[],history:[],finalAmount:700,finalCommission:70},
+  {id:104,customer:'Carlo Dizon',tech:'Ronnie Cabatingan',service:'Aircon',problems:['Needs cleaning'],date:'Sep 18, 2026',time:'09:00',barangay:'Banilad',address:'Banilad, Cebu City',lat:10.3391,lng:123.9115,status:'Completed',declined:[],history:[],finalAmount:480,finalCommission:48},
   {id:105,customer:'Marki Santos',tech:'Jun Alvarez',service:'Aircon',problems:['Water leaking'],date:'Sep 15, 2026',time:'16:30',barangay:'IT Park / Apas',address:'IT Park, Cebu City',lat:10.3298,lng:123.9057,status:'Cancelled',declined:[],history:[]},
 ];
 let MESSAGES = {
@@ -1100,9 +1120,9 @@ REVIEWS = [
   { id:9008, bookingId:95,  customer:'Angela Reyes', tech:'Jun Alvarez', service:'Aircon', stars:{Workmanship:4,Punctuality:5,Cleanliness:5,'Price fairness':4}, avg:4.5, text:'Cleaned two units quickly.', photo:null, warranty:true, at:Date.now()-25*86400000 },
 ];
 COMMISSIONS = [
-  { id:9201, bookingId:103, tech:'Mikko Bacus', finalAmount:700, rate:COMMISSION_RATE, commission:84, status:'Paid', at:Date.now()-8*86400000, paidAt:Date.now()-7*86400000 },
-  { id:9202, bookingId:104, tech:'Ronnie Cabatingan', finalAmount:480, rate:COMMISSION_RATE, commission:58, status:'Paid', at:Date.now()-3*86400000, paidAt:Date.now()-2*86400000 },
-  { id:9203, bookingId:100, tech:'Nilo Abella', finalAmount:1200, rate:COMMISSION_RATE, commission:144, status:'Owed', at:Date.now()-2*86400000 },
+  { id:9201, bookingId:103, tech:'Mikko Bacus', finalAmount:700, rate:COMMISSION_RATE, commission:70, status:'Paid', at:Date.now()-8*86400000, paidAt:Date.now()-7*86400000 },
+  { id:9202, bookingId:104, tech:'Ronnie Cabatingan', finalAmount:480, rate:COMMISSION_RATE, commission:48, status:'Paid', at:Date.now()-3*86400000, paidAt:Date.now()-2*86400000 },
+  { id:9203, bookingId:100, tech:'Nilo Abella', finalAmount:1200, rate:COMMISSION_RATE, commission:120, status:'Owed', at:Date.now()-2*86400000 },
 ];
 
 const SESSION = { customer:{name:'Marki Santos', initials:'MS'}, admin:{name:'Admin User', initials:'AU'}, tech:{name:'Jun Alvarez', initials:'JA'} };
@@ -1138,6 +1158,7 @@ function badgeClass(s){ return {
   Suspended:'badge-suspended',Completed:'badge-completed',Cancelled:'badge-cancelled',
   Unmatched:'badge-suspended',NoShow:'badge-suspended',Disputed:'badge-suspended',
   Open:'badge-warn',Resolved:'badge-active',Owed:'badge-pending',Paid:'badge-active',
+  Verified:'badge-active', Pending2:'badge-pending', Unverified:'badge-suspended',
 }[s]||'badge-completed'; }
 function badge(s){ return '<span class="badge '+badgeClass(s)+'">'+s+'</span>'; }
 function toast(msg){
@@ -1206,7 +1227,7 @@ function sendMessage(bookingId){
 const state = { role:null };
 let userFilter={search:'',role:'All'}, addUserOpen=false, techFilterVal='All', bookingFilterVal='All';
 let reviewsFilterVal='All';
-let wizard = { step:1, service:null, problems:[], notes:'', date:'', time:'', landmark:'', selectedTechIds:[] };
+let wizard = { step:1, services:[], applianceIssues:{}, date:'', time:'', landmark:'', selectedTechIds:[] };
 
 /* ---------- router ---------- */
 function render(){
@@ -1304,6 +1325,7 @@ function renderShellContent(h){
   }
   const sc = document.getElementById('shell-content');
   if(sc) sc.innerHTML = html;
+  if(h==='#/app/book' && wizard.step===4) syncWizardNext();
 }
 function bookingRow(b){
   const link = state.role==='customer' ? '#/app/bookings/'+b.id : (state.role==='tech' ? '#/tech/schedule' : '#/admin/bookings');
@@ -1320,17 +1342,21 @@ function customerHome(){
   const rc = customerReferralCode('Marki Santos');
   return '<div class="max-w-3xl">'
     +'<h1 class="text-3xl font-semibold mb-1 text-ink tracking-tight">Hi, Marki.</h1><p class="text-muted mb-10">Here\'s what\'s happening.</p>'
-    +'<a href="#/app/book" class="card p-6 mb-10 block hover:bg-surface-2 transition flex items-center justify-between gap-4">'
+    +'<a href="#/app/book" class="card p-6 mb-4 block hover:bg-surface-2 transition flex items-center justify-between gap-4">'
       +'<div><p class="text-base font-medium text-ink mb-1">Need something fixed?</p><p class="text-sm text-muted">Describe the issue and pick from multiple technicians.</p></div>'
       +'<div class="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center flex-shrink-0">'+ic('plus','w-5 h-5')+'</div>'
     +'</a>'
+    +'<button onclick="openExploreMap()" class="card p-5 mb-10 w-full text-left hover:bg-surface-2 transition flex items-center justify-between gap-4">'
+      +'<div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-surface-2 text-ink flex items-center justify-center flex-shrink-0">'+ic('map','w-4 h-4')+'</div><div><p class="text-sm font-medium text-ink">See technicians near you</p><p class="text-xs text-muted mt-0.5">Live map, powered by OpenStreetMap</p></div></div>'
+      +ic('chevron','w-4 h-4 text-muted')
+    +'</button>'
     +(active.length?'<div class="mb-10"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-3">Active</h2><div class="card divide-y divide-line">'+active.map(bookingCard).join('')+'</div></div>':'')
     +(recent.length?'<div class="mb-10"><div class="flex items-center justify-between mb-3"><h2 class="text-xs uppercase tracking-wider text-muted font-medium">Recent</h2><a href="#/app/bookings" class="btn-link text-xs">View all</a></div><div class="card divide-y divide-line">'+recent.map(bookingRow).join('')+'</div></div>':'')
     +'<div class="card p-5"><div class="flex items-center justify-between gap-4"><div><p class="text-sm font-medium text-ink mb-1">Refer a technician</p><p class="text-xs text-muted">Code: <b class="text-accent">'+rc.code+'</b></p></div></div></div>'
   +'</div>';
 }
 
-/* ---- Book wizard — 4 steps: appliance → problems → location/time → pick techs ---- */
+/* ---- Book wizard — 4 steps: appliances (multi) → problems per appliance → location/time → pick techs ---- */
 function customerBookWizard(){
   const step = wizard.step;
   const steps = [1,2,3,4].map(n=>{
@@ -1341,69 +1367,84 @@ function customerBookWizard(){
   let body = '';
   if(step === 1){
     body = '<h2 class="text-3xl font-semibold text-ink mb-2 tracking-tight">What needs fixing?</h2>'
-      +'<p class="text-muted mb-8">Pick the appliance.</p>'
+      +'<p class="text-muted mb-8">Pick one or more appliances — you can request a single visit for several.</p>'
       +'<div class="grid grid-cols-3 sm:grid-cols-4 gap-2">'
-        +SERVICES.map(s=>'<button onclick="wizard.service=\''+s.label+'\';wizard.problems=[];wizard.step=2;renderShellContent(location.hash)" class="appliance-tile '+(wizard.service===s.label?'selected':'')+'"><div class="icon-wrap">'+appIcon(s.id)+'</div><p class="label">'+s.label+'</p></button>').join('')
-      +'</div>';
+        +SERVICES.map(s=>{
+          const sel = wizard.services.includes(s.label);
+          return '<button onclick="toggleWizardService(\''+s.label+'\')" class="appliance-tile '+(sel?'selected':'')+'"><div class="icon-wrap">'+appIcon(s.id)+(sel?'<span class="sel-check">'+ic('check','w-2.5 h-2.5')+'</span>':'')+'</div><p class="label">'+s.label+'</p></button>';
+        }).join('')
+      +'</div>'
+      +(wizard.services.length?'<p class="text-xs text-muted mt-5">'+wizard.services.length+' selected: '+esc(wizard.services.join(', '))+'</p>':'');
   }
   else if(step === 2){
-    const svc = SERVICES.find(s=>s.label===wizard.service);
-    const problems = svc ? (COMMON_PROBLEMS[svc.id]||[]) : [];
-    body = '<h2 class="text-3xl font-semibold text-ink mb-2 tracking-tight">What\'s the issue?</h2>'
-      +'<p class="text-muted mb-8">Select all that apply.</p>'
-      +'<div class="card card-bordered overflow-hidden mb-4">'
-        +problems.map(p=>'<button onclick="toggleProblem(\''+esc(p).replace(/'/g,"\\'")+'\')" class="problem-checkbox '+(wizard.problems.includes(p)?'selected':'')+'"><span class="box">'+(wizard.problems.includes(p)?ic('check','w-3 h-3'):'')+'</span><span>'+esc(p)+'</span></button>').join('')
-      +'</div>'
-      +'<div><label class="input-label">Anything else? (optional)</label><textarea id="wiz-notes" rows="3" class="input" oninput="wizard.notes=this.value" placeholder="e.g. Unit is a split-type, 2 years old.">'+esc(wizard.notes)+'</textarea></div>';
+    body = '<h2 class="text-3xl font-semibold text-ink mb-2 tracking-tight">What\'s wrong with each?</h2>'
+      +'<p class="text-muted mb-8">Select the symptoms for every appliance you picked.</p>'
+      +'<div class="space-y-5">'
+      +wizard.services.map(label=>{
+        const svc = SERVICES.find(s=>s.label===label);
+        const problems = svc ? (COMMON_PROBLEMS[svc.id]||[]) : [];
+        if(!wizard.applianceIssues[label]) wizard.applianceIssues[label] = { problems:[], notes:'' };
+        const state_ = wizard.applianceIssues[label];
+        return '<div class="card card-bordered overflow-hidden">'
+          +'<div class="flex items-center gap-3 p-4 border-b border-line bg-surface-2"><div class="w-9 h-9 rounded-lg bg-surface flex items-center justify-center">'+appIcon(svc?svc.id:'','w-5 h-5')+'</div><p class="font-medium text-ink flex-1">'+esc(label)+'</p>'+(state_.problems.length?'<span class="badge badge-info">'+state_.problems.length+' selected</span>':'<span class="badge badge-warn">Pick at least 1</span>')+'</div>'
+          +problems.map(p=>'<button onclick="toggleApplianceProblem(\''+esc(label).replace(/'/g,"\\'")+'\',\''+esc(p).replace(/'/g,"\\'")+'\')" class="problem-checkbox '+(state_.problems.includes(p)?'selected':'')+'"><span class="box">'+(state_.problems.includes(p)?ic('check','w-3 h-3'):'')+'</span><span>'+esc(p)+'</span></button>').join('')
+          +'<div class="p-3 border-t border-line"><textarea rows="2" class="input text-sm" oninput="wizard.applianceIssues[\''+esc(label).replace(/'/g,"\\'")+'\'].notes=this.value" placeholder="Anything else about the '+esc(label).toLowerCase()+'? (optional)">'+esc(state_.notes)+'</textarea></div>'
+        +'</div>';
+      }).join('')
+      +'</div>';
   }
   else if(step === 3){
     const loc = getLoc('customer:Marki Santos');
     const verified = loc && loc.verified && loc.lat && isInCebu(loc.lat, loc.lng);
     const bar = verified ? nearestBarangay(loc.lat, loc.lng) : null;
     body = '<h2 class="text-3xl font-semibold text-ink mb-2 tracking-tight">Where and when?</h2>'
-      +'<p class="text-muted mb-8">We use your GPS so technicians know where to go.</p>'
+      +'<p class="text-muted mb-8">One visit covers all '+wizard.services.length+' appliance'+(wizard.services.length===1?'':'s')+'. We use your GPS so technicians know where to go.</p>'
       +'<div class="space-y-4">'
         +'<div>'+(verified
           ? '<div class="location-verified"><div class="dot"></div><span>Verified — near '+esc(bar.name)+' ('+loc.lat.toFixed(4)+', '+loc.lng.toFixed(4)+')</span></div>'
           : '<label class="input-label">Location</label><button onclick="verifyLocation()" class="btn-secondary w-full">Detect my location</button>')+'</div>'
         +(verified?'<div><label class="input-label">Landmark or unit (optional)</label><input class="input" value="'+esc(wizard.landmark)+'" oninput="wizard.landmark=this.value" placeholder="e.g. Unit 4B, near SM Seaside"/></div>':'')
-        +'<div><label class="input-label">Date</label><input id="wiz-date" type="date" class="input" value="'+esc(wizard.date)+'" oninput="wizard.date=this.value"/></div>'
-        +'<div><label class="input-label">Time</label><input id="wiz-time" type="time" class="input" value="'+esc(wizard.time)+'" oninput="wizard.time=this.value"/></div>'
+        +'<div><label class="input-label">Date</label><input id="wiz-date" type="date" class="input" value="'+esc(wizard.date)+'" oninput="wizard.date=this.value;syncWizardNext()"/></div>'
+        +'<div><label class="input-label">Time</label><input id="wiz-time" type="time" class="input" value="'+esc(wizard.time)+'" oninput="wizard.time=this.value;syncWizardNext()"/></div>'
       +'</div>'
       +'<p class="text-xs text-muted mt-5 leading-relaxed">Your GPS location is verified so technicians know you\'re a real customer.</p>';
   }
   else {
-    // Step 4 — pick one or more technicians
-    const matches = TECHS.filter(t => t.status === 'Active' && t.services.includes(wizard.service));
+    // Step 4 — pick one or more technicians covering ANY of the selected appliances
     const custLoc = getLoc('customer:Marki Santos');
     const custBase = custLoc && custLoc.lat ? custLoc : barangayOf('Lahug');
+    const matches = TECHS.filter(t => t.status === 'Active' && wizard.services.some(s=>t.services.includes(s)));
+    if(wizard.preferredTechId && !wizard.selectedTechIds.includes(wizard.preferredTechId) && matches.some(t=>t.id===wizard.preferredTechId)){
+      wizard.selectedTechIds.push(wizard.preferredTechId); wizard.preferredTechId = null;
+    }
     const withDist = matches.map(t => ({ t, km: haversineKm(custBase, {lat:t.lat, lng:t.lng}) || 999 }))
       .filter(x => x.km <= x.t.radiusKm)
       .sort((a,b)=> a.km - b.km || b.t.rating - a.t.rating);
-    body = '<h2 class="text-3xl font-semibold text-ink mb-2 tracking-tight">Pick technicians</h2>'
-      +'<p class="text-muted mb-8">Select one or more. Each will send their own estimated price for the issue you described.</p>'
+    body = '<div class="flex items-center justify-between gap-3 mb-2"><h2 class="text-3xl font-semibold text-ink tracking-tight">Pick technicians</h2><button onclick="openExploreMap()" class="btn-secondary text-xs py-2 px-3 shrink-0">'+ic('map','w-3.5 h-3.5')+' Map</button></div>'
+      +'<p class="text-muted mb-8">Select one or more covering your appliance(s). Each will send their own estimated price.</p>'
       +(withDist.length?'<div class="space-y-3">'+withDist.map(({t,km})=>{
         const sel = wizard.selectedTechIds.includes(t.id);
-        const est = t.estimateHint || null;
+        const covers = wizard.services.filter(s=>t.services.includes(s));
         return '<button onclick="toggleTechSelection('+t.id+')" class="tech-select-card w-full text-left '+(sel?'selected':'')+'">'
           +'<div class="flex items-start gap-3">'
             +'<div class="check-circle mt-0.5">'+(sel?ic('check','w-3.5 h-3.5'):'')+'</div>'
             +'<div class="flex-1 min-w-0">'
               +'<p class="text-base font-medium text-ink flex items-center gap-1.5">'+esc(t.name)+(t.verified?'<span class="text-[var(--success)]">'+ic('shieldCheck','w-4 h-4')+'</span>':'')+'</p>'
-              +'<p class="text-xs text-muted mt-0.5">'+esc(t.specialty||t.services.join(', '))+'</p>'
+              +'<p class="text-xs text-muted mt-0.5">Covers: '+esc(covers.join(', '))+'</p>'
               +'<div class="flex items-center gap-3 mt-2 text-xs">'
                 +'<span class="text-ink">★ '+t.rating.toFixed(1)+'</span>'
                 +'<span class="text-muted">'+t.jobs+' jobs</span>'
                 +'<span class="text-muted">'+km.toFixed(1)+' km</span>'
+                +(t.certStatus==='Verified'?'<span class="text-[var(--success)]">NC2 verified</span>':'')
               +'</div>'
             +'</div>'
           +'</div>'
         +'</button>';
-      }).join('')+'</div>':'<div class="card p-8 text-center text-sm text-muted">No technicians available for this service near you.</div>')
-      +'<p class="text-xs text-muted mt-5 leading-relaxed">Selected technicians will be asked to post their estimated price. You then pick one to visit based on their estimate, rating, and distance.</p>';
+      }).join('')+'</div>':'<div class="card p-8 text-center text-sm text-muted">No technicians available for these services near you.</div>')
+      +'<p class="text-xs text-muted mt-5 leading-relaxed">Selected technicians see every appliance and issue in this request and will each post one combined estimate. You then pick a technician to visit based on estimate, rating, and distance.</p>';
   }
 
-  const canNext = (step===1 && wizard.service) || (step===2 && wizard.problems.length>0) || (step===3 && wizard.date && wizard.time) || (step===4 && wizard.selectedTechIds.length>0);
+  const canNext = computeWizardCanNext();
   const nextLabel = step===4 ? 'Request estimates' : 'Next';
 
   return '<div class="max-w-2xl">'
@@ -1412,11 +1453,37 @@ function customerBookWizard(){
     +body
     +'<div class="flex gap-3 mt-10">'
       +(step>1?'<button onclick="wizard.step='+(step-1)+';renderShellContent(location.hash)" class="btn-secondary flex-1">Back</button>':'')
-      +'<button onclick="wizardNext()" '+(canNext?'':'disabled')+' class="btn-primary flex-1">'+nextLabel+'</button>'
+      +'<button id="wiz-next-btn" onclick="wizardNext()" '+(canNext?'':'disabled')+' class="btn-primary flex-1">'+nextLabel+'</button>'
     +'</div>'
   +'</div>';
 }
-function toggleProblem(p){ const i = wizard.problems.indexOf(p); if(i > -1) wizard.problems.splice(i, 1); else wizard.problems.push(p); renderShellContent(location.hash); }
+function computeWizardCanNext(){
+  const step = wizard.step;
+  if(step===1) return wizard.services.length>0;
+  if(step===2) return wizard.services.length>0 && wizard.services.every(s => wizard.applianceIssues[s] && wizard.applianceIssues[s].problems.length>0);
+  if(step===3) return !!(wizard.date && wizard.time);
+  if(step===4) return wizard.selectedTechIds.length>0;
+  return false;
+}
+/* Inputs update wizard state without a full re-render (so focus/cursor isn't lost);
+   this keeps the Next button's enabled state in sync as the person types/selects. */
+function syncWizardNext(){
+  const btn = document.getElementById('wiz-next-btn');
+  if(!btn) return;
+  btn.disabled = !computeWizardCanNext();
+}
+function toggleWizardService(label){
+  const i = wizard.services.indexOf(label);
+  if(i > -1){ wizard.services.splice(i,1); delete wizard.applianceIssues[label]; }
+  else { wizard.services.push(label); wizard.applianceIssues[label] = { problems:[], notes:'' }; }
+  renderShellContent(location.hash);
+}
+function toggleApplianceProblem(label, p){
+  const st = wizard.applianceIssues[label] || (wizard.applianceIssues[label] = { problems:[], notes:'' });
+  const i = st.problems.indexOf(p);
+  if(i > -1) st.problems.splice(i, 1); else st.problems.push(p);
+  renderShellContent(location.hash);
+}
 function toggleTechSelection(id){
   const i = wizard.selectedTechIds.indexOf(id);
   if(i > -1) wizard.selectedTechIds.splice(i, 1);
@@ -1433,47 +1500,49 @@ function verifyLocation(){
       if(!isInCebu(lat, lng)){ toast('Outside Cebu — FixLink serves Cebu only'); return; }
       const loc = LOCATIONS[key] || (LOCATIONS[key] = {});
       loc.lat = lat; loc.lng = lng; loc.verified = true; loc.updatedAt = Date.now(); loc.sharing = true;
-      wizard.verifiedLoc = { lat, lng };
       persist(); renderShellContent(location.hash); toast('Location verified');
     },
     () => {
       const base = barangayOf('Lahug');
       const loc = LOCATIONS[key] || (LOCATIONS[key] = {});
       loc.lat = base.lat; loc.lng = base.lng; loc.verified = true; loc.updatedAt = Date.now(); loc.sharing = true;
-      wizard.verifiedLoc = { lat: base.lat, lng: base.lng };
       persist(); renderShellContent(location.hash); toast('Using default Cebu location (demo)');
     },
     { enableHighAccuracy:true, timeout:8000 }
   );
 }
 function wizardNext(){
+  if(!computeWizardCanNext()) return;
   if(wizard.step < 4){ wizard.step++; renderShellContent(location.hash); }
   else { submitBookingRequest(); }
 }
 function submitBookingRequest(){
-  if(!wizard.service || !wizard.problems.length || !wizard.selectedTechIds.length) return;
+  if(!computeWizardCanNext()) return;
   const custLoc = getLoc('customer:Marki Santos');
   const bar = custLoc && custLoc.lat ? nearestBarangay(custLoc.lat, custLoc.lng) : barangayOf('Lahug');
   const bookingId = Date.now();
   const techsPicked = wizard.selectedTechIds.map(id => TECHS.find(t=>t.id===id)).filter(Boolean);
+  const items = wizard.services.map(s => ({ service:s, problems:(wizard.applianceIssues[s]||{}).problems||[], notes:(wizard.applianceIssues[s]||{}).notes||'' }));
+  const combinedProblems = items.flatMap(it => it.problems.map(p => (items.length>1 ? it.service+': ' : '')+p));
   BOOKINGS.unshift({
     id: bookingId, customer:'Marki Santos', tech:techsPicked[0].name,
     requestedTechs: techsPicked.map(t=>t.name),
-    service: wizard.service,
-    problems: wizard.problems.slice(),
-    notes: wizard.notes,
+    service: wizard.services.join(' + '),
+    items: items,
+    problems: combinedProblems,
+    notes: items.map(it=>it.notes).filter(Boolean).join(' | '),
     date: wizard.date, time: wizard.time,
     barangay: bar.name,
     address: (wizard.landmark?wizard.landmark+', ':'') + bar.name + ', Cebu City',
     lat: custLoc && custLoc.lat, lng: custLoc && custLoc.lng,
     status:'Pending', declined:[],
-    history:[{at:Date.now(), actor:'customer', event:'Request sent to '+techsPicked.length+' technician'+(techsPicked.length===1?'':'s')}],
+    history:[{at:Date.now(), actor:'customer', event:'Request sent to '+techsPicked.length+' technician'+(techsPicked.length===1?'':'s')+' for '+items.length+' appliance'+(items.length===1?'':'s')}],
     respondDeadline: Date.now()+25000
   });
-  techsPicked.forEach(t => notify('tech', t.name, 'New estimate request', wizard.service+' in '+bar.name, '#/tech/estimates'));
-  audit('customer:Marki Santos', 'booking:created', 'booking:'+bookingId, { techs: techsPicked.map(t=>t.name) });
+  techsPicked.forEach(t => notify('tech', t.name, 'New estimate request', wizard.services.join(', ')+' in '+bar.name, '#/tech/estimates'));
+  audit('customer:Marki Santos', 'booking:created', 'booking:'+bookingId, { techs: techsPicked.map(t=>t.name), appliances: wizard.services });
   persist();
-  wizard = { step:1, service:null, problems:[], notes:'', date:'', time:'', landmark:'', selectedTechIds:[] };
+  wizard = { step:1, services:[], applianceIssues:{}, date:'', time:'', landmark:'', selectedTechIds:[] };
   toast('Request sent to '+techsPicked.length+' technician'+(techsPicked.length===1?'':'s'));
   location.hash = '#/app/bookings';
 }
@@ -1507,7 +1576,6 @@ function customerBookingDetail(id){
   const approvedQuote = QUOTES.find(q=>q.bookingId===id && q.status==='Approved');
   const myReview = REVIEWS.find(r=>r.bookingId===id);
   const dispute = DISPUTES.find(d=>d.bookingId===id);
-  const probs = (b.problems||[]).join(', ');
   const isMulti = (b.requestedTechs||[]).length > 1;
 
   return '<div class="max-w-2xl">'
@@ -1518,7 +1586,7 @@ function customerBookingDetail(id){
       +'<div class="flex items-center justify-between mb-5"><h1 class="text-2xl font-semibold text-ink tracking-tight">'+esc(b.service)+'</h1>'+badge(b.status)+'</div>'
       +lifecycleBar(b)
       +'<div class="space-y-3 text-sm">'
-        +(probs?'<div class="flex justify-between gap-4"><span class="text-muted">Issue</span><span class="text-ink text-right">'+esc(probs)+'</span></div>':'')
+        +((b.items&&b.items.length)?'<div><span class="text-muted">Appliances &amp; issues</span><div class="mt-2 space-y-2">'+b.items.map(it=>'<div class="px-3 py-2 rounded-lg bg-surface-2"><p class="text-ink font-medium">'+esc(it.service)+'</p><p class="text-xs text-muted mt-0.5">'+esc(it.problems.join(', '))+'</p></div>').join('')+'</div></div>':'')
         +'<div class="flex justify-between gap-4"><span class="text-muted">Technicians requested</span><span class="text-ink">'+((b.requestedTechs||[b.tech]).join(', '))+'</span></div>'
         +'<div class="flex justify-between gap-4"><span class="text-muted">When</span><span class="text-ink">'+esc(b.date)+' · '+esc(b.time)+'</span></div>'
         +'<div class="flex justify-between gap-4"><span class="text-muted">Where</span><span class="text-ink text-right">'+esc(b.address||b.barangay)+'</span></div>'
@@ -1572,6 +1640,9 @@ function customerBookingDetail(id){
 
 function chooseTechForBooking(bookingId, techName){
   const b = BOOKINGS.find(x=>x.id===bookingId); if(!b) return;
+  (b.requestedTechs||[]).forEach(name=>{
+    if(name !== techName) notify('tech', name, 'Not selected this time', b.customer+' went with another technician for the '+b.service+' job.', '#/tech/estimates');
+  });
   b.tech = techName;
   b.status = 'Confirmed';
   delete b.respondDeadline;
@@ -1651,13 +1722,13 @@ function adminDashboard(){
     +'<div class="card p-6"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Recent bookings</h2><div class="divide-y divide-line">'
     +recent.map(b=>'<div class="py-3 flex items-center justify-between gap-3"><div><p class="text-sm font-medium text-ink">'+esc(b.customer)+' → '+esc(b.tech)+'</p><p class="text-xs text-muted mt-0.5">'+esc(b.service)+'</p></div>'+badge(b.status)+'</div>').join('')
     +'</div></div>'
-    +'<div class="card p-6"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Commission (12%)</h2>'
+    +'<div class="card p-6"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Commission (10%)</h2>'
       +'<div class="space-y-3 text-sm">'
         +'<div class="flex justify-between"><span class="text-muted">Total earned</span><span class="font-medium text-ink">₱'+totalCommissions.toLocaleString()+'</span></div>'
         +'<div class="flex justify-between"><span class="text-muted">Paid</span><span class="text-ink">₱'+paid.toLocaleString()+'</span></div>'
         +'<div class="flex justify-between"><span class="text-muted">Owed by techs</span><span class="text-ink">₱'+owed.toLocaleString()+'</span></div>'
       +'</div>'
-      +'<p class="text-xs text-muted mt-5 leading-relaxed">Customers pay technicians directly. FixLink charges 12% of the final approved price — remitted by the technician after each job.</p>'
+      +'<p class="text-xs text-muted mt-5 leading-relaxed">Customers pay technicians directly. FixLink charges 10% of the final approved price — remitted by the technician after each job.</p>'
     +'</div></div></div>';
 }
 function setUserSearch(v){ userFilter.search=v; renderShellContent(location.hash); }
@@ -1683,10 +1754,10 @@ function adminUsers(){
     +filtered.map(u=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">'+esc(u.name)+'</td><td class="p-4 text-muted">'+esc(u.email)+'</td><td class="p-4 text-ink">'+esc(u.role)+'</td><td class="p-4">'+badge(u.status)+'</td><td class="p-4 text-right whitespace-nowrap"><button onclick="toggleUserStatus('+u.id+')" class="btn-link text-xs mr-4">'+(u.status==='Active'?'Suspend':'Activate')+'</button><button onclick="removeUser('+u.id+')" class="btn-link text-xs" style="color:var(--danger)">Remove</button></td></tr>').join('')
     +'</tbody></table></div></div>';
 }
-function toggleVerify(id){ const t=TECHS.find(t=>t.id===id); t.verified=!t.verified; audit('admin','tech:'+(t.verified?'verified':'unverified'),'tech:'+t.name); persist(); renderShellContent(location.hash); }
+function toggleVerify(id){ const t=TECHS.find(t=>t.id===id); t.verified=!t.verified; t.certStatus = t.verified ? 'Verified' : 'Pending'; audit('admin','tech:'+(t.verified?'verified':'unverified'),'tech:'+t.name); persist(); renderShellContent(location.hash); }
 function adminTechnicians(){
-  return '<div><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Technicians</h1><div class="card overflow-x-auto"><table class="w-full text-sm min-w-[650px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Name</th><th class="p-4 font-medium">Services</th><th class="p-4 font-medium">Rating</th><th class="p-4 font-medium">Jobs</th><th class="p-4 font-medium">Owed</th><th class="p-4 font-medium">Verified</th><th class="p-4"></th></tr></thead><tbody>'
-    +TECHS.map(t=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">'+esc(t.name)+'</td><td class="p-4 text-ink">'+esc(t.services.join(', '))+'</td><td class="p-4 text-ink">'+t.rating+'</td><td class="p-4 text-ink">'+t.jobs+'</td><td class="p-4 text-ink">₱'+techOwed(t.name).toLocaleString()+'</td><td class="p-4">'+(t.verified?badge('Active'):badge('Pending'))+'</td><td class="p-4 text-right"><button onclick="toggleVerify('+t.id+')" class="btn-link text-xs">'+(t.verified?'Unverify':'Verify')+'</button></td></tr>').join('')
+  return '<div><h1 class="text-3xl font-semibold mb-2 text-ink tracking-tight">Technicians</h1><p class="text-muted mb-6">Verification is skills-based: technicians submit a TESDA NC2 certificate (or equivalent) in their trade before "Verified" appears on their profile and in customer-facing search.</p><div class="card overflow-x-auto"><table class="w-full text-sm min-w-[750px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Name</th><th class="p-4 font-medium">Services</th><th class="p-4 font-medium">Certification</th><th class="p-4 font-medium">Rating</th><th class="p-4 font-medium">Owed</th><th class="p-4 font-medium">Verified</th><th class="p-4"></th></tr></thead><tbody>'
+    +TECHS.map(t=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">'+esc(t.name)+'</td><td class="p-4 text-ink">'+esc(t.services.join(', '))+'</td><td class="p-4 text-muted">'+esc(t.cert||'—')+'</td><td class="p-4 text-ink">'+t.rating+'</td><td class="p-4 text-ink">₱'+techOwed(t.name).toLocaleString()+'</td><td class="p-4">'+badge(t.verified?'Verified':(t.certStatus==='Pending'?'Pending':'Unverified'))+'</td><td class="p-4 text-right"><button onclick="toggleVerify('+t.id+')" class="btn-link text-xs">'+(t.verified?'Unverify':'Verify')+'</button></td></tr>').join('')
     +'</tbody></table></div></div>';
 }
 function setBookingFilter(s){ bookingFilterVal=s; renderShellContent(location.hash); }
@@ -1707,12 +1778,12 @@ function adminCommissions(){
   const total = COMMISSIONS.reduce((s,c)=>s+c.commission, 0);
   const owed = COMMISSIONS.filter(c=>c.status==='Owed').reduce((s,c)=>s+c.commission, 0);
   const paid = COMMISSIONS.filter(c=>c.status==='Paid').reduce((s,c)=>s+c.commission, 0);
-  return '<div><h1 class="text-3xl font-semibold mb-2 text-ink tracking-tight">Commissions</h1><p class="text-muted mb-6">12% of the final approved price on completed jobs.</p>'
+  return '<div><h1 class="text-3xl font-semibold mb-2 text-ink tracking-tight">Commissions</h1><p class="text-muted mb-6">10% of the final approved price on completed jobs.</p>'
     +'<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">'
       +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Total</p><p class="text-3xl font-semibold text-ink tracking-tight">₱'+total.toLocaleString()+'</p></div>'
       +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Paid</p><p class="text-3xl font-semibold text-[var(--success)] tracking-tight">₱'+paid.toLocaleString()+'</p></div>'
       +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Owed</p><p class="text-3xl font-semibold text-[var(--warn)] tracking-tight">₱'+owed.toLocaleString()+'</p></div>'
-      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Rate</p><p class="text-3xl font-semibold text-ink tracking-tight">12%</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Rate</p><p class="text-3xl font-semibold text-ink tracking-tight">10%</p></div>'
     +'</div>'
     +'<div class="card overflow-x-auto"><table class="w-full text-sm min-w-[650px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Technician</th><th class="p-4 font-medium">Booking</th><th class="p-4 font-medium">Final amount</th><th class="p-4 font-medium">Rate</th><th class="p-4 font-medium">Commission</th><th class="p-4 font-medium">Status</th><th class="p-4"></th></tr></thead><tbody>'
     +COMMISSIONS.map(c=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">'+esc(c.tech)+'</td><td class="p-4 text-muted">#'+c.bookingId+'</td><td class="p-4 text-ink">₱'+c.finalAmount.toLocaleString()+'</td><td class="p-4 text-muted">'+(c.rate*100).toFixed(0)+'%</td><td class="p-4 font-medium text-ink">₱'+c.commission.toLocaleString()+'</td><td class="p-4">'+badge(c.status)+'</td><td class="p-4 text-right">'+(c.status==='Owed'?'<button onclick="markCommissionPaid('+c.id+')" class="btn-link text-xs">Mark paid</button>':'')+'</td></tr>').join('')
@@ -1737,7 +1808,7 @@ function adminAudit(){
 function techDashboard(){
   const mine = BOOKINGS.filter(b=>b.tech==='Jun Alvarez' && b.status!=='Inquiry');
   const active = mine.filter(b=>!TERMINAL.includes(b.status));
-  const estimateRequests = BOOKINGS.filter(b => b.status==='Pending' && (b.requestedTechs||[]).includes('Jun Alvarez'));
+  const estimateRequests = BOOKINGS.filter(b => ['Pending','Estimated'].includes(b.status) && (b.requestedTechs||[]).includes('Jun Alvarez') && !ESTIMATES.some(e=>e.bookingId===b.id && e.tech==='Jun Alvarez'));
   const owed = techOwed('Jun Alvarez');
   return '<div><h1 class="text-3xl font-semibold mb-8 text-ink tracking-tight">Dashboard</h1>'
     +'<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">'
@@ -1807,7 +1878,7 @@ function techSchedule(){
     +'</div></div>';
 }
 function techEstimates(){
-  const requests = BOOKINGS.filter(b => b.status==='Pending' && (b.requestedTechs||[]).includes('Jun Alvarez'));
+  const requests = BOOKINGS.filter(b => ['Pending','Estimated'].includes(b.status) && (b.requestedTechs||[]).includes('Jun Alvarez') && !ESTIMATES.some(e=>e.bookingId===b.id && e.tech==='Jun Alvarez'));
   const posted = ESTIMATES.filter(e => e.tech === 'Jun Alvarez').sort((a,b)=>b.postedAt-a.postedAt);
   return '<div><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Estimates</h1>'
     +(requests.length?'<div class="card p-6 mb-6"><h2 class="text-xs uppercase tracking-wider text-muted font-medium mb-4">Pending requests</h2><div class="divide-y divide-line">'+requests.map(b=>'<div class="py-4 flex items-center justify-between gap-3"><div><p class="text-sm font-medium text-ink">'+esc(b.service)+' · '+esc(b.customer)+'</p><p class="text-xs text-muted mt-0.5">'+esc((b.problems||[]).join(', '))+' · '+esc(b.barangay)+'</p></div><button onclick="openEstimateComposer('+b.id+')" class="btn-primary text-xs py-2 px-3">Post estimate</button></div>').join('')+'</div></div>':'')
@@ -1827,10 +1898,10 @@ function techEarnings(){
     +'<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">'
       +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Jobs done</p><p class="text-3xl font-semibold text-ink tracking-tight">'+mine.length+'</p></div>'
       +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Gross collected</p><p class="text-3xl font-semibold text-accent tracking-tight">₱'+gross.toLocaleString()+'</p></div>'
-      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Net after 12%</p><p class="text-3xl font-semibold text-[var(--success)] tracking-tight">₱'+(gross - commissionPaid - commissionOwed).toLocaleString()+'</p></div>'
+      +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Net after 10%</p><p class="text-3xl font-semibold text-[var(--success)] tracking-tight">₱'+(gross - commissionPaid - commissionOwed).toLocaleString()+'</p></div>'
       +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Commission owed</p><p class="text-3xl font-semibold text-[var(--warn)] tracking-tight">₱'+commissionOwed.toLocaleString()+'</p></div>'
     +'</div>'
-    +'<div class="card p-6 mb-4"><p class="text-sm font-medium text-ink mb-1">You collect directly from customers</p><p class="text-xs text-muted leading-relaxed">Cash or GCash, at the door. FixLink never touches the money. You keep 88% of the final approved price and remit 12% to FixLink after each completed job.</p></div>'
+    +'<div class="card p-6 mb-4"><p class="text-sm font-medium text-ink mb-1">You collect directly from customers</p><p class="text-xs text-muted leading-relaxed">Cash or GCash, at the door. FixLink never touches the money. You keep 90% of the final approved price and remit 10% to FixLink after each completed job.</p></div>'
     +'<div class="card overflow-x-auto"><table class="w-full text-sm min-w-[520px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Customer</th><th class="p-4 font-medium">Service</th><th class="p-4 font-medium">Date</th><th class="p-4 font-medium">Final</th><th class="p-4 font-medium">Commission</th></tr></thead><tbody>'
     +(mine.length?mine.map(b=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">'+esc(b.customer)+'</td><td class="p-4 text-ink">'+esc(b.service)+'</td><td class="p-4 text-muted">'+esc(b.date)+'</td><td class="p-4 font-medium text-ink">'+(b.finalAmount?'₱'+b.finalAmount.toLocaleString():'—')+'</td><td class="p-4 text-ink">'+(b.finalCommission?'₱'+b.finalCommission.toLocaleString():'—')+'</td></tr>').join(''):'<tr><td class="p-4 text-muted" colspan="5">No completed jobs.</td></tr>')
     +'</tbody></table></div></div>';
@@ -1839,13 +1910,13 @@ function techCommissions(){
   const mine = COMMISSIONS.filter(c=>c.tech==='Jun Alvarez');
   const owed = techOwed('Jun Alvarez');
   const paid = techPaid('Jun Alvarez');
-  return '<div><h1 class="text-3xl font-semibold mb-2 text-ink tracking-tight">Commissions</h1><p class="text-muted mb-6">12% of each completed job. Remit to FixLink after the customer pays you.</p>'
+  return '<div><h1 class="text-3xl font-semibold mb-2 text-ink tracking-tight">Commissions</h1><p class="text-muted mb-6">10% of each completed job. Remit to FixLink after the customer pays you.</p>'
     +'<div class="grid grid-cols-3 gap-3 mb-6">'
       +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Total</p><p class="text-2xl font-semibold text-ink tracking-tight">₱'+(owed+paid).toLocaleString()+'</p></div>'
       +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Owed</p><p class="text-2xl font-semibold text-[var(--warn)] tracking-tight">₱'+owed.toLocaleString()+'</p></div>'
       +'<div class="card p-5"><p class="text-xs uppercase tracking-wider text-muted font-medium mb-2">Paid</p><p class="text-2xl font-semibold text-[var(--success)] tracking-tight">₱'+paid.toLocaleString()+'</p></div>'
     +'</div>'
-    +'<div class="card overflow-x-auto"><table class="w-full text-sm min-w-[520px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Booking</th><th class="p-4 font-medium">Final</th><th class="p-4 font-medium">Commission (12%)</th><th class="p-4 font-medium">Status</th><th class="p-4"></th></tr></thead><tbody>'
+    +'<div class="card overflow-x-auto"><table class="w-full text-sm min-w-[520px]"><thead><tr class="text-left text-xs text-muted border-b border-line"><th class="p-4 font-medium">Booking</th><th class="p-4 font-medium">Final</th><th class="p-4 font-medium">Commission (10%)</th><th class="p-4 font-medium">Status</th><th class="p-4"></th></tr></thead><tbody>'
     +(mine.length?mine.map(c=>'<tr class="border-b border-line last:border-0"><td class="p-4 font-medium text-ink">#'+c.bookingId+'</td><td class="p-4 text-ink">₱'+c.finalAmount.toLocaleString()+'</td><td class="p-4 font-medium text-ink">₱'+c.commission.toLocaleString()+'</td><td class="p-4">'+badge(c.status)+'</td><td class="p-4 text-right">'+(c.status==='Owed'?'<button onclick="markCommissionPaid('+c.id+')" class="btn-link text-xs">Mark paid</button>':'')+'</td></tr>').join(''):'<tr><td class="p-4 text-muted" colspan="5">No commission records.</td></tr>')
     +'</tbody></table></div></div>';
 }
@@ -1858,10 +1929,19 @@ function toggleMyService(label){
 function techProfile(){
   const me=TECHS.find(t=>t.id===1);
   const myReviews = REVIEWS.filter(r=>r.tech===me.name);
-  return '<div class="max-w-md"><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Profile</h1><div class="card p-6 space-y-5">'
+  return '<div class="max-w-lg"><h1 class="text-3xl font-semibold mb-6 text-ink tracking-tight">Profile</h1><div class="card p-6 space-y-5">'
     +'<div><label class="input-label">Name</label><input class="input" value="Jun Alvarez"/></div>'
-    +'<div><label class="input-label block mb-3">Appliances</label>'
-      +'<div class="grid grid-cols-2 gap-2">'+SERVICES.map(s=>'<label class="flex items-center gap-2 text-sm border border-line rounded-lg px-3 py-2 cursor-pointer text-ink '+(me.services.includes(s.label)?'border-[var(--accent)] bg-[var(--accent-soft)]':'')+'"><input type="checkbox" '+(me.services.includes(s.label)?'checked':'')+' onchange="toggleMyService(\''+s.label+'\')"/> '+s.label+'</label>').join('')+'</div>'
+    +'<div>'
+      +'<div class="flex items-center justify-between mb-3"><label class="input-label mb-0">Appliances you fix</label><span class="text-xs text-muted">Tap to toggle</span></div>'
+      +'<div class="grid grid-cols-3 sm:grid-cols-4 gap-2">'+SERVICES.map(s=>{
+        const sel = me.services.includes(s.label);
+        return '<button type="button" onclick="toggleMyService(\''+s.label+'\')" class="appliance-tile '+(sel?'selected':'')+'"><div class="icon-wrap">'+appIcon(s.id)+(sel?'<span class="sel-check">'+ic('check','w-2.5 h-2.5')+'</span>':'')+'</div><p class="label">'+s.label+'</p></button>';
+      }).join('')+'</div>'
+      +'<p class="text-xs text-muted mt-3">Customers only see you when booking one of these. Keep at least one selected.</p>'
+    +'</div>'
+    +'<div class="rounded-xl p-4 bg-surface-2">'
+      +'<div class="flex items-center justify-between mb-1"><p class="text-sm font-medium text-ink flex items-center gap-1.5">'+ic('fileCheck','w-4 h-4 text-[var(--success)]')+' Skills verification</p>'+badge(me.certStatus||'Pending')+'</div>'
+      +'<p class="text-xs text-muted leading-relaxed">'+esc(me.cert||'No certificate on file')+'</p>'
     +'</div>'
     +'<button onclick="toast(\'Saved\')" class="btn-primary w-full">Save</button>'
     +'</div>'
