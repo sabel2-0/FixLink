@@ -23,13 +23,15 @@ export function LoginForm() {
     setSubmitting(true)
     setFormError(null)
     try {
-      const { data: signInData, error } = await supabase.auth.signInWithPassword({
+      const { data: signIn, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       })
       if (error) throw error
 
-      const userId = signInData.user?.id
+      const userId = signIn.user?.id
+      if (!userId) throw new Error("No user returned")
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
@@ -38,6 +40,7 @@ export function LoginForm() {
 
       const dest =
         profile?.role === "technician" ? "/tech" : profile?.role === "admin" ? "/admin" : "/app"
+
       router.push(dest)
       router.refresh()
     } catch (err) {
@@ -56,14 +59,14 @@ export function LoginForm() {
       </div>
       <div>
         <label className="input-label">Password</label>
-        <input {...register("password")} type="password" placeholder="********" className="input" />
+        <input {...register("password")} type="password" placeholder="••••••••" className="input" />
         {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>}
       </div>
 
       {formError && <p className="text-sm text-red-500">{formError}</p>}
 
       <button type="submit" disabled={submitting} className="btn-primary w-full mt-2">
-        {submitting ? "Logging in..." : "Log in"}
+        {submitting ? "Logging in…" : "Log in"}
       </button>
     </form>
   )

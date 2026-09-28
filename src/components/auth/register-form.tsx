@@ -38,8 +38,13 @@ export function RegisterForm() {
         email: data.email,
         password: data.password,
         options: {
-          data: { full_name: data.fullName, role: data.role },
-          emailRedirectTo: `${location.origin}/auth/callback`,
+          data: {
+            full_name: data.fullName,
+            role: data.role,
+            phone: data.phone,
+            cert_number: data.certNumber || null,
+            cert_trade: data.certTrade || null,
+          },
         },
       })
       if (authError) throw authError
@@ -47,34 +52,31 @@ export function RegisterForm() {
       const userId = authData.user?.id
       if (!userId) throw new Error("Signup did not return a user")
 
-      await supabase.from("profiles").update({ phone: data.phone }).eq("id", userId)
+      if (!authData.session) {
+  router.push(`/verify-email?email=${encodeURIComponent(data.email)}`)
+  return
+}
 
-      if (data.role === "technician") {
-        let certFilePath: string | null = null
-
-        if (certFile) {
-          const ext = certFile.name.split(".").pop()
-          const path = `${userId}/nc2-certificate.${ext}`
-          const { error: uploadError } = await supabase.storage
-            .from("certs")
-            .upload(path, certFile, { upsert: true })
-          if (uploadError) throw uploadError
-          certFilePath = path
-        }
+      if (data.role === "technician" && certFile) {
+        const ext = certFile.name.split(".").pop() || "bin"
+        const path = `${userId}/nc2-certificate.${ext}`
+        const { error: uploadError } = await supabase.storage
+          .from("certs")
+          .upload(path, certFile, { upsert: true })
+        if (uploadError) throw uploadError
 
         await supabase
           .from("technician_profiles")
           .update({
-            cert_number: data.certNumber || null,
-            cert_trade: data.certTrade || null,
-            cert_file_path: certFilePath,
-            cert_status: certFilePath || data.certNumber ? "pending" : "unverified",
+            cert_file_path: path,
+            cert_status: "pending",
             cert_submitted_at: new Date().toISOString(),
           })
           .eq("id", userId)
       }
 
-      router.push("/verify-email")
+      router.push(data.role === "technician" ? "/tech" : "/app")
+      router.refresh()
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
@@ -109,7 +111,7 @@ export function RegisterForm() {
       </div>
 
       <div>
-        <label className="input-label">I am a...</label>
+        <label className="input-label">I am a…</label>
         <div className="seg">
           <button type="button" className={role === "customer" ? "active" : ""} onClick={() => selectRole("customer")}>
             Customer
@@ -122,7 +124,7 @@ export function RegisterForm() {
 
       {role === "technician" && (
         <div className="card-bordered rounded-xl p-3 space-y-3" style={{ border: "1px dashed var(--line)" }}>
-          <p className="text-xs font-medium text-ink mb-0">Skills verification</p>
+          <p className="text-xs font-medium text-ink">Skills verification</p>
           <p className="text-xs text-muted leading-relaxed">
             To protect customers, technicians must pass ID and skills verification before taking jobs.
             A TESDA National Certificate II (NC2) in your trade is the fastest path — admin can also
@@ -130,7 +132,6 @@ export function RegisterForm() {
           </p>
 
           <input {...register("certNumber")} placeholder="e.g. NC2-AIRCON-2024-00123" className="input" />
-
           <input {...register("certTrade")} placeholder="e.g. RAC Servicing NC2 (Aircon & Ref)" className="input" />
           {errors.certTrade && <p className="text-xs text-red-500 mt-1">{errors.certTrade.message}</p>}
 
@@ -146,8 +147,8 @@ export function RegisterForm() {
           </div>
 
           <p className="text-xs text-muted leading-relaxed">
-            A photo or PDF of your certificate, plus the number above, lets admin verify you faster and
-            more reliably than a number alone.
+            A photo or PDF of your certificate, plus the number above, lets admin verify you faster
+            and more reliably than a number alone.
           </p>
         </div>
       )}
@@ -155,7 +156,7 @@ export function RegisterForm() {
       {formError && <p className="text-sm text-red-500">{formError}</p>}
 
       <button type="submit" disabled={submitting} className="btn-primary w-full mt-2">
-        {submitting ? "Creating account..." : "Create account"}
+        {submitting ? "Creating account…" : "Create account"}
       </button>
 
       <p className="text-xs text-muted mt-2 leading-relaxed text-center">
