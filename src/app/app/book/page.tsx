@@ -137,7 +137,7 @@ export default function BookPage() {
 
       if (error) { console.error(error); toast(error.message); setLoadingTechs(false); return }
 
-      const filtered = (data as Tech[]).filter((t) => {
+      const filtered = (data as unknown as Tech[]).filter((t) => {
 
         const svc = (t.technician_services || []).map((s) => s.service)
 
@@ -433,7 +433,7 @@ const withDist = useMemo(() => {
 
     } catch (e) {
 
-      toast(e && e.message ? e.message : "Something went wrong")
+      toast(e instanceof Error ? e.message : "Something went wrong")
 
     } finally {
 

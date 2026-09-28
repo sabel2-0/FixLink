@@ -1,4 +1,4 @@
-import type { SVGProps } from "react"
+import type { SVGProps, JSX } from "react"
 
 export type IconName =
   | "grid" | "users" | "wrench" | "calendar" | "dollar" | "user" | "logout"
