@@ -1,7 +1,17 @@
+export const dynamic = "force-dynamic"
+
 import Link from "next/link"
+export const dynamic = "force-dynamic"
+
 import { createClient } from "@/lib/supabase/server"
+export const dynamic = "force-dynamic"
+
 import { Badge } from "@/components/ui/Badge"
+export const dynamic = "force-dynamic"
+
 import { EmptyState } from "@/components/ui/EmptyState"
+export const dynamic = "force-dynamic"
+
 import { Icon } from "@/lib/icons"
 
 const ACTIVE = ["pending","estimated","confirmed","en_route","arrived","in_progress","quote_pending","awaiting_confirmation"]
