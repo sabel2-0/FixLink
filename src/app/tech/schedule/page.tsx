@@ -60,7 +60,7 @@ export default async function TechSchedule() {
                     {(b.status === "in_progress" || b.status === "arrived") && (
                       <QuoteComposer bookingId={b.id} customer={b.customer?.full_name || "Customer"} service={services} />
                     )}
-                    {b.status === "in_progress" && <CompleteJobButton bookingId={b.id} />}
+                    {b.status === "in_progress" && !(b.quotes || []).some((q: any) => q.status === "pending") && (b.quotes || []).some((q: any) => q.status === "approved") && <CompleteJobButton bookingId={b.id} />}
                     {b.status === "quote_pending" && <span className="text-xs text-muted">Waiting for approval</span>}
                     {b.status === "awaiting_confirmation" && <span className="text-xs text-muted">Waiting for customer</span>}
                   </div>
