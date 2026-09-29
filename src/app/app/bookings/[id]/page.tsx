@@ -6,6 +6,7 @@ import { peso } from "@/lib/format"
 import { LiveMapWrapper } from "@/components/booking/LiveMapWrapper"
 import { CancelBookingButton } from "@/components/booking/CancelBookingButton"
 import { SelectEstimateButton } from "@/components/booking/SelectEstimateButton"
+import { DecideQuoteButtons } from "@/components/booking/DecideQuoteButtons"
 import { ChatButton } from "@/components/chat/ChatButton"
 import { BookingTimeline } from "@/components/booking/BookingTimeline"
 
@@ -200,6 +201,7 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
                 <div key={it.label} className="quote-line"><span>{it.label}</span><span>{peso(it.amount)}</span></div>
               ))}
               <div className="quote-line font-semibold pt-3 border-t border-line"><span>Total</span><span>{peso(active.total)}</span></div>
+              <DecideQuoteButtons quoteId={active.id} total={Number(active.total)} technicianName={tech || "the technician"} />
             </div>
           ) : approved ? (
             <div className="px-3 py-2 rounded-lg bg-surface-2 flex items-center justify-between">
