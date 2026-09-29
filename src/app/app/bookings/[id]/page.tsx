@@ -9,6 +9,7 @@ import { SelectEstimateButton } from "@/components/booking/SelectEstimateButton"
 import { DecideQuoteButtons } from "@/components/booking/DecideQuoteButtons"
 import { ConfirmJobButton } from "@/components/booking/ConfirmJobButton"
 import { PaymentRecorder } from "@/components/booking/PaymentRecorder"
+import { PaymentReceipt } from "@/components/booking/PaymentReceipt"
 import { ChatButton } from "@/components/chat/ChatButton"
 import { BookingTimeline } from "@/components/booking/BookingTimeline"
 
@@ -35,7 +36,7 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
 
   const { data: b } = await supabase
     .from("bookings")
-    .select("id, status, scheduled_date, scheduled_time, barangay, address, final_amount, technician_id, cancelled_at, cancelled_by, cancel_reason, payment_method, payment_reference, paid_at, payment_recorded_by, technician:technician_profiles!bookings_technician_id_fkey(id, rating, profile:profiles!technician_profiles_id_fkey(full_name)), booking_items(id, service, problems, notes), estimates(id, technician_id, amount, eta_minutes, note, created_at, technician:technician_profiles!estimates_technician_id_fkey(profile:profiles!technician_profiles_id_fkey(full_name))), quotes(id, total, commission, status, quote_items(label, amount))")
+    .select("id, status, scheduled_date, scheduled_time, barangay, address, final_amount, technician_id, cancelled_at, cancelled_by, cancel_reason, payment_method, payment_reference, paid_at, payment_recorded_by, payment_confirmed_at, payment_confirmed_by, technician:technician_profiles!bookings_technician_id_fkey(id, rating, profile:profiles!technician_profiles_id_fkey(full_name)), booking_items(id, service, problems, notes), estimates(id, technician_id, amount, eta_minutes, note, created_at, technician:technician_profiles!estimates_technician_id_fkey(profile:profiles!technician_profiles_id_fkey(full_name))), quotes(id, total, commission, status, quote_items(label, amount))")
     .eq("id", id)
     .single()
 
@@ -254,42 +255,36 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
       )}
 
       {booking.status === "completed" && (
-        <div className="card p-5 mb-4">
-          <p className="text-xs uppercase tracking-wider text-muted font-medium mb-3">Payment</p>
+        <>
           {booking.paid_at ? (
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted">Method</span>
-                <span>{booking.payment_method || "&#8212;"}</span>
-              </div>
-              {booking.payment_reference && (
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-muted">Reference</span>
-                  <span className="text-right truncate">{booking.payment_reference}</span>
-                </div>
-              )}
-              <div className="flex items-center justify-between">
-                <span className="text-muted">Recorded by</span>
-                <span className="capitalize">{booking.payment_recorded_by || "&#8212;"}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted">Paid on</span>
-                <span>{new Date(booking.paid_at).toLocaleString()}</span>
-              </div>
-            </div>
+            <PaymentReceipt
+              finalAmount={Number(booking.final_amount || 0)}
+              method={booking.payment_method}
+              reference={booking.payment_reference}
+              recordedBy={booking.payment_recorded_by}
+              paidAt={booking.paid_at}
+              confirmedBy={booking.payment_confirmed_by}
+              confirmedAt={booking.payment_confirmed_at}
+              commission={Number(booking.final_commission || Math.round(Number(booking.final_amount || 0) * 0.10))}
+              technicianName={tech || "the technician"}
+              serviceLabel={(booking.booking_items || []).map((i: any) => i.service).join(" + ")}
+              scheduledDate={booking.scheduled_date}
+            />
           ) : (
-            <>
+            <div className="card p-5 mb-4">
+              <p className="text-xs uppercase tracking-wider text-muted font-medium mb-3">Payment</p>
               <p className="text-sm text-muted mb-4 leading-relaxed">
-                Pay &#8369;{Number(booking.final_amount || 0).toLocaleString()} directly to {tech || "the technician"}. Record the payment here for both your records.
+                Pay ₱{Number(booking.final_amount || 0).toLocaleString()} directly to {tech || "the technician"}.
+                Record the payment here for both your records.
               </p>
               <PaymentRecorder
                 bookingId={booking.id}
                 finalAmount={Number(booking.final_amount || 0)}
                 myRole="customer"
               />
-            </>
+            </div>
           )}
-        </div>
+        </>
       )}
 
       <div className="card p-6 mb-4">
