@@ -7,6 +7,8 @@ import { LiveMapWrapper } from "@/components/booking/LiveMapWrapper"
 import { CancelBookingButton } from "@/components/booking/CancelBookingButton"
 import { SelectEstimateButton } from "@/components/booking/SelectEstimateButton"
 import { DecideQuoteButtons } from "@/components/booking/DecideQuoteButtons"
+import { ConfirmJobButton } from "@/components/booking/ConfirmJobButton"
+import { PaymentRecorder } from "@/components/booking/PaymentRecorder"
 import { ChatButton } from "@/components/chat/ChatButton"
 import { BookingTimeline } from "@/components/booking/BookingTimeline"
 
@@ -33,7 +35,7 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
 
   const { data: b } = await supabase
     .from("bookings")
-    .select("id, status, scheduled_date, scheduled_time, barangay, address, final_amount, technician_id, cancelled_at, cancelled_by, cancel_reason, technician:technician_profiles!bookings_technician_id_fkey(id, rating, profile:profiles!technician_profiles_id_fkey(full_name)), booking_items(id, service, problems, notes), estimates(id, technician_id, amount, eta_minutes, note, created_at, technician:technician_profiles!estimates_technician_id_fkey(profile:profiles!technician_profiles_id_fkey(full_name))), quotes(id, total, commission, status, quote_items(label, amount))")
+    .select("id, status, scheduled_date, scheduled_time, barangay, address, final_amount, technician_id, cancelled_at, cancelled_by, cancel_reason, payment_method, payment_reference, paid_at, payment_recorded_by, technician:technician_profiles!bookings_technician_id_fkey(id, rating, profile:profiles!technician_profiles_id_fkey(full_name)), booking_items(id, service, problems, notes), estimates(id, technician_id, amount, eta_minutes, note, created_at, technician:technician_profiles!estimates_technician_id_fkey(profile:profiles!technician_profiles_id_fkey(full_name))), quotes(id, total, commission, status, quote_items(label, amount))")
     .eq("id", id)
     .single()
 
