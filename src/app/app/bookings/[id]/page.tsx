@@ -232,6 +232,66 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
+      {booking.status === "awaiting_confirmation" && (
+        <div className="card p-5 mb-4">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: "color-mix(in srgb, var(--accent) 18%, transparent)", color: "var(--accent)" }}>
+              <Icon name="check" className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold mb-0.5">Technician marked the job done</p>
+              <p className="text-xs text-muted leading-relaxed">
+                Review the work. Once you confirm, pay {tech || "the technician"} &#8369;{Number(booking.final_amount || 0).toLocaleString()} in cash or GCash.
+              </p>
+            </div>
+          </div>
+          <ConfirmJobButton
+            bookingId={booking.id}
+            finalAmount={Number(booking.final_amount || 0)}
+            technicianName={tech || "the technician"}
+          />
+        </div>
+      )}
+
+      {booking.status === "completed" && (
+        <div className="card p-5 mb-4">
+          <p className="text-xs uppercase tracking-wider text-muted font-medium mb-3">Payment</p>
+          {booking.paid_at ? (
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted">Method</span>
+                <span>{booking.payment_method || "&#8212;"}</span>
+              </div>
+              {booking.payment_reference && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-muted">Reference</span>
+                  <span className="text-right truncate">{booking.payment_reference}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-muted">Recorded by</span>
+                <span className="capitalize">{booking.payment_recorded_by || "&#8212;"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted">Paid on</span>
+                <span>{new Date(booking.paid_at).toLocaleString()}</span>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-muted mb-4 leading-relaxed">
+                Pay &#8369;{Number(booking.final_amount || 0).toLocaleString()} directly to {tech || "the technician"}. Record the payment here for both your records.
+              </p>
+              <PaymentRecorder
+                bookingId={booking.id}
+                finalAmount={Number(booking.final_amount || 0)}
+                myRole="customer"
+              />
+            </>
+          )}
+        </div>
+      )}
+
       <div className="card p-6 mb-4">
         <p className="text-xs uppercase tracking-wider text-muted font-medium mb-4">Timeline</p>
         <BookingTimeline bookingId={booking.id} />
