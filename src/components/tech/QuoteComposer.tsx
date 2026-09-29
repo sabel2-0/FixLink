@@ -88,7 +88,7 @@ export function QuoteComposer({ bookingId, customer, service }: { bookingId: str
               <div className="space-y-2">
                 {items.map((it, i) => (
                   <div key={i} className="flex gap-2 items-center">
-                    <input className="input flex-1 text-sm" value={it.label} onChange={(e) => updateItem(i, { label: e.target.value })} />
+                    <input className="input flex-1 text-sm" style={{ color: "var(--ink)" }} placeholder="e.g. Labor, Parts, Cleaning fee" value={it.label} onChange={(e) => updateItem(i, { label: e.target.value })} />
                     <span className="text-sm text-muted">₱</span>
                     <input
                       className="input w-24 text-sm"
