@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/Badge"
+import { Icon } from "@/lib/icons"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { JobActions } from "@/components/tech/JobActions"
 import { QuoteComposer } from "@/components/tech/QuoteComposer"
 import { CompleteJobButton } from "@/components/tech/CompleteJobButton"
+import { ConfirmPaymentReceived } from "@/components/booking/ConfirmPaymentReceived"
 
 function fmtDate(d: string | null | undefined): string {
   if (!d) return "—"
@@ -25,7 +27,7 @@ export default async function TechSchedule() {
 
   const { data: jobs } = await supabase
     .from("bookings")
-    .select("id, status, scheduled_date, scheduled_time, barangay, address, final_amount, customer:profiles!bookings_customer_id_fkey(full_name), booking_items(service, problems)")
+    .select("id, status, scheduled_date, scheduled_time, barangay, address, final_amount, final_commission, payment_method, payment_reference, paid_at, payment_recorded_by, payment_confirmed_at, payment_confirmed_by, customer:profiles!bookings_customer_id_fkey(full_name), booking_items(service, problems)")
     .eq("technician_id", user.id)
     .order("scheduled_date", { ascending: true })
 
