@@ -1,0 +1,29 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" fill="none">
+  <rect width="500" height="400" fill="transparent"/>
+  <!-- sky circle -->
+  <circle cx="380" cy="90" r="60" fill="#E5F0FF" opacity="0.6"/>
+  <!-- house body -->
+  <path d="M120 200 L260 100 L400 200 L400 340 L120 340 Z" fill="#E5E5EA"/>
+  <!-- roof -->
+  <path d="M100 210 L260 90 L420 210 L400 210 L260 110 L120 210 Z" fill="#0A84FF"/>
+  <!-- door -->
+  <rect x="240" y="260" width="60" height="80" rx="4" fill="#3A3A3C"/>
+  <!-- door handle -->
+  <circle cx="285" cy="300" r="3" fill="#E5E5EA"/>
+  <!-- windows -->
+  <rect x="160" y="240" width="50" height="50" rx="4" fill="#0A84FF" opacity="0.25"/>
+  <rect x="310" y="240" width="50" height="50" rx="4" fill="#0A84FF" opacity="0.25"/>
+  <!-- technician body -->
+  <circle cx="360" cy="330" r="18" fill="#F2F2F7"/>
+  <path d="M342 348 Q342 380 342 400 L378 400 Q378 380 378 348 Q360 340 342 348 Z" fill="#0A84FF"/>
+  <!-- head -->
+  <circle cx="360" cy="318" r="12" fill="#D1D1D6"/>
+  <!-- cap -->
+  <path d="M348 314 Q360 300 372 314 L372 318 L348 318 Z" fill="#0A84FF"/>
+  <!-- wrench in hand -->
+  <path d="M382 350 L410 320" stroke="#3A3A3C" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="413" cy="317" r="8" fill="none" stroke="#3A3A3C" stroke-width="4"/>
+  <!-- tool box -->
+  <rect x="410" y="360" width="60" height="35" rx="4" fill="#3A3A3C"/>
+  <rect x="430" y="352" width="20" height="8" rx="2" fill="#3A3A3C"/>
+</svg>

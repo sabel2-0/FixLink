@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -36,20 +36,6 @@ export function CancelBookingButton({ bookingId, status }: { bookingId: string; 
         .eq("customer_id", user.id)
       if (e) throw e
 
-      // Notify the invited technicians (best-effort, ignore errors)
-      const { data: invited } = await supabase
-        .from("booking_requested_techs")
-        .select("technician_id")
-        .eq("booking_id", bookingId)
-      if (invited && invited.length) {
-        const rows = invited.map((r: any) => ({
-          recipient_id: r.technician_id,
-          title: "Booking cancelled",
-          body: "The customer cancelled this request.",
-          link: "/tech/schedule",
-        }))
-        await supabase.from("notifications").insert(rows)
-      }
 
       setOpen(false)
       router.refresh()
@@ -116,7 +102,7 @@ export function CancelBookingButton({ bookingId, status }: { bookingId: string; 
                 disabled={busy}
                 style={{ background: "var(--danger)", color: "#fff" }}
               >
-                {busy ? "Cancelling…" : "Yes, cancel"}
+                {busy ? "Cancelling..." : "Yes, cancel"}
               </button>
             </div>
           </div>

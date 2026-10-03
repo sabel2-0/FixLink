@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -36,7 +36,7 @@ export function JobActions({ bookingId, status }: { bookingId: string; status: s
       disabled={busy}
       className="btn-primary text-xs py-2 px-3"
     >
-      {busy ? "…" : step.label}
+      {busy ? "..." : step.label}
     </button>
   )
 }

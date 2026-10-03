@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useRef, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -11,6 +11,7 @@ type Message = {
   recipient_id: string
   body: string
   created_at: string
+  read_at: string | null
 }
 
 type Props = {
@@ -123,6 +124,10 @@ function loadStoredTheme(): ChatTheme {
   }
 }
 
+function fmtTime(iso: string) {
+  return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+}
+
 export function ChatModal({ open, onClose, bookingId, meId, partnerId, partnerName, partnerRole }: Props) {
   const supabase = createClient()
   const [messages, setMessages] = useState<Message[]>([])
@@ -161,7 +166,7 @@ export function ChatModal({ open, onClose, bookingId, meId, partnerId, partnerNa
     return () => { cancelled = true }
   }, [open, bookingId, meId, partnerId, supabase])
 
-  // Realtime
+  // Realtime: INSERT + UPDATE
   useEffect(() => {
     if (!open) return
     const channel = supabase
@@ -191,9 +196,35 @@ export function ChatModal({ open, onClose, bookingId, meId, partnerId, partnerNa
           return [...prev, m]
         })
       })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "messages",
+        filter: "booking_id=eq." + bookingId,
+      }, (payload) => {
+        const m = payload.new as Message
+        setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, read_at: m.read_at } : x)))
+      })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [open, bookingId, meId, partnerId, supabase])
+
+  // Auto-mark incoming messages as read while chat is open
+  useEffect(() => {
+    if (!open) return
+    const unread = messages.filter(
+      (m) => m.sender_id === partnerId && m.recipient_id === meId && !m.read_at
+    )
+    if (unread.length === 0) return
+    const ids = unread.map((m) => m.id)
+    const now = new Date().toISOString()
+    ;(async () => {
+      await supabase.from("messages").update({ read_at: now }).in("id", ids)
+    })()
+    setMessages((prev) =>
+      prev.map((m) => (ids.includes(m.id) ? { ...m, read_at: now } : m))
+    )
+  }, [open, messages, partnerId, meId, supabase])
 
   useEffect(() => {
     const el = scrollRef.current
@@ -211,6 +242,7 @@ export function ChatModal({ open, onClose, bookingId, meId, partnerId, partnerNa
       recipient_id: partnerId,
       body,
       created_at: new Date().toISOString(),
+      read_at: null,
     }
     setMessages((prev) => [...prev, optimistic])
     setInput("")
@@ -239,6 +271,12 @@ export function ChatModal({ open, onClose, bookingId, meId, partnerId, partnerNa
 
   if (!open) return null
 
+  // id of the last message the current user sent — for the Seen indicator
+  let lastMyId: string | null = null
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].sender_id === meId) { lastMyId = messages[i].id; break }
+  }
+
   return (
     <div
       className="fixed inset-0 z-[60] flex sm:items-center sm:justify-center sm:p-4"
@@ -246,7 +284,7 @@ export function ChatModal({ open, onClose, bookingId, meId, partnerId, partnerNa
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        className="w-full h-full sm:h-auto sm:max-h-[92vh] sm:max-w-md sm:rounded-2xl overflow-hidden flex flex-col"
+        className="w-full h-full sm:h-[600px] sm:max-h-[85vh] sm:max-w-2xl sm:rounded-2xl overflow-hidden flex flex-col"
         style={{ background: theme.bg }}
       >
         {/* Header */}
@@ -326,7 +364,7 @@ export function ChatModal({ open, onClose, bookingId, meId, partnerId, partnerNa
           onClick={() => showThemes && setShowThemes(false)}
         >
           {loading ? (
-            <p className="text-center text-xs py-8" style={{ color: "var(--muted)" }}>Loading…</p>
+            <p className="text-center text-xs py-8" style={{ color: "var(--muted)" }}>Loading...</p>
           ) : messages.length === 0 ? (
             <div className="text-center py-12">
               <div
@@ -341,8 +379,9 @@ export function ChatModal({ open, onClose, bookingId, meId, partnerId, partnerNa
           ) : (
             messages.map((m) => {
               const isMine = m.sender_id === meId
+              const showSeen = isMine && !!m.read_at
               return (
-                <div key={m.id} className={"flex " + (isMine ? "justify-end" : "justify-start")}>
+                <div key={m.id} className={"flex flex-col " + (isMine ? "items-end" : "items-start")}>
                   <div
                     className="max-w-[78%] px-3.5 py-2 text-sm shadow-sm"
                     style={{
@@ -355,9 +394,14 @@ export function ChatModal({ open, onClose, bookingId, meId, partnerId, partnerNa
                   >
                     <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{m.body}</p>
                     <p className="text-[10px] mt-1 opacity-60 text-right">
-                      {new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                      {fmtTime(m.created_at)}
                     </p>
                   </div>
+                  {showSeen && (
+                    <p className="text-[10px] mt-0.5 pr-1 opacity-70" style={{ color: theme.theirText }}>
+                      Seen · {fmtTime(m.read_at as string)}
+                    </p>
+                  )}
                 </div>
               )
             })
@@ -371,7 +415,7 @@ export function ChatModal({ open, onClose, bookingId, meId, partnerId, partnerNa
         >
           <input
             type="text"
-            placeholder="Message…"
+            placeholder="Message..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {

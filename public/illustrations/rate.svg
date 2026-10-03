@@ -1,0 +1,19 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" fill="transparent"/>
+  <!-- big star -->
+  <g transform="translate(200,140)">
+    <polygon points="0,-90 27,-27 96,-27 40,14 61,82 0,42 -61,82 -40,14 -96,-27 -27,-27" fill="#FF9500"/>
+  </g>
+  <!-- small stars -->
+  <g transform="translate(80,220)">
+    <polygon points="0,-22 7,-7 23,-7 10,3 15,19 0,10 -15,19 -10,3 -23,-7 -7,-7" fill="#FF9500" opacity="0.6"/>
+  </g>
+  <g transform="translate(320,220)">
+    <polygon points="0,-22 7,-7 23,-7 10,3 15,19 0,10 -15,19 -10,3 -23,-7 -7,-7" fill="#FF9500" opacity="0.6"/>
+  </g>
+  <!-- sparkles -->
+  <circle cx="60" cy="80" r="3" fill="#0A84FF"/>
+  <circle cx="340" cy="80" r="4" fill="#0A84FF"/>
+  <circle cx="360" cy="180" r="3" fill="#0A84FF"/>
+  <circle cx="40" cy="180" r="4" fill="#0A84FF"/>
+</svg>

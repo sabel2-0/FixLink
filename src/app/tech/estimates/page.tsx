@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+﻿import { createClient } from "@/lib/supabase/server"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { EstimateComposer } from "@/components/tech/EstimateComposer"
 import { ChatButton } from "@/components/chat/ChatButton"
@@ -59,17 +59,23 @@ export default async function TechEstimates() {
         {openRequests.length === 0 ? (
           <EmptyState icon="inbox" title="No new requests" description="You'll see customer requests here." />
         ) : (
-          <div className="divide-y divide-line">
+          <div className="flex flex-col gap-3">
             {openRequests.map((b: any) => {
               const services = (b.booking_items || []).map((i: any) => i.service).join(" + ")
               const problems = (b.booking_items || []).flatMap((i: any) => i.problems || [])
               return (
-                <div key={b.id} className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div key={b.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">{services || "Service"}</p>
-                    <p className="text-xs text-muted mt-0.5">{b.customer?.full_name || "Customer"} · {b.barangay}</p>
-                    <p className="text-xs text-muted mt-0.5">{fmtDate(b.scheduled_date)}{b.scheduled_time ? " · " + fmtTime(b.scheduled_time) : ""}</p>
-                    {problems.length > 0 && <p className="text-xs text-muted mt-1 truncate">{problems.join(", ")}</p>}
+                    <p className="text-sm font-semibold text-white">{services || "Service"}</p>
+                    <p className="text-xs text-muted mt-1">{b.customer?.full_name || "Customer"} • {b.barangay}</p>
+                    <p className="text-xs text-muted mt-0.5">{fmtDate(b.scheduled_date)}{b.scheduled_time ? " • " + fmtTime(b.scheduled_time) : ""}</p>
+                    {problems.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {problems.map((p: string, i: number) => (
+                          <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-muted">{p}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <ChatButton
@@ -80,11 +86,11 @@ export default async function TechEstimates() {
                       variant="icon"
                     />
                     <EstimateComposer
-                    bookingId={b.id}
-                    service={services || "Service"}
-                    customer={b.customer?.full_name || "Customer"}
-                    barangay={b.barangay || "—"}
-                    problems={problems}
+                      bookingId={b.id}
+                      service={services || "Service"}
+                      customer={b.customer?.full_name || "Customer"}
+                      barangay={b.barangay || "—"}
+                      problems={problems}
                     />
                   </div>
                 </div>
@@ -99,20 +105,25 @@ export default async function TechEstimates() {
         {!posted || posted.length === 0 ? (
           <p className="text-sm text-muted">No estimates posted yet.</p>
         ) : (
-          <div className="divide-y divide-line">
+          <div className="flex flex-col gap-3">
             {posted.map((e: any) => {
               const services = (e.booking?.booking_items || []).map((i: any) => i.service).join(" + ")
+              const status = e.booking?.status || "unknown"
+              const statusColor = status === "completed" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : status === "cancelled" ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+              
               return (
-                <div key={e.id} className="py-4 flex items-start justify-between gap-3">
+                <div key={e.id} className="flex items-start justify-between gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">{services || "Service"}</p>
-                    <p className="text-xs text-muted mt-0.5">{e.booking?.customer?.full_name || "Customer"} · {e.booking?.barangay}</p>
-                    {e.note && <p className="text-xs text-muted mt-0.5 italic">"{e.note}"</p>}
-                    {e.eta_minutes != null && <p className="text-xs text-muted mt-0.5">~{e.eta_minutes} min ETA</p>}
+                    <p className="text-sm font-semibold text-white">{services || "Service"}</p>
+                    <p className="text-xs text-muted mt-1">{e.booking?.customer?.full_name || "Customer"} • {e.booking?.barangay}</p>
+                    {e.note && <p className="text-xs text-muted mt-1 italic">"{e.note}"</p>}
+                    {e.eta_minutes != null && <p className="text-xs text-muted mt-1">~{e.eta_minutes} min ETA</p>}
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-semibold">{peso(e.amount)}</p>
-                    <p className="text-xs text-muted mt-0.5">{e.booking?.status}</p>
+                  <div className="text-right shrink-0 flex flex-col items-end gap-1.5">
+                    <p className="text-base font-semibold text-white">{peso(e.amount)}</p>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-medium border ${statusColor}`}>
+                      {status}
+                    </span>
                   </div>
                 </div>
               )

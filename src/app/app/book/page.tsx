@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useMemo, useState } from "react"
 
@@ -26,6 +26,8 @@ type Tech = {
   jobs_completed: number | null
 
   home_barangay: string | null
+  home_city: string | null
+  home_province: string | null
 
   home_lat: number | null
 
@@ -57,7 +59,7 @@ function cityOf(barangay: string | null | undefined): string {
 
   if (b.includes("talisay") || b.includes("tabunok")) return "Talisay"
 
-  return "Cebu City"
+  return "Other areas"
 
 }
 
@@ -111,6 +113,20 @@ export default function BookPage() {
 
 
 
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  // Realtime: bump refreshKey when tech data changes â†’ re-runs the fetch effect
+  useEffect(() => {
+    const channel = supabase
+      .channel("realtime:book-page")
+      .on("postgres_changes", { event: "*", schema: "public", table: "technician_profiles" }, () => setRefreshKey((k) => k + 1))
+      .on("postgres_changes", { event: "*", schema: "public", table: "technician_services" }, () => setRefreshKey((k) => k + 1))
+      .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, () => setRefreshKey((k) => k + 1))
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [supabase])
+
   useEffect(() => { setBarangayFilter("All") }, [cityFilter])
 
 
@@ -129,7 +145,7 @@ export default function BookPage() {
 
         .from("technician_profiles")
 
-        .select("id, rating, jobs_completed, home_barangay, home_lat, home_lng, service_radius_km, cert_status, technician_services!technician_services_technician_id_fkey(service), profile:profiles!technician_profiles_id_fkey(full_name)")
+        .select("id, rating, jobs_completed, home_barangay, home_city, home_province, home_lat, home_lng, service_radius_km, cert_status, technician_services!technician_services_technician_id_fkey(service), profile:profiles!technician_profiles_id_fkey(full_name)")
 
       if (cancelled) return
 
@@ -151,7 +167,7 @@ export default function BookPage() {
 
     return () => { cancelled = true }
 
-  }, [step, services, supabase, toast])
+  }, [step, services, supabase, toast, refreshKey])
 
 
 
@@ -177,7 +193,8 @@ export default function BookPage() {
 
         const parts = [a.village || a.suburb || a.neighbourhood || a.hamlet, a.town || a.city || a.municipality, a.province || a.state].filter(Boolean)
 
-        setAddressLabel(parts.join(", ") || data.display_name || "")
+        const finalLabel = parts.join(", ") || data.display_name || ""
+        setAddressLabel(finalLabel)
 
       } catch (e) {
 
@@ -227,7 +244,7 @@ const withDist = useMemo(() => {
 
 
 
-  const cityTechs = useMemo(() => withDist.filter((x) => cityFilter === "All" || cityOf(x.t.home_barangay) === cityFilter), [withDist, cityFilter])
+  const cityTechs = useMemo(() => withDist.filter((x) => cityFilter === "All" || (x.t.home_city || cityOf(x.t.home_barangay)) === cityFilter), [withDist, cityFilter])
 
   const barangayTechs = useMemo(() => barangayFilter === "All" ? cityTechs : cityTechs.filter((x) => (x.t.home_barangay || "") === barangayFilter), [cityTechs, barangayFilter])
 
@@ -237,7 +254,7 @@ const withDist = useMemo(() => {
 
     const m: Record<string, number> = {}
 
-    for (const x of withDist) { const c = cityOf(x.t.home_barangay); m[c] = (m[c] || 0) + 1 }
+    for (const x of withDist) { const c = x.t.home_city || cityOf(x.t.home_barangay); m[c] = (m[c] || 0) + 1 }
 
     return m
 
@@ -327,9 +344,12 @@ const withDist = useMemo(() => {
 
     navigator.geolocation.getCurrentPosition(
 
-      (pos) => { setLat(pos.coords.latitude); setLng(pos.coords.longitude); setLocVerified(true); toast("Location verified") },
+      (pos) => {
+        const la = pos.coords.latitude, ln = pos.coords.longitude
+        setLat(la); setLng(ln); setLocVerified(true); toast("Location verified")
+},
 
-      () => { const b = BARANGAYS[0]; setLat(b.lat); setLng(b.lng); setLocVerified(true); toast("Using default Cebu location") },
+      () => { const b = BARANGAYS[0]; setLat(b.lat); setLng(b.lng); setLocVerified(true); toast("Using default location") },
 
       { enableHighAccuracy: true, timeout: 8000 }
 
@@ -373,7 +393,15 @@ const withDist = useMemo(() => {
 
       if (!user) throw new Error("Not signed in")
 
-      const bar = (lat != null && lng != null) ? nearestBarangay(lat, lng) : BARANGAYS[0]
+      // Prefer Nominatim's first token as the barangay (accurate); fall back to offline list
+      const nominatimBarangay = addressLabel && addressLabel.trim()
+        ? addressLabel.trim().split(",")[0].trim()
+        : ""
+      const bar = {
+        name: nominatimBarangay ||
+          ((lat != null && lng != null) ? nearestBarangay(lat, lng).name : BARANGAYS[0].name),
+      }
+      const cleanAddr = (addressLabel && addressLabel.trim()) ? addressLabel.trim() : bar.name
 
       const insRes = await supabase.from("bookings").insert({
 
@@ -383,7 +411,7 @@ const withDist = useMemo(() => {
 
         barangay: bar.name,
 
-        address: (landmark ? landmark + ", " : "") + bar.name + ", Cebu City",
+        address: (landmark ? landmark + " - " : "") + cleanAddr + ", Philippines",
 
         lat: lat, lng: lng,
 
@@ -396,7 +424,6 @@ const withDist = useMemo(() => {
       }).select("id").single()
 
       if (insRes.error) throw insRes.error
-
       const bookingId = insRes.data.id
 
 
@@ -621,7 +648,7 @@ const withDist = useMemo(() => {
 
                 <div className="rounded-xl overflow-hidden border border-line" style={{ height: 260 }}>
 
-                  <NearbyMap meLat={lat} meLng={lng} height="100%" techs={[]} />
+                  <NearbyMap meLat={lat} meLng={lng} height="100%" techs={[]} hideLegend />
 
                 </div>
 
@@ -713,7 +740,7 @@ const withDist = useMemo(() => {
 
                 </button>
 
-                {["Cebu City", "Mactan", "Mandaue", "Cordova", "Talisay"].map((city) => {
+                {Object.keys(cityCounts).sort().map((city) => {
 
                   const count = cityCounts[city] || 0
 
@@ -848,12 +875,27 @@ const withDist = useMemo(() => {
                               </span>
 
                               <span className="block text-xs text-muted mt-1">
-
-                                ★ {(t.rating || 0).toFixed(1)} · {t.jobs_completed || 0} jobs · {km.toFixed(1)} km
-
+                                {t.rating != null
+                                  ? `★ ${Number(t.rating).toFixed(1)} · ${t.jobs_completed || 0} completed ${(t.jobs_completed || 0) === 1 ? "job" : "jobs"}`
+                                  : `No reviews yet · ${t.jobs_completed || 0} completed ${(t.jobs_completed || 0) === 1 ? "job" : "jobs"}`}
+                                {" · "}{km.toFixed(1)} km
                               </span>
 
-                              <span className="block text-xs text-muted mt-0.5">{t.home_barangay}</span>
+                              <span className="block text-xs text-muted mt-0.5">
+                                {[t.home_province, t.home_city, t.home_barangay].filter(Boolean).join(" · ") || "—"}
+                              </span>
+
+                              {(() => {
+                                const svc = (t.technician_services || []).map((s: any) => s.service)
+                                if (svc.length === 0) return null
+                                const shown = svc.slice(0, 4).join(", ")
+                                const more = svc.length > 4 ? " +" + (svc.length - 4) : ""
+                                return (
+                                  <span className="block text-xs text-muted mt-1">
+                                    <span className="text-muted/70">Covers: </span>{shown}{more}
+                                  </span>
+                                )
+                              })()}
 
                             </span>
 
@@ -901,7 +943,7 @@ const withDist = useMemo(() => {
           >
             {step === 4 ? (
               <>
-                <span>{submitting ? "Sending…" : "Request estimates"}</span>
+                <span>{submitting ? "Sending..." : "Request estimates"}</span>
                 {!submitting && selectedTechIds.length > 0 && (
                   <span style={{
                     background: "rgba(255,255,255,.22)",
@@ -1013,7 +1055,7 @@ const withDist = useMemo(() => {
                 onClick={() => { if (activeBooking) { setShowConfirm(false); return } setShowConfirm(false); submit() }}
                 disabled={submitting}
               >
-                {submitting ? "Sending…" : "Send request"}
+                {submitting ? "Sending..." : "Send request"}
               </button>
             </div>
           </div>

@@ -441,3 +441,16 @@ html,body{background:var(--paper);color:var(--ink);}
 .seg a:hover{background:var(--surface-2);}
 .seg a.active{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600;}
 .seg a .seg-count{font-size:11px;opacity:.6;}
+
+
+/* Prevent horizontal page overflow WITHOUT breaking position: sticky.
+   `clip` doesn't create a scroll container like `hidden` does, so
+   headers with `sticky top-0` still stick to the viewport. */
+html {
+  overflow-x: clip;
+}
+@supports not (overflow-x: clip) {
+  html {
+    overflow-x: hidden;
+  }
+}

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -28,6 +28,8 @@ export function SelectEstimateButton({ bookingId, technicianId, technicianName }
         .eq("customer_id", user.id)
       if (e) throw e
 
+      // Trigger on bookings handles notifying the CHOSEN technician.
+      // Below: notify the OTHER invited technicians.
       const { data: invited } = await supabase
         .from("booking_requested_techs")
         .select("technician_id")
@@ -37,6 +39,7 @@ export function SelectEstimateButton({ bookingId, technicianId, technicianName }
         await supabase.from("notifications").insert(
           others.map((r: any) => ({
             recipient_id: r.technician_id,
+            kind: "booking",
             title: "Not selected this time",
             body: "The customer chose another technician for this job.",
             link: "/tech/estimates",
@@ -131,7 +134,7 @@ export function SelectEstimateButton({ bookingId, technicianId, technicianName }
                 disabled={busy}
                 className="btn-primary flex-1"
               >
-                {busy ? "Confirming…" : "Yes, select"}
+                {busy ? "Confirming..." : "Yes, select"}
               </button>
             </div>
           </div>

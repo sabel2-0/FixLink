@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useRef, useState } from "react"
 
@@ -8,26 +8,13 @@ type Props = {
   height?: number
 }
 
-const SATELLITE_STYLE = {
-  version: 8 as const,
-  sources: {
-    "esri-satellite": {
-      type: "raster" as const,
-      tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
-      tileSize: 256,
-      attribution: "Tiles &copy; Esri",
-    },
-    "esri-labels": {
-      type: "raster" as const,
-      tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"],
-      tileSize: 256,
-    },
-  },
-  layers: [
-    { id: "esri-satellite", type: "raster" as const, source: "esri-satellite" },
-    { id: "esri-labels", type: "raster" as const, source: "esri-labels" },
-  ],
-}
+const AWS_REGION = process.env.NEXT_PUBLIC_AWS_REGION || "ap-southeast-1"
+const AWS_KEY = process.env.NEXT_PUBLIC_AWS_MAP_KEY || ""
+const AWS_STYLE = "Standard"
+const AWS_COLOR = "Light"
+const STYLE_URL =
+  "https://maps.geo." + AWS_REGION + ".amazonaws.com/v2/styles/" + AWS_STYLE +
+  "/descriptor?key=" + encodeURIComponent(AWS_KEY) + "&color-scheme=" + AWS_COLOR
 
 declare global {
   interface Window { maplibregl?: any }
@@ -69,8 +56,11 @@ export function LocationMap({ lat, lng, height = 260 }: Props) {
   const mapRef = useRef<any>(null)
   const markerRef = useRef<any>(null)
   const [ready, setReady] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!AWS_KEY) { setError("Map key is missing."); return }
+
     let cancelled = false
     ;(async () => {
       try {
@@ -82,7 +72,7 @@ export function LocationMap({ lat, lng, height = 260 }: Props) {
         if (!mapRef.current) {
           mapRef.current = new maplibregl.Map({
             container: ref.current,
-            style: SATELLITE_STYLE as any,
+            style: STYLE_URL,
             center: start,
             zoom: 16,
             attributionControl: false,
@@ -91,16 +81,17 @@ export function LocationMap({ lat, lng, height = 260 }: Props) {
           mapRef.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right")
 
           const el = document.createElement("div")
-          el.style.cssText = "width:26px;height:26px;border-radius:50%;background:#007AFF;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.5);pointer-events:none;"
+          el.style.cssText = "width:26px;height:26px;border-radius:50%;background:#0A84FF;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.5);pointer-events:none;"
           markerRef.current = new maplibregl.Marker({ element: el, draggable: false })
             .setLngLat(start)
             .addTo(mapRef.current)
 
-          // Lock panning to a reasonable radius so user can't wander to another city
           mapRef.current.setMaxBounds([
             [start[0] - 0.05, start[1] - 0.05],
             [start[0] + 0.05, start[1] + 0.05],
           ])
+
+          mapRef.current.on("load", () => setReady(true))
         } else {
           mapRef.current.setCenter(start)
           markerRef.current?.setLngLat(start)
@@ -109,9 +100,9 @@ export function LocationMap({ lat, lng, height = 260 }: Props) {
             [start[0] + 0.05, start[1] + 0.05],
           ])
         }
-        setReady(true)
       } catch (err) {
         console.error("Failed to load maplibre:", err)
+        if (!cancelled) setError("Couldn't load map.")
       }
     })()
     return () => { cancelled = true }
@@ -119,19 +110,21 @@ export function LocationMap({ lat, lng, height = 260 }: Props) {
 
   useEffect(() => {
     return () => {
-      if (mapRef.current) {
-        mapRef.current.remove()
-        mapRef.current = null
-      }
+      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null }
     }
   }, [])
 
   return (
     <div style={{ position: "relative" }}>
       <div ref={ref} style={{ height, width: "100%", borderRadius: 12, overflow: "hidden" }} />
-      {!ready && (
+      {!ready && !error && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", fontSize: 13 }}>
-          Loading satellite…
+          Loading map...
+        </div>
+      )}
+      {error && (
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--danger)", fontSize: 13 }}>
+          {error}
         </div>
       )}
     </div>

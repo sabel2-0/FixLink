@@ -1,13 +1,14 @@
-import { createClient } from "@/lib/supabase/server"
+﻿import { createClient } from "@/lib/supabase/server"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ChatButton } from "@/components/chat/ChatButton"
+import { RealtimeRefresh } from "@/components/RealtimeRefresh"
+import { MarkMessagesRead } from "@/components/chat/MarkMessagesRead"
 
 export default async function CustomerMessages() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  // My bookings (active or recent)
   const { data: bookings } = await supabase
     .from("bookings")
     .select("id, status, scheduled_date, scheduled_time, barangay, technician_id, created_at, booking_items(service)")
@@ -17,7 +18,6 @@ export default async function CustomerMessages() {
   const list = bookings || []
   const bookingIds = list.map((b: any) => b.id)
 
-  // Invited techs per booking
   const { data: invitedRows } = bookingIds.length
     ? await supabase
         .from("booking_requested_techs")
@@ -31,7 +31,6 @@ export default async function CustomerMessages() {
     invitedByBooking[r.booking_id].push(r.technician_id)
   }
 
-  // Collect all tech IDs to fetch names
   const techIds = new Set<string>()
   for (const b of list) {
     if (b.technician_id) techIds.add(b.technician_id)
@@ -46,17 +45,15 @@ export default async function CustomerMessages() {
   const nameOf = (id: string) =>
     (techs || []).find((p: any) => p.id === id)?.full_name || "Technician"
 
-  // Last message per (booking, tech) pair
   const { data: allMessages } = bookingIds.length
     ? await supabase
         .from("messages")
-        .select("booking_id, sender_id, recipient_id, body, created_at")
+        .select("booking_id, sender_id, recipient_id, body, created_at, read_at")
         .in("booking_id", bookingIds)
         .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
         .order("created_at", { ascending: false })
     : { data: [] as any[] }
 
-  // Group by (booking_id + partner_id)
   type Thread = {
     key: string
     bookingId: string
@@ -94,6 +91,8 @@ export default async function CustomerMessages() {
     }
   }
 
+  const unreadByThread: Record<string, number> = {}
+
   for (const m of allMessages || []) {
     const partnerId = m.sender_id === user.id ? m.recipient_id : m.sender_id
     const key = m.booking_id + ":" + partnerId
@@ -102,6 +101,9 @@ export default async function CustomerMessages() {
       threads[key].lastBody = m.body
       threads[key].lastAt = m.created_at
       threads[key].lastFromMe = m.sender_id === user.id
+    }
+    if (m.recipient_id === user.id && !m.read_at) {
+      unreadByThread[key] = (unreadByThread[key] || 0) + 1
     }
   }
 
@@ -114,6 +116,8 @@ export default async function CustomerMessages() {
 
   return (
     <div className="max-w-3xl">
+      <RealtimeRefresh tables={["messages"]} />
+      <MarkMessagesRead />
       <h1 className="text-3xl font-semibold mb-2 tracking-tight">Messages</h1>
       <p className="text-muted mb-6">Chat with the technicians you invited.</p>
 
@@ -124,35 +128,43 @@ export default async function CustomerMessages() {
       ) : (
         <div className="card overflow-hidden">
           <div className="divide-y divide-line">
-            {sorted.map((t) => (
-              <div key={t.key} className="p-4 flex items-center gap-3 hover:bg-surface-2 transition">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold shrink-0" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
-                  {t.partnerName.slice(0, 1).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium truncate">{t.partnerName}</p>
-                    {t.lastAt && (
-                      <p className="text-[11px] text-muted shrink-0">
-                        {new Date(t.lastAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </p>
-                    )}
+            {sorted.map((t) => {
+              const unread = unreadByThread[t.key] || 0
+              return (
+                <div
+                  key={t.key}
+                  className="p-4 flex items-center gap-3 hover:bg-surface-2 transition"
+                  style={unread > 0 ? { background: "color-mix(in srgb, var(--accent) 6%, transparent)" } : undefined}
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold shrink-0" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+                    {t.partnerName.slice(0, 1).toUpperCase()}
                   </div>
-                  <p className="text-xs text-muted mt-0.5 truncate">{t.service}{t.barangay ? " · " + t.barangay : ""}</p>
-                  <p className="text-xs mt-1 truncate" style={{ color: t.lastAt ? "var(--ink)" : "var(--muted)" }}>
-                    {t.lastFromMe && <span className="text-muted">You: </span>}
-                    {t.lastBody}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={"text-sm truncate " + (unread > 0 ? "font-semibold text-ink" : "font-medium")}>{t.partnerName}</p>
+                      {t.lastAt && (
+                        <p className="text-[11px] text-muted shrink-0">
+                          {new Date(t.lastAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted mt-0.5 truncate">{t.service}{t.barangay ? " - " + t.barangay : ""}</p>
+                    <p className="text-xs mt-1 truncate" style={{ color: t.lastAt ? "var(--ink)" : "var(--muted)", fontWeight: unread > 0 ? 600 : 400 }}>
+                      {t.lastFromMe && <span className="text-muted">You: </span>}
+                      {t.lastBody}
+                    </p>
+                  </div>
+
+                  <ChatButton
+                    bookingId={t.bookingId}
+                    partnerId={t.partnerId}
+                    partnerName={t.partnerName}
+                    partnerRole={t.service + (t.barangay ? " - " + t.barangay : "")}
+                    variant="icon"
+                  />
                 </div>
-                <ChatButton
-                  bookingId={t.bookingId}
-                  partnerId={t.partnerId}
-                  partnerName={t.partnerName}
-                  partnerRole={t.service + (t.barangay ? " · " + t.barangay : "")}
-                  variant="icon"
-                />
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
