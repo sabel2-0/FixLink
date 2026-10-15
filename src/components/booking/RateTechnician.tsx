@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -164,16 +164,40 @@ export function RateTechnician({
 
         const { data: booking, error: bErr } = await supabase
           .from("bookings")
-          .select("technician_id, customer_id")
+          .select("technician_id, customer_id, booking_items(service)")
           .eq("id", bookingId)
           .single()
         if (bErr) throw bErr
         if (!booking?.technician_id) throw new Error("Booking has no technician")
 
+        // Snapshot the reviewer's display name at submit time so it stays
+        // stable even if they later change their profile.
+        const { data: me } = await supabase
+          .from("profiles")
+          .select("first_name, last_name, full_name")
+          .eq("id", user.id)
+          .maybeSingle()
+
+        let customerName = "Verified customer"
+        if (me?.first_name) {
+          customerName = me.last_name
+            ? me.first_name + " " + me.last_name.charAt(0).toUpperCase() + "."
+            : me.first_name
+        } else if (me?.full_name) {
+          customerName = me.full_name.split(" ")[0]
+        }
+
+        const svcList = (booking.booking_items || [])
+          .map((it: any) => it.service)
+          .filter(Boolean)
+        const serviceLabel = svcList.length ? svcList.join(" + ") : null
+
         const { error: insErr } = await supabase.from("reviews").insert({
           booking_id: bookingId,
           customer_id: user.id,
           technician_id: booking.technician_id,
+          customer_name: customerName,
+          service_label: serviceLabel,
           ...payload,
         })
         if (insErr) throw insErr
@@ -290,7 +314,7 @@ export function RateTechnician({
                 disabled={busy || overall < 1}
                 className="btn-primary flex-1 !py-2.5 !text-[15px] whitespace-nowrap disabled:opacity-50"
               >
-                {busy ? "Saving…" : isEdit ? "Update review" : "Submit review"}
+                {busy ? "Saving..." : isEdit ? "Update review" : "Submit review"}
               </button>
             </div>
           </div>

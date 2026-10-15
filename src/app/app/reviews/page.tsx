@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { Stars } from "@/components/ui/Stars"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { RealtimeRefresh } from "@/components/RealtimeRefresh"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 export default async function ReviewsPage() {
   const supabase = await createClient()
@@ -52,7 +53,7 @@ export default async function ReviewsPage() {
     <div className="max-w-4xl">
       <RealtimeRefresh tables={["reviews", "technician_profiles"]} />
       <h1 className="text-3xl font-semibold mb-2 tracking-tight">Ratings</h1>
-      <p className="text-muted mb-8">What other customers say about technicians on FixLink.</p>
+      <p className="text-muted mb-8">What other customers say about technicians on <SiteName />.</p>
 
       {/* Summary */}
       <div className="card p-6 mb-6">

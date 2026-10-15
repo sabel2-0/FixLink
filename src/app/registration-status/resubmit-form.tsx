@@ -296,7 +296,7 @@ export function ResubmitForm({
               }
               searchPlaceholder="Search cities…"
               disabled={!regionCode || (provinces.length > 0 && !provinceCode)}
-              loading={regionCode && (provinces.length === 0 || provinceCode) && cities.length === 0}
+              loading={!!(regionCode && (provinces.length === 0 || provinceCode) && cities.length === 0)}
             />
           </Field>
 
@@ -308,7 +308,7 @@ export function ResubmitForm({
               placeholder={cityCode ? "Select your barangay…" : "Pick a city first"}
               searchPlaceholder="Search barangays…"
               disabled={!cityCode}
-              loading={cityCode && barangays.length === 0}
+              loading={!!(cityCode && barangays.length === 0)}
             />
           </Field>
 

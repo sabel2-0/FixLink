@@ -9,6 +9,7 @@ import { CompleteJobButton } from "@/components/tech/CompleteJobButton"
 import { ConfirmPaymentReceived } from "@/components/booking/ConfirmPaymentReceived"
 import { BookingRealtimeRefresh } from "@/components/booking/BookingRealtimeRefresh"
 import { ViewLocationButton } from "@/components/booking/ViewLocationButton"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 function fmtDate(d: string | null | undefined): string {
   if (!d) return "—"
@@ -183,6 +184,16 @@ export default async function TechSchedule() {
                         <div className="flex justify-between text-sm font-semibold pt-2 mt-2 border-t border-line">
                           <span>Total</span>
                           <span className="text-ink">₱{Number(q.total).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-xs pt-1.5">
+                          <span className="text-muted"><SiteName /> fee (10%)</span>
+                          <span style={{ color: "var(--danger)" }}>−₱{Math.round(Number(q.total) * 0.10).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted">You receive</span>
+                          <span style={{ color: "var(--success)" }} className="font-semibold">
+                            ₱{(Number(q.total) - Math.round(Number(q.total) * 0.10)).toLocaleString()}
+                          </span>
                         </div>
                         {q.note && <p className="text-xs text-muted mt-2 italic">"{q.note}"</p>}
                       </div>

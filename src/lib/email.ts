@@ -1,3 +1,5 @@
+import { getSiteName } from "./email-templates"
+
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 
 type SendOpts = {
@@ -10,7 +12,7 @@ type SendOpts = {
 export async function sendEmail({ to, toName, subject, html }: SendOpts) {
   const key = process.env.BREVO_API_KEY
   const sender = process.env.BREVO_SENDER_EMAIL
-  const senderName = process.env.BREVO_SENDER_NAME || "FixLink"
+  const senderName = process.env.BREVO_SENDER_NAME || (await getSiteName())
 
   if (!key || !sender) {
     console.warn("[email] Brevo env vars missing — skipping send")

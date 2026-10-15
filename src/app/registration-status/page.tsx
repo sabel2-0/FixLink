@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { ResubmitForm } from "./resubmit-form"
 import { CustomerResubmitForm } from "./customer-resubmit-form"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 export default async function RegistrationStatusPage() {
   const supabase = await createClient()
@@ -28,8 +29,7 @@ export default async function RegistrationStatusPage() {
     return (
       <div className="min-h-screen bg-paper py-8 px-4">
         <div className="max-w-lg mx-auto">
-          <Link href="/" className="display text-lg font-semibold block text-center mb-8 text-ink tracking-tight">
-            FixLink
+          <Link href="/" className="display text-lg font-semibold block text-center mb-8 text-ink tracking-tight"><SiteName />
           </Link>
 
           {status === "pending" && (
@@ -91,8 +91,7 @@ export default async function RegistrationStatusPage() {
   return (
     <div className="min-h-screen bg-paper py-8 px-4">
       <div className="max-w-lg mx-auto">
-        <Link href="/" className="display text-lg font-semibold block text-center mb-8 text-ink tracking-tight">
-          FixLink
+        <Link href="/" className="display text-lg font-semibold block text-center mb-8 text-ink tracking-tight"><SiteName />
         </Link>
 
         {status === "pending" && (

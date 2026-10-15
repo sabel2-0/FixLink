@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 type FAQ = { q: string; a: React.ReactNode; cat: "customer" | "technician" | "account" }
 
@@ -31,7 +32,7 @@ const FAQS: FAQ[] = [
     q: "How do I pay?",
     a: (<>
       You pay the technician <strong>directly</strong> in cash or GCash at the end of
-      the job. FixLink never handles your money. The platform only charges the technician
+      the job. <SiteName /> never handles your money. The platform only charges the technician
       a 10% commission on the final approved price.
     </>),
   },
@@ -56,7 +57,7 @@ const FAQS: FAQ[] = [
     cat: "technician",
     q: "What if my application is rejected?",
     a: (<>
-      You&apos;ll receive an email explaining the reason. Log in to FixLink — you&apos;ll
+      You&apos;ll receive an email explaining the reason. Log in to <SiteName /> — you&apos;ll
       be taken to a status page where you can <strong>resubmit clearer documents</strong>.
       There is no limit on resubmissions.
     </>),
@@ -66,7 +67,7 @@ const FAQS: FAQ[] = [
     q: "How and when do I pay the 10% commission?",
     a: (<>
       After you receive payment from the customer, remit 10% of the final approved price
-      to FixLink. You can view what you owe on <strong>Commissions</strong> in your
+      to <SiteName />. You can view what you owe on <strong>Commissions</strong> in your
       dashboard. Failure to remit may result in account suspension.
     </>),
   },
@@ -85,14 +86,14 @@ const FAQS: FAQ[] = [
     a: (<>
       Check your spam folder first. If still nothing, wait 10 minutes — email providers
       rate-limit new senders. If you never get it, email
-      <a href="mailto:fixlink.ph@gmail.com" className="text-accent hover:underline"> fixlink.ph@gmail.com</a>.
+      <a href="mailto:support@gmail.com" className="text-accent hover:underline">support@gmail.com</a>.
     </>),
   },
   {
     cat: "account",
     q: "How do I delete my account?",
     a: (<>
-      Email <a href="mailto:fixlink.ph@gmail.com" className="text-accent hover:underline">fixlink.ph@gmail.com</a> with
+      Email <a href="mailto:support@gmail.com" className="text-accent hover:underline">support@gmail.com</a> with
       the subject &ldquo;Delete my account&rdquo;. We&apos;ll remove your profile,
       verification documents, and booking history within 30 days.
     </>),
@@ -103,7 +104,7 @@ const FAQS: FAQ[] = [
     a: (<>
       On the login page, click <strong>Forgot?</strong> and follow the reset link sent
       to your email. If you don&apos;t receive it, contact
-      <a href="mailto:fixlink.ph@gmail.com" className="text-accent hover:underline"> fixlink.ph@gmail.com</a>.
+      <a href="mailto:support@gmail.com" className="text-accent hover:underline">support@gmail.com</a>.
     </>),
   },
 ]
@@ -125,7 +126,7 @@ export default function HelpPage() {
     <main className="min-h-dvh bg-paper">
       <header className="border-b border-line">
         <div className="max-w-3xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
-          <Link href="/" className="display text-lg font-semibold text-ink tracking-tight">FixLink</Link>
+          <Link href="/" className="display text-lg font-semibold text-ink tracking-tight"><SiteName /></Link>
           <Link href="/" className="text-sm text-accent font-medium hover:underline">Back to home</Link>
         </div>
       </header>
@@ -134,7 +135,7 @@ export default function HelpPage() {
         <h1 className="text-3xl sm:text-4xl font-semibold text-ink tracking-tight mb-3">Help center</h1>
         <p className="text-sm text-muted mb-8">
           Answers to the most common questions. Can&apos;t find what you need? Email{" "}
-          <a href="mailto:fixlink.ph@gmail.com" className="text-accent hover:underline">fixlink.ph@gmail.com</a>.
+          <a href="mailto:support@gmail.com" className="text-accent hover:underline">support@gmail.com</a>.
         </p>
 
         <div className="flex flex-wrap gap-2 mb-8">
@@ -182,7 +183,7 @@ export default function HelpPage() {
         <div className="card p-6 mt-10">
           <h2 className="text-base font-semibold text-ink tracking-tight mb-1">Still need help?</h2>
           <p className="text-sm text-muted mb-4">We respond within 1 business day.</p>
-          <a href="mailto:fixlink.ph@gmail.com" className="btn-primary inline-flex">Email support</a>
+          <a href="mailto:support@gmail.com" className="btn-primary inline-flex">Email support</a>
         </div>
 
         <div className="mt-12 pt-8 border-t border-line flex flex-wrap gap-4 text-sm">

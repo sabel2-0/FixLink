@@ -4,6 +4,7 @@ import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { Icon } from "@/lib/icons"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 export function ConfirmJobButton({ bookingId, finalAmount, technicianName }: { bookingId: string; finalAmount: number; technicianName: string }) {
   const supabase = createClient()
@@ -56,7 +57,7 @@ export function ConfirmJobButton({ bookingId, finalAmount, technicianName }: { b
                 <span className="font-semibold">₱{finalAmount.toLocaleString()}</span>
               </div>
               <p className="text-xs text-muted leading-relaxed">
-                After confirming, you can record the payment method so FixLink and the technician both have it on record.
+                After confirming, you can record the payment method so <SiteName /> and the technician both have it on record.
               </p>
               {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
             </div>

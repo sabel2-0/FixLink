@@ -1,5 +1,6 @@
-import { peso } from "@/lib/format"
+﻿import { peso } from "@/lib/format"
 import { Icon } from "@/lib/icons"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 type Props = {
   finalAmount: number
@@ -85,7 +86,7 @@ export function PaymentReceipt({
           <span className="font-semibold">{peso(finalAmount)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-muted text-sm">FixLink commission (10%)</span>
+          <span className="text-muted text-sm"><SiteName /> commission (10%)</span>
           <span>{peso(commission)}</span>
         </div>
         <div className="flex justify-between pt-2.5 border-t border-line">

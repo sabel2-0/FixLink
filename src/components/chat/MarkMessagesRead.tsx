@@ -19,7 +19,7 @@ export function MarkMessagesRead() {
         .update({ read_at: now })
         .eq("recipient_id", user.id)
         .is("read_at", null)
-        .select("id", { count: "exact" })
+        .select("id")
       if (error) {
         console.error("[MarkMessagesRead]", error)
         return

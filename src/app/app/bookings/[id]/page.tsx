@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/Badge"
 import { Icon } from "@/lib/icons"
@@ -37,7 +37,7 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
 
   const { data: b } = await supabase
     .from("bookings")
-    .select("id, status, scheduled_date, scheduled_time, barangay, address, final_amount, technician_id, cancelled_at, cancelled_by, cancel_reason, payment_method, payment_reference, paid_at, payment_recorded_by, payment_confirmed_at, payment_confirmed_by, technician:technician_profiles!bookings_technician_id_fkey(id, rating, profile:profiles!technician_profiles_id_fkey(full_name)), booking_items(id, service, problems, notes), estimates(id, technician_id, amount, eta_minutes, note, created_at, technician:technician_profiles!estimates_technician_id_fkey(profile:profiles!technician_profiles_id_fkey(full_name))), quotes(id, total, commission, status, note, quote_items(label, amount))")
+    .select("id, status, scheduled_date, scheduled_time, barangay, address, final_amount, technician_id, cancelled_at, cancelled_by, cancel_reason, payment_method, payment_reference, paid_at, payment_recorded_by, payment_confirmed_at, payment_confirmed_by, technician:technician_profiles!bookings_technician_id_fkey(id, rating, gcash_number, maya_number, preferred_payment, profile:profiles!technician_profiles_id_fkey(full_name)), booking_items(id, service, problems, notes), estimates(id, technician_id, amount, eta_minutes, note, created_at, technician:technician_profiles!estimates_technician_id_fkey(profile:profiles!technician_profiles_id_fkey(full_name))), quotes(id, total, commission, status, note, quote_items(label, amount))")
     .eq("id", id)
     .single()
 
@@ -202,7 +202,7 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
               ) : isPendingEstimate && invitedTechs.length > 0 ? (
                 <div className="px-3 py-3 rounded-lg bg-surface-2 flex items-center gap-3">
                   <div style={{ width: 16, height: 16, border: "2px solid var(--accent)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-                  <p className="text-sm text-muted">Waiting for {invitedTechs.length} technician{invitedTechs.length === 1 ? "" : "s"} to send their estimate…</p>
+                  <p className="text-sm text-muted">Waiting for {invitedTechs.length} technician{invitedTechs.length === 1 ? "" : "s"} to send their estimate...</p>
                 </div>
               ) : (
                 <p className="text-sm text-muted">No estimates were received.</p>
@@ -314,6 +314,10 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
                     bookingId={booking.id}
                     finalAmount={Number(booking.final_amount || 0)}
                     myRole="customer"
+                    techName={tech || "Technician"}
+                    techGcashNumber={booking.technician?.gcash_number || null}
+                    techMayaNumber={booking.technician?.maya_number || null}
+                    techPreferredPayment={booking.technician?.preferred_payment || null}
                   />
                 </div>
               )}

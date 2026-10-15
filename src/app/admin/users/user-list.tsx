@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useSiteName } from "@/components/shared/SiteNameProvider"
 import { BlueCheck } from "@/components/admin/blue-check"
 import { UserDocsButton } from "./user-docs-button"
 import { UserActions } from "./user-actions"
@@ -9,6 +10,7 @@ type RoleFilter = "all" | "customer" | "technician" | "admin"
 type StatusFilter = "all" | "active" | "suspended"
 
 export function UserList({ users, deleted = [] }: { users: any[]; deleted?: any[] }) {
+  const siteName = useSiteName()
   const [role, setRole] = useState<RoleFilter>("all")
   const [status, setStatus] = useState<StatusFilter>("all")
   const [search, setSearch] = useState("")
@@ -75,7 +77,7 @@ export function UserList({ users, deleted = [] }: { users: any[]; deleted?: any[
       <input
         value={search}
         onChange={e => setSearch(e.target.value)}
-        placeholder="Search name or email…"
+        placeholder="Search name or email..."
         className="input w-full mb-4"
       />
 
@@ -186,6 +188,7 @@ function DeletedAccounts({ rows }: { rows: any[] }) {
 }
 
 function UserCard({ u }: { u: any }) {
+  const siteName = useSiteName()
   const isTech = u.role === "technician"
   const t = u.tech
   const isVerified = isTech ? t?.cert_status === "verified" : u.verification_status === "verified"
@@ -205,6 +208,26 @@ function UserCard({ u }: { u: any }) {
             {isVerified && <BlueCheck />}
             <RoleBadge role={u.role} />
             {isTech && t?.cert_status && <StatusPill status={t.cert_status} />}
+            {isTech && (() => {
+              const bal = Number(t?.credits_balance ?? 0)
+              const thr = Number(t?.min_credits_threshold ?? 100)
+              const isNeg = bal < 0
+              const isLow = !isNeg && bal < thr
+              const tone = isNeg
+                ? { bg: "color-mix(in srgb, var(--danger) 15%, transparent)", color: "var(--danger)" }
+                : isLow
+                ? { bg: "color-mix(in srgb, var(--warn) 18%, transparent)",  color: "var(--warn)" }
+                : { bg: "color-mix(in srgb, var(--success) 15%, transparent)", color: "var(--success)" }
+              return (
+                <span
+                  className="text-[10px] px-2 py-0.5 rounded-full font-semibold tracking-wide"
+                  style={{ background: tone.bg, color: tone.color }}
+                  title={`${siteName} wallet · min ₱${thr}`}
+                >
+                  ₱{bal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                </span>
+              )
+            })()}
             {!isTech && u.role === "customer" && u.verification_status && u.verification_status !== "unverified" && (
               <StatusPill status={u.verification_status} />
             )}

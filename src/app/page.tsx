@@ -1,57 +1,11 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, type ReactNode } from "react"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/ThemeToggle"
-
-type Service = {
-  name: string
-  /** inner SVG content for a 24×24 viewBox */
-  icon: string
-}
-
-const SERVICES: Service[] = [
-  {
-    name: "Aircon",
-    icon: '<rect x="2" y="5" width="20" height="8" rx="2"/><line x1="5" y1="9.5" x2="19" y2="9.5"/><line x1="6" y1="17" x2="5" y2="19"/><line x1="10" y1="17" x2="9" y2="20"/><line x1="14" y1="17" x2="13" y2="20"/><line x1="18" y1="17" x2="17" y2="19"/>',
-  },
-  {
-    name: "Refrigerator",
-    icon: '<rect x="6" y="2" width="12" height="20" rx="2"/><line x1="6" y1="10" x2="18" y2="10"/><line x1="9" y1="5.5" x2="9" y2="7.5"/><line x1="9" y1="13" x2="9" y2="15"/>',
-  },
-  {
-    name: "Washing machine",
-    icon: '<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="7" x2="20" y2="7"/><circle cx="7" cy="4.5" r="0.6" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="4.5"/><path d="M8.5 14.5c1-1.5 2-1.5 3.5 0s2.5 1.5 3.5 0"/>',
-  },
-  {
-    name: "TV",
-    icon: '<rect x="2" y="4" width="20" height="13" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
-  },
-  {
-    name: "Water heater",
-    icon: '<rect x="6" y="2" width="12" height="20" rx="4"/><circle cx="12" cy="12" r="2.5"/><line x1="10" y1="4" x2="14" y2="4"/>',
-  },
-  {
-    name: "Microwave",
-    icon: '<rect x="2" y="5" width="20" height="14" rx="2"/><rect x="5" y="8" width="11" height="8" rx="1"/><circle cx="19" cy="9" r="0.8" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="0.8" fill="currentColor" stroke="none"/><circle cx="19" cy="15" r="0.8" fill="currentColor" stroke="none"/>',
-  },
-  {
-    name: "Electric fan",
-    icon: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M12 10.5c0-2 1-3.5 3-3.5s2 2.5 0 3.5-3 0-3 0z"/><path d="M13.5 12c2 0 3.5 1 3.5 3s-2.5 2-3.5 0 0-3 0-3z"/><path d="M10.5 12c-2 0-3.5-1-3.5-3s2.5-2 3.5 0 0 3 0 3z"/><path d="M12 13.5c0 2-1 3.5-3 3.5s-2-2.5 0-3.5 3 0 3 0z"/>',
-  },
-  {
-    name: "Rice cooker",
-    icon: '<path d="M5 8h14l-1.5 12a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1z"/><path d="M8 8V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V8"/><line x1="9" y1="12" x2="9" y2="16"/>',
-  },
-  {
-    name: "Electric kettle",
-    icon: '<path d="M5 9h14l-1 11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/><path d="M3 12h2"/><path d="M19 12h2"/>',
-  },
-  {
-    name: "Induction stove",
-    icon: '<rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><circle cx="16" cy="12" r="2.5"/><line x1="4" y1="18" x2="20" y2="18"/>',
-  },
-]
+import { SERVICES } from "@/lib/booking/constants"
+import { ApplianceIcon } from "@/lib/icons"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 const PROBLEMS = [
   {
@@ -244,8 +198,7 @@ export default function Home() {
       {/* HEADER */}
       <header className="sticky top-0 z-40 landing-nav">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
-          <Link href="/" className="display text-lg font-semibold text-ink tracking-tight">
-            FixLink
+          <Link href="/" className="display text-lg font-semibold text-ink tracking-tight"><SiteName />
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted">
             <a href="#problem" className="hover:text-ink transition">Problem</a>
@@ -312,44 +265,39 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SERVICES */}
+      {/* WHAT WE FIX */}
       <section className="border-b border-line">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20">
           <p className="eyebrow mb-6 reveal">What we fix</p>
 
-          <h2 className="display text-3xl sm:text-4xl tracking-tighter max-w-3xl mb-14 reveal delay-1">
-            Every appliance in your home.
+          <h2 className="display text-3xl sm:text-4xl tracking-tighter max-w-3xl mb-4 reveal delay-1">
+            Appliances and devices, at home.
           </h2>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-            {SERVICES.map((s, i) => (
-              <div
-                key={s.name}
-                className={"card p-5 flex flex-col items-center text-center hover-lift reveal delay-" + (i % 4)}
-              >
-                <span
-                  className="flex items-center justify-center rounded-2xl mb-3"
-                  style={{
-                    width: 52,
-                    height: 52,
-                    background: "color-mix(in srgb, var(--accent) 10%, transparent)",
-                    color: "var(--accent)",
-                  }}
-                  aria-hidden
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="26"
-                    height="26"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    dangerouslySetInnerHTML={{ __html: s.icon }}
-                  />
+          <p className="text-muted max-w-2xl mb-14 reveal delay-2">
+            From aircon cleaning to laptop screen replacement — one platform, verified technicians, written quotes.
+          </p>
+
+          <p className="text-[11px] uppercase tracking-wider text-muted font-medium mb-5 reveal">Appliances</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-14">
+            {SERVICES.filter((s) => s.category === "appliance").map((s, i) => (
+              <div key={s.id} className={"card p-5 flex flex-col items-center text-center hover-lift reveal delay-" + (i % 4)}>
+                <span className="flex items-center justify-center rounded-2xl mb-3" style={{ width: 52, height: 52, background: "color-mix(in srgb, var(--accent) 10%, transparent)", color: "var(--accent)" }}>
+                  <ApplianceIcon id={s.id} className="w-6 h-6" />
                 </span>
-                <p className="text-sm font-medium text-ink leading-snug">{s.name}</p>
+                <p className="text-sm font-medium text-ink leading-snug">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-[11px] uppercase tracking-wider text-muted font-medium mb-5 reveal">Devices</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {SERVICES.filter((s) => s.category === "device").map((s, i) => (
+              <div key={s.id} className={"card p-5 flex flex-col items-center text-center hover-lift reveal delay-" + (i % 4)}>
+                <span className="flex items-center justify-center rounded-2xl mb-3" style={{ width: 52, height: 52, background: "color-mix(in srgb, var(--accent) 10%, transparent)", color: "var(--accent)" }}>
+                  <ApplianceIcon id={s.id} className="w-6 h-6" />
+                </span>
+                <p className="text-sm font-medium text-ink leading-snug">{s.label}</p>
               </div>
             ))}
           </div>
@@ -427,7 +375,7 @@ export default function Home() {
             </h2>
             <p className="text-muted max-w-md text-sm leading-relaxed reveal delay-2">
               No monthly fees. No upfront cost. You only pay when you get paid. The
-              customer pays you directly, and you remit the 10% to FixLink after each
+              customer pays you directly, and you remit the 10% to <SiteName /> after each
               completed job.
             </p>
           </div>
@@ -441,7 +389,7 @@ export default function Home() {
             <PriceCard
               eyebrow="Commission"
               big="10% per job"
-              body="Charged only on completed jobs, on the final approved price. If you don't get paid, FixLink doesn't either."
+              body={<>Charged only on completed jobs, on the final approved price. If you don't get paid, <SiteName /> doesn't either.</>}
             />
           </div>
 
@@ -454,7 +402,7 @@ export default function Home() {
                 <span className="text-ink font-medium">₱1,000</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted">FixLink commission (10%)</span>
+                <span className="text-muted"><SiteName /> commission (10%)</span>
                 <span className="text-ink">₱100</span>
               </div>
               <div className="flex justify-between pt-4 border-t border-line">
@@ -485,7 +433,7 @@ export default function Home() {
       {/* FOOTER */}
       <footer className="text-sm text-muted">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10 flex flex-col sm:flex-row justify-between gap-4 border-t border-line">
-          <p>FixLink — 2026</p>
+          <p><SiteName /> — 2026</p>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link href="/about" className="hover:text-ink transition">About</Link>
             <Link href="/help" className="hover:text-ink transition">Help</Link>
@@ -507,7 +455,7 @@ function PriceCard({
 }: {
   eyebrow: string
   big: string
-  body: string
+  body: ReactNode
 }) {
   return (
     <div className="card p-6 hover-lift reveal">

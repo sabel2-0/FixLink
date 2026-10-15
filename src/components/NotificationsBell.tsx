@@ -42,40 +42,47 @@ export function NotificationsBell() {
 
   useEffect(() => {
     let cancelled = false
+    let cachedUserId: string | null = null
+    let inFlight = false
 
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user || cancelled) return
-      setUserId(user.id)
-
-      const { data } = await supabase
-        .from("notifications")
-        .select("id, kind, title, body, link, read, created_at", { head: false })
-        .eq("recipient_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20)
-
-      if (!cancelled) setItems(data || [])
+    // Query uses the cached userId — no auth call, no lock contention.
+    async function fetchNotifications() {
+      if (!cachedUserId || cancelled || inFlight) return
+      inFlight = true
+      try {
+        const { data } = await supabase
+          .from("notifications")
+          .select("id, kind, title, body, link, read, created_at", { head: false })
+          .eq("recipient_id", cachedUserId)
+          .order("created_at", { ascending: false })
+          .limit(20)
+        if (!cancelled) setItems(data || [])
+      } finally {
+        inFlight = false
+      }
     }
 
-    load()
+    // One-time auth check. getUser() acquires the shared auth lock, so we do
+    // it exactly once on mount instead of on every poll.
+    ;(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || cancelled) return
+      cachedUserId = user.id
+      setUserId(user.id)
+      await fetchNotifications()
+    })()
 
     const ch = supabase
       .channel("notif-bell")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "notifications" },
-        () => load()
+        () => fetchNotifications()
       )
       .subscribe()
 
-    let pollCount = 0
-    const poll = setInterval(() => {
-      pollCount++
-      // every ~30s, do a heavy refresh too
-      if (pollCount % 6 === 0) console.log("[bell] poll tick", pollCount)
-      load()
-    }, 3000)
+    const poll = setInterval(fetchNotifications, 3000)
+
     return () => {
       cancelled = true
       clearInterval(poll)

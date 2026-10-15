@@ -1,5 +1,6 @@
 import { LoginForm } from "@/components/auth/login-form"
 import Link from "next/link"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 export default function LoginPage() {
   return (
@@ -23,8 +24,7 @@ export default function LoginPage() {
 
       {/* Top bar */}
       <header className="relative z-10 flex items-center justify-between px-5 sm:px-8 h-14">
-        <Link href="/" className="display text-lg font-semibold text-white tracking-tight drop-shadow">
-          FixLink
+        <Link href="/" className="display text-lg font-semibold text-white tracking-tight drop-shadow"><SiteName />
         </Link>
         <Link
           href="/register"
@@ -39,7 +39,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           <div className="card card-bordered p-6 sm:p-8 backdrop-blur-sm" style={{ background: "color-mix(in srgb, var(--surface) 92%, transparent)" }}>
             <h1 className="text-xl font-semibold text-ink mb-1 tracking-tight">Welcome back</h1>
-            <p className="text-sm text-muted mb-6">Log in to your FixLink account.</p>
+            <p className="text-sm text-muted mb-6">Log in to your <SiteName /> account.</p>
             <LoginForm />
           </div>
 

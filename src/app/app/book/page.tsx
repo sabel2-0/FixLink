@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useMemo, useState } from "react"
 
@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/AppToast"
 import { SERVICES, COMMON_PROBLEMS, nearestBarangay, haversine, BARANGAYS } from "@/lib/booking/constants"
 
 import { NearbyMap } from "@/components/booking/NearbyMap"
+import { TechProfileModal } from "@/components/booking/TechProfileModal"
 
 
 
@@ -78,6 +79,8 @@ export default function BookPage() {
   const [step, setStep] = useState(1)
 
   const [services, setServices] = useState<string[]>([])
+  const [serviceCategory, setServiceCategory] = useState<"appliance" | "device">("appliance")
+  const [profileTech, setProfileTech] = useState<any | null>(null)
 
   const [issues, setIssues] = useState<Record<string, { problems: string[]; notes: string }>>({})
 
@@ -115,7 +118,7 @@ export default function BookPage() {
 
   const [refreshKey, setRefreshKey] = useState(0)
 
-  // Realtime: bump refreshKey when tech data changes â†’ re-runs the fetch effect
+  // Realtime: bump refreshKey when tech data changes → re-runs the fetch effect
   useEffect(() => {
     const channel = supabase
       .channel("realtime:book-page")
@@ -141,26 +144,47 @@ export default function BookPage() {
 
     ;(async () => {
 
-      const { data, error } = await supabase
-
+      // Flat fetch: 3 simple queries instead of FK-embedded joins.
+      // Prevents 57014 (statement timeout) under connection-pool contention.
+      const { data: techsRaw, error: techErr } = await supabase
         .from("technician_profiles")
-
-        .select("id, rating, jobs_completed, home_barangay, home_city, home_province, home_lat, home_lng, service_radius_km, cert_status, technician_services!technician_services_technician_id_fkey(service), profile:profiles!technician_profiles_id_fkey(full_name)")
+        .select("id, rating, jobs_completed, home_barangay, home_city, home_province, home_lat, home_lng, service_radius_km, cert_status, years_experience")
 
       if (cancelled) return
+      if (techErr) { console.error(techErr); toast(techErr.message); setLoadingTechs(false); return }
 
-      if (error) { console.error(error); toast(error.message); setLoadingTechs(false); return }
+      const techIds = (techsRaw || []).map((t: any) => t.id)
+      let svcRows: any[] = []
+      let profRows: any[] = []
+      if (techIds.length > 0) {
+        const [svcRes, profRes] = await Promise.all([
+          supabase.from("technician_services").select("technician_id, service").in("technician_id", techIds),
+          supabase.from("profiles").select("id, full_name").in("id", techIds),
+        ])
+        svcRows = svcRes.data || []
+        profRows = profRes.data || []
+      }
+
+      const svcByTech: Record<string, { service: string }[]> = {}
+      for (const r of svcRows) {
+        if (!svcByTech[r.technician_id]) svcByTech[r.technician_id] = []
+        svcByTech[r.technician_id].push({ service: r.service })
+      }
+      const nameById: Record<string, string> = {}
+      for (const p of profRows) nameById[p.id] = p.full_name
+
+      const data = (techsRaw || []).map((t: any) => ({
+        ...t,
+        technician_services: svcByTech[t.id] || [],
+        profile: { full_name: nameById[t.id] || "Technician" },
+      }))
 
       const filtered = (data as unknown as Tech[]).filter((t) => {
-
         const svc = (t.technician_services || []).map((s) => s.service)
-
         return services.every((s) => svc.includes(s))
-
       })
 
       setTechs(filtered)
-
       setLoadingTechs(false)
 
     })()
@@ -516,11 +540,31 @@ const withDist = useMemo(() => {
 
           <h2 className="text-3xl font-semibold mb-2 tracking-tight">What needs fixing?</h2>
 
-          <p className="text-muted mb-8">Pick one or more appliances.</p>
+          <p className="text-muted mb-6">
+            Pick one or more {serviceCategory === "appliance" ? "appliances" : "devices"}.
+          </p>
+
+          {/* Category tabs */}
+          <div className="seg mb-6" style={{ maxWidth: 360 }}>
+            <button
+              type="button"
+              className={serviceCategory === "appliance" ? "active" : ""}
+              onClick={() => setServiceCategory("appliance")}
+            >
+              Appliances
+            </button>
+            <button
+              type="button"
+              className={serviceCategory === "device" ? "active" : ""}
+              onClick={() => setServiceCategory("device")}
+            >
+              Devices
+            </button>
+          </div>
 
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
 
-            {SERVICES.map((s) => {
+            {SERVICES.filter((s) => s.category === serviceCategory).map((s) => {
 
               const sel = services.includes(s.label)
 
@@ -545,6 +589,12 @@ const withDist = useMemo(() => {
             })}
 
           </div>
+
+          {serviceCategory === "device" && (
+            <p className="text-xs text-muted mt-4 leading-relaxed">
+              Device repair is performed by technicians with TESDA CSS NC II certification.
+            </p>
+          )}
 
         </div>
 
@@ -856,7 +906,7 @@ const withDist = useMemo(() => {
 
                         return (
 
-                          <button key={t.id} type="button" onClick={() => { toggleTech(t.id); setFocusId(t.id) }} className={"w-full text-left p-4 hover:bg-surface-2 transition flex items-start gap-3 " + (sel ? "bg-accent-soft" : "")}>
+                          <div key={t.id} role="button" tabIndex={0} onClick={() => { toggleTech(t.id); setFocusId(t.id) }} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleTech(t.id); setFocusId(t.id) } }} className={"w-full text-left p-4 hover:bg-surface-2 transition flex items-start gap-3 cursor-pointer " + (sel ? "bg-accent-soft" : "")}>
 
                             <span className={"check-circle mt-0.5 " + (sel ? "selected" : "")} style={{ flexShrink: 0 }}>
 
@@ -886,20 +936,44 @@ const withDist = useMemo(() => {
                               </span>
 
                               {(() => {
-                                const svc = (t.technician_services || []).map((s: any) => s.service)
-                                if (svc.length === 0) return null
-                                const shown = svc.slice(0, 4).join(", ")
-                                const more = svc.length > 4 ? " +" + (svc.length - 4) : ""
+                                const svcLabels = (t.technician_services || []).map((s: any) => s.service)
+                                if (svcLabels.length === 0) return null
                                 return (
-                                  <span className="block text-xs text-muted mt-1">
-                                    <span className="text-muted/70">Covers: </span>{shown}{more}
+                                  <span className="flex flex-wrap gap-1 mt-2">
+                                    {svcLabels.slice(0, 4).map((label: string) => {
+                                      const svcDef = SERVICES.find((s) => s.label === label)
+                                      return (
+                                        <span
+                                          key={label}
+                                          className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full"
+                                          style={{ background: "var(--surface-2)", color: "var(--ink)" }}
+                                        >
+                                          {svcDef && <ApplianceIcon id={svcDef.id} className="w-3 h-3" />}
+                                          {label}
+                                        </span>
+                                      )
+                                    })}
+                                    {svcLabels.length > 4 && (
+                                      <span className="text-[11px] text-muted self-center px-1">
+                                        +{svcLabels.length - 4} more
+                                      </span>
+                                    )}
                                   </span>
                                 )
                               })()}
 
                             </span>
 
-                          </button>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setProfileTech(t) }}
+                              className="shrink-0 self-start text-xs font-medium px-2.5 py-1 rounded-md"
+                              style={{ background: "var(--surface-2)", color: "var(--accent)" }}
+                            >
+                              View Reviews
+                            </button>
+
+                          </div>
 
                         )
 
@@ -1060,7 +1134,37 @@ const withDist = useMemo(() => {
             </div>
           </div>
         </div>
-      )}    </div>
+      )}
+
+      {profileTech && (() => {
+        const pt = profileTech
+        const ptName = (pt.profile && pt.profile.full_name) || "Technician"
+        const ptServices = (pt.technician_services || []).map((s: any) => s.service)
+        const km = (lat != null && lng != null && pt.home_lat != null && pt.home_lng != null)
+          ? haversine(lat, lng, pt.home_lat, pt.home_lng)
+          : 0
+        return (
+          <TechProfileModal
+            techId={pt.id}
+            techName={ptName}
+            rating={pt.rating}
+            jobsCompleted={pt.jobs_completed}
+            yearsExperience={pt.years_experience ?? null}
+            barangay={pt.home_barangay ?? null}
+            city={pt.home_city ?? null}
+            province={pt.home_province ?? null}
+            services={ptServices}
+            distanceKm={km}
+            isSelected={selectedTechIds.includes(pt.id)}
+            onSelect={() => {
+              if (!selectedTechIds.includes(pt.id)) toggleTech(pt.id)
+              setProfileTech(null)
+            }}
+            onClose={() => setProfileTech(null)}
+          />
+        )
+      })()}
+    </div>
 
   )
 

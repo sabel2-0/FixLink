@@ -5,6 +5,7 @@ import { Icon } from "@/lib/icons"
 import { peso } from "@/lib/format"
 import { BookingTimeline } from "@/components/booking/BookingTimeline"
 import { BookingRealtimeRefresh } from "@/components/booking/BookingRealtimeRefresh"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 function fmtDate(d: string | null | undefined): string {
   if (!d) return "—"
@@ -254,7 +255,7 @@ export default async function AdminBookingDetail({ params }: { params: Promise<{
                   </div>
                   {booking.final_commission && (
                     <div className="px-3 py-2 rounded-lg bg-surface-2 flex items-center justify-between">
-                      <span className="text-sm text-muted">FixLink commission (10%)</span>
+                      <span className="text-sm text-muted"><SiteName /> commission (10%)</span>
                       <span className="text-sm text-ink">{peso(booking.final_commission)}</span>
                     </div>
                   )}

@@ -1,8 +1,29 @@
 import Link from "next/link"
+import { SiteName } from "@/components/shared/SiteNameProvider"
+import { createClient } from "@/lib/supabase/server"
 
-export const metadata = {
-  title: "Privacy Policy — FixLink",
-  description: "How FixLink collects, uses, and protects your personal information under the Philippine Data Privacy Act of 2012 (RA 10173).",
+const FALLBACK_NAME = "FixLink"
+
+async function getSiteName(): Promise<string> {
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from("app_settings")
+      .select("site_name")
+      .eq("id", 1)
+      .maybeSingle()
+    return data?.site_name || FALLBACK_NAME
+  } catch {
+    return FALLBACK_NAME
+  }
+}
+
+export async function generateMetadata() {
+  const name = await getSiteName()
+  return {
+    title: `Privacy Policy — ${name}`,
+    description: `How ${name} collects, uses, and protects your personal information under the Philippine Data Privacy Act of 2012 (RA 10173).`,
+  }
 }
 
 export default function PrivacyPage() {
@@ -10,7 +31,7 @@ export default function PrivacyPage() {
     <main className="min-h-dvh bg-paper">
       <header className="border-b border-line">
         <div className="max-w-3xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
-          <Link href="/" className="display text-lg font-semibold text-ink tracking-tight">FixLink</Link>
+          <Link href="/" className="display text-lg font-semibold text-ink tracking-tight"><SiteName /></Link>
           <Link href="/register" className="text-sm text-accent font-medium hover:underline">Back to sign up</Link>
         </div>
       </header>
@@ -24,7 +45,7 @@ export default function PrivacyPage() {
         </p>
 
         <Section title="1. What we collect">
-          <p>When you create an account or use FixLink, we collect:</p>
+          <p>When you create an account or use <SiteName />, we collect:</p>
           <ul className="list-disc pl-6 space-y-1.5">
             <li><strong>Identity information</strong> — full name, email address, mobile number.</li>
             <li><strong>Verification documents</strong> — government-issued ID (front and back) and a selfie holding that ID.</li>
@@ -44,13 +65,13 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="3. Who sees your data">
-          <p>Verification documents (IDs, selfie, certificate) are visible <strong>only to FixLink admin</strong> for the purpose of review. Other users never see your documents.</p>
-          <p>If you are a technician, your first name, barangay, city, an approximate map pin, ratings, and service offerings are visible to customers browsing for technicians. Your exact GPS coordinates are only visible to FixLink admin for verification, and to a customer only while you are actively assigned to their job (live tracking).</p>
+          <p>Verification documents (IDs, selfie, certificate) are visible <strong>only to <SiteName /> admin</strong> for the purpose of review. Other users never see your documents.</p>
+          <p>If you are a technician, your first name, barangay, city, an approximate map pin, ratings, and service offerings are visible to customers browsing for technicians. Your exact GPS coordinates are only visible to <SiteName /> admin for verification, and to a customer only while you are actively assigned to their job (live tracking).</p>
           <p>We do not sell, rent, or share your personal information with third parties for marketing.</p>
         </Section>
 
         <Section title="4. Third-party services">
-          <p>We use the following service providers to run FixLink:</p>
+          <p>We use the following service providers to run <SiteName />:</p>
           <ul className="list-disc pl-6 space-y-1.5">
             <li><strong>Supabase</strong> — authentication and database hosting.</li>
             <li><strong>Cloudinary</strong> — secure document storage.</li>
@@ -75,7 +96,7 @@ export default function PrivacyPage() {
             <li><strong>Erasure</strong> — request deletion of your account and documents.</li>
             <li><strong>Data portability</strong> — receive a copy of your data in a common format.</li>
           </ul>
-          <p>To exercise any of these, email <a href="mailto:privacy@fixlink.ph" className="text-accent hover:underline">privacy@fixlink.ph</a>.</p>
+          <p>To exercise any of these, email <a href="mailto:privacy@gmail.com" className="text-accent hover:underline">privacy@gmail.com</a>.</p>
         </Section>
 
         <Section title="7. Security">
@@ -83,7 +104,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="8. Contact">
-          <p>For privacy concerns or to exercise your rights, contact our Data Protection Officer at <a href="mailto:privacy@fixlink.ph" className="text-accent hover:underline">privacy@fixlink.ph</a>.</p>
+          <p>For privacy concerns or to exercise your rights, contact our Data Protection Officer at <a href="mailto:privacy@gmail.com" className="text-accent hover:underline">privacy@gmail.com</a>.</p>
         </Section>
 
         <div className="mt-12 pt-8 border-t border-line flex flex-wrap gap-4 text-sm">
@@ -96,7 +117,7 @@ export default function PrivacyPage() {
   )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: { title: React.ReactNode; children: React.ReactNode }) {
   return (
     <section className="mb-8">
       <h2 className="text-lg font-semibold text-ink mb-3 tracking-tight">{title}</h2>

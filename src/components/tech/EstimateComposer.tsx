@@ -1,9 +1,10 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { peso } from "@/lib/format"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 type Props = {
   bookingId: string
@@ -75,7 +76,7 @@ export function EstimateComposer({ bookingId, customer, service, barangay, probl
   }
 
   // Only consider times STRICTLY after the customer's requested time.
-  // Same time or earlier â†’ invalid.
+  // Same time or earlier → invalid.
   const minAllowedTime = (() => {
     if (!scheduled.time) return ""
     const [h, m] = scheduled.time.split(":").map(Number)
@@ -223,7 +224,7 @@ export function EstimateComposer({ bookingId, customer, service, barangay, probl
                 {priceNum > 0 && (
                   <div className="mt-2 rounded-lg bg-surface-2 p-2.5 text-xs space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-muted">FixLink commission (10%)</span>
+                      <span className="text-muted"><SiteName /> commission (10%)</span>
                       <span className="text-ink">−{peso(commission)}</span>
                     </div>
                     <div className="flex justify-between">
@@ -248,7 +249,7 @@ export function EstimateComposer({ bookingId, customer, service, barangay, probl
                   <p className="text-[11px] text-red-500 mt-1.5">{arrivalError}</p>
                 ) : arrivalValid && scheduled.time ? (
                   <p className="text-[11px] mt-1.5" style={{ color: "var(--success)" }}>
-                    âœ“ That&apos;s <strong>{etaMin} min</strong> after their requested {fmtTime(scheduled.time)}.
+                    ✓ That&apos;s <strong>{etaMin} min</strong> after their requested {fmtTime(scheduled.time)}.
                   </p>
                 ) : (
                   <p className="text-[11px] text-muted mt-1.5">

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
@@ -54,7 +54,7 @@ export function TechProfileForm({
         .eq("id", profile.id)
       if (techErr) throw new Error("Tech profile: " + techErr.message)
 
-      // 3. Services â€” delete then insert
+      // 3. Services — delete then insert
       const { error: delErr } = await supabase
         .from("technician_services")
         .delete()
@@ -115,7 +115,7 @@ export function TechProfileForm({
               {isVerified && <span className="badge badge-active">Verified</span>}
             </div>
             {certStatus === "pending" && (
-              <p className="text-xs text-muted">Under review. Usually 1â€“2 business days.</p>
+              <p className="text-xs text-muted">Under review. Usually 1–2 business days.</p>
             )}
             {certStatus === "rejected" && (
               <>
@@ -154,17 +154,17 @@ export function TechProfileForm({
           </Field>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Field label="Region">
-              <input value={tech?.home_region || "â€”"} disabled className="input opacity-60" />
+              <input value={tech?.home_region || "—"} disabled className="input opacity-60" />
             </Field>
             <Field label="Province">
-              <input value={tech?.home_province || "â€”"} disabled className="input opacity-60" />
+              <input value={tech?.home_province || "—"} disabled className="input opacity-60" />
             </Field>
             <Field label="City">
-              <input value={tech?.home_city || "â€”"} disabled className="input opacity-60" />
+              <input value={tech?.home_city || "—"} disabled className="input opacity-60" />
             </Field>
           </div>
           <Field label="Barangay">
-            <input value={tech?.home_barangay || "â€”"} disabled className="input opacity-60" />
+            <input value={tech?.home_barangay || "—"} disabled className="input opacity-60" />
           </Field>
           <p className="text-xs text-muted">
             To change your location, use the resubmit flow from your verification status page.
@@ -219,7 +219,7 @@ export function TechProfileForm({
           disabled={saving || pending}
           className="btn-primary"
         >
-          {saving ? "Savingâ€¦" : "Save changes"}
+          {saving ? "Saving…" : "Save changes"}
         </button>
         {saveMsg && (
           <span className={`text-sm ${saveMsg === "Saved" ? "text-[var(--success)]" : "text-red-500"}`}>

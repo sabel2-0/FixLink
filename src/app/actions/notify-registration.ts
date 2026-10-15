@@ -30,12 +30,12 @@ export async function notifyRegistrationDecision(
 
   if (profile.role === "technician") {
     if (decision === "verified") {
-      const t = certVerifiedEmail(firstName, APP_URL)
+      const t = await certVerifiedEmail(firstName, APP_URL)
       const r = await sendEmail({ to: profile.email, subject: t.subject, html: t.html })
       return { ok: r.ok }
     }
     if (decision === "rejected") {
-      const t = certRejectedEmail(firstName, reason || "", APP_URL)
+      const t = await certRejectedEmail(firstName, reason || "", APP_URL)
       const r = await sendEmail({ to: profile.email, subject: t.subject, html: t.html })
       return { ok: r.ok }
     }
@@ -43,12 +43,12 @@ export async function notifyRegistrationDecision(
 
   if (profile.role === "customer") {
     if (decision === "verified") {
-      const t = customerVerifiedEmail(firstName, APP_URL)
+      const t = await customerVerifiedEmail(firstName, APP_URL)
       const r = await sendEmail({ to: profile.email, subject: t.subject, html: t.html })
       return { ok: r.ok }
     }
     if (decision === "rejected") {
-      const t = customerRejectedEmail(firstName, reason || "", APP_URL)
+      const t = await customerRejectedEmail(firstName, reason || "", APP_URL)
       const r = await sendEmail({ to: profile.email, subject: t.subject, html: t.html })
       return { ok: r.ok }
     }

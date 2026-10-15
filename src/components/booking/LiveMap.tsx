@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useRef, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -68,7 +68,7 @@ export function LiveMap({ bookingId, meId, otherId, height = 320 }: Props) {
   const sharingRef = useRef(false)
 
   const [ready, setReady] = useState(false)
-  const [status, setStatus] = useState("Waiting for locationâ€¦")
+  const [status, setStatus] = useState("Waiting for location…")
   const [sharing, setSharingState] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
 
@@ -123,7 +123,7 @@ export function LiveMap({ bookingId, meId, otherId, height = 320 }: Props) {
         function drawLine() {
           const a = meMarker.current?.getLngLat()
           const b = otherMarker.current?.getLngLat()
-          if (!a || !b) { setStatus("Waiting for locationâ€¦"); return }
+          if (!a || !b) { setStatus("Waiting for location…"); return }
 
           const coords = [[a.lng, a.lat], [b.lng, b.lat]]
           try {
@@ -185,7 +185,7 @@ export function LiveMap({ bookingId, meId, otherId, height = 320 }: Props) {
         await pullLocations()
         setReady(true)
 
-        // Realtime â€” refetch on any change
+        // Realtime — refetch on any change
         channelRef.current = supabase
           .channel("live:" + bookingId + ":" + meId)
           .on("postgres_changes", { event: "*", schema: "public", table: "live_locations" }, () => {
@@ -253,7 +253,7 @@ export function LiveMap({ bookingId, meId, otherId, height = 320 }: Props) {
       <div ref={ref} style={{ height, width: "100%", borderRadius: 12, overflow: "hidden" }} />
       {!ready && !loadError && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", fontSize: 13 }}>
-          Loading live mapâ€¦
+          Loading live map…
         </div>
       )}
       {loadError && (

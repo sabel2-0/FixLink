@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Stars } from "@/components/ui/Stars"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { RealtimeRefresh } from "@/components/RealtimeRefresh"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 export default async function AdminReviewsPage() {
   const supabase = await createClient()
@@ -67,7 +68,7 @@ export default async function AdminReviewsPage() {
     <div className="max-w-5xl">
       <RealtimeRefresh tables={["reviews", "technician_profiles"]} />
       <h1 className="text-3xl font-semibold mb-2 tracking-tight">Ratings</h1>
-      <p className="text-muted mb-8">Every review customers have left on FixLink.</p>
+      <p className="text-muted mb-8">Every review customers have left on <SiteName />.</p>
 
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">

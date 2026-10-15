@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+﻿import { createClient } from "@/lib/supabase/server"
 import { UserList } from "./user-list"
 
 export default async function AdminUsersPage() {
@@ -15,7 +15,7 @@ export default async function AdminUsersPage() {
       .order("created_at", { ascending: false }),
     supabase
       .from("technician_profiles")
-      .select("id, cert_number, cert_trade, cert_file_url, cert_status"),
+      .select("id, cert_number, cert_trade, cert_file_url, cert_status, credits_balance, min_credits_threshold"),
     supabase
       .from("deleted_accounts")
       .select("id, original_user_id, full_name, email, phone, role, reason, deleted_by_name, deleted_at")

@@ -7,10 +7,11 @@ import { Icon, IconName } from "@/lib/icons"
 import { useState, useEffect, ReactNode } from "react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { NotificationsBell } from "@/components/NotificationsBell"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 export type NavItem = { href: string; label: string; icon: IconName }
 
-type Counts = { messages: number; estimates: number; jobs: number }
+type Counts = { messages: number; estimates: number; jobs: number; topups: number }
 
 export function RoleLayout({
   roleLabel,
@@ -27,7 +28,7 @@ export function RoleLayout({
   const router = useRouter()
   const supabase = createClient()
   const [open, setOpen] = useState(false)
-  const [counts, setCounts] = useState<Counts>({ messages: 0, estimates: 0, jobs: 0 })
+  const [counts, setCounts] = useState<Counts>({ messages: 0, estimates: 0, jobs: 0, topups: 0 })
 
   async function logout() {
     await supabase.auth.signOut()
@@ -58,7 +59,16 @@ export function RoleLayout({
           .select("id", { count: "exact", head: true })
           .eq("technician_id", user.id)
           .not("status", "in", "(completed,cancelled,disputed)")
-        jobCount = jc || 0
+
+        // PLUS: completed jobs with a recorded but unconfirmed payment
+        const { count: pc } = await supabase
+          .from("bookings")
+          .select("id", { count: "exact", head: true })
+          .eq("technician_id", user.id)
+          .not("paid_at", "is", null)
+          .is("payment_confirmed_at", null)
+
+        jobCount = (jc || 0) + (pc || 0)
 
         // Open estimate requests I haven't responded to
         const { data: invites } = await supabase
@@ -85,7 +95,16 @@ export function RoleLayout({
         }
       }
 
-      if (!cancelled) setCounts({ messages: mc || 0, estimates: estCount, jobs: jobCount })
+      let topupCount = 0
+      if (roleLabel === "Admin") {
+        const { count: tc } = await supabase
+          .from("credit_topups")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending")
+        topupCount = tc || 0
+      }
+
+      if (!cancelled) setCounts({ messages: mc || 0, estimates: estCount, jobs: jobCount, topups: topupCount })
     }
 
     load()
@@ -95,6 +114,8 @@ export function RoleLayout({
 
     const tables = roleLabel === "Technician"
       ? ["messages", "bookings", "estimates", "booking_requested_techs"]
+      : roleLabel === "Admin"
+      ? ["credit_topups"]
       : ["messages"]
 
     let ch = supabase.channel("nav-counts:" + roleLabel)
@@ -121,6 +142,7 @@ export function RoleLayout({
     if (href.endsWith("/messages")) return counts.messages
     if (href.endsWith("/estimates")) return counts.estimates
     if (href.endsWith("/schedule")) return counts.jobs
+    if (href.endsWith("/topups")) return counts.topups
     return 0
   }
 
@@ -173,8 +195,7 @@ export function RoleLayout({
     <div className="h-dvh flex bg-paper overflow-hidden">
       <aside className="hidden md:flex md:flex-col w-60 shrink-0 bg-surface border-r border-line h-full overflow-hidden">
         <div className="h-14 shrink-0 flex items-center px-5 border-b border-line">
-          <Link href="/" className="display text-base font-semibold text-ink tracking-tight">
-            FixLink
+          <Link href="/" className="display text-base font-semibold text-ink tracking-tight"><SiteName />
           </Link>
         </div>
         {links}
@@ -194,8 +215,7 @@ export function RoleLayout({
         }`}
       >
         <div className="h-14 shrink-0 flex items-center justify-between px-5 border-b border-line">
-          <Link href="/" className="display text-base font-semibold text-ink tracking-tight">
-            FixLink
+          <Link href="/" className="display text-base font-semibold text-ink tracking-tight"><SiteName />
           </Link>
           <button
             onClick={() => setOpen(false)}

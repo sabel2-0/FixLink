@@ -1,7 +1,9 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useRef } from "react"
 import Link from "next/link"
+import { InfraCard } from "@/components/shared/InfraCard"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 const TEAM = [
   "Jinky Juban",
@@ -24,6 +26,7 @@ type StackItem = {
 const STACK: StackItem[] = [
   { name: "Next.js",             slug: "nextdotjs",   color: "FFFFFF", fallback: "N"  },
   { name: "Supabase",            slug: "supabase",    color: "3ECF8E", fallback: "S"  },
+  { name: "PostgreSQL",          slug: "postgresql",  color: "4169E1", fallback: "PG" },
   { name: "TypeScript",          slug: "typescript",  color: "3178C6", fallback: "TS" },
   { name: "Tailwind CSS",        slug: "tailwindcss", color: "06B6D4", fallback: "T"  },
   { name: "Vercel",              slug: "vercel",      color: "FFFFFF", fallback: "▲"  },
@@ -115,7 +118,7 @@ export function AboutContent() {
       {/* HEADER */}
       <header className="sticky top-0 z-40 landing-nav">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
-          <Link href="/" className="display text-lg font-semibold text-ink tracking-tight">FixLink</Link>
+          <Link href="/" className="display text-lg font-semibold text-ink tracking-tight"><SiteName /></Link>
           <nav className="flex items-center gap-6 text-sm">
             <Link href="/help" className="text-muted hover:text-ink transition hidden sm:inline">Help</Link>
             <Link href="/login" className="text-muted hover:text-ink transition">Log in</Link>
@@ -129,7 +132,7 @@ export function AboutContent() {
         <div className="max-w-6xl mx-auto px-5 sm:px-8 pt-20 pb-24 sm:pt-32 sm:pb-32">
           <p className="eyebrow mb-8 reveal">About the project · 2026</p>
           <h1 className="display text-5xl sm:text-7xl lg:text-8xl leading-[0.95] tracking-tighter mb-10 reveal delay-1">
-            <span className="text-gradient">FixLink</span>
+            <span className="text-gradient"><SiteName /></span>
           </h1>
           <p className="text-lg sm:text-xl text-muted max-w-2xl leading-relaxed reveal delay-2">
             Trusted appliance repair, on demand. Verified technicians, written quotes, live tracking —
@@ -219,6 +222,21 @@ export function AboutContent() {
         </div>
       </section>
 
+      {/* INFRASTRUCTURE */}
+      <section className="border-b border-line">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 grid md:grid-cols-[1fr_1.6fr] gap-12 md:gap-20">
+          <div>
+            <p className="eyebrow reveal">Running on</p>
+          </div>
+          <div className="reveal delay-1">
+            <p className="text-base sm:text-lg text-muted leading-relaxed mb-6">
+              Production infrastructure from day one — not a localhost demo.
+            </p>
+            <InfraCard />
+          </div>
+        </div>
+      </section>
+
       {/* MISSION */}
       <section className="border-b border-line">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-24 grid md:grid-cols-[1fr_1.6fr] gap-12 md:gap-20">
@@ -235,7 +253,7 @@ export function AboutContent() {
               guesswork, no haggling over price at the door.
             </p>
             <p className="text-base sm:text-lg text-muted leading-relaxed reveal delay-2">
-              Every technician on FixLink is verified through TESDA NC2 documentation
+              Every technician on <SiteName /> is verified through TESDA NC2 documentation
               and government ID review. Customers are verified the same way.
               Trust on both sides, engineered into the product.
             </p>
@@ -269,7 +287,7 @@ export function AboutContent() {
       {/* FOOTER */}
       <footer className="text-sm text-muted">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10 flex flex-col sm:flex-row justify-between gap-4 border-t border-line">
-          <p>FixLink — 2026</p>
+          <p><SiteName /> — 2026</p>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link href="/help" className="hover:text-ink transition">Help</Link>
             <Link href="/terms" className="hover:text-ink transition">Terms</Link>

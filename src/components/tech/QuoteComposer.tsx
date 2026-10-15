@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { Icon } from "@/lib/icons"
 import { peso } from "@/lib/format"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 type Item = { label: string; amount: number }
 
@@ -171,7 +172,7 @@ export function QuoteComposer({ bookingId, customer, service }: { bookingId: str
                   <span className="font-semibold tabular-nums">{peso(total)}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-muted">FixLink commission (10%)</span>
+                  <span className="text-muted"><SiteName /> commission (10%)</span>
                   <span className="tabular-nums">−{peso(commission)}</span>
                 </div>
                 <div className="flex justify-between font-semibold pt-2 border-t border-line">

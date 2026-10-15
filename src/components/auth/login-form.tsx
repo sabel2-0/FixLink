@@ -55,14 +55,14 @@ export function LoginForm({ notice }: { notice?: string | null } = {}) {
       // Auth row exists but no profile = account was deleted by admin
       if (!profile) {
         await supabase.auth.signOut()
-        setFormError("This account doesn't exist or has been removed. If you think this is a mistake, contact fixlink.ph@gmail.com.")
+        setFormError("This account doesn't exist or has been removed. If you think this is a mistake, contact support@gmail.com.")
         return
       }
 
       // Suspended/deactivated account
       if (profile.status === "suspended") {
         await supabase.auth.signOut()
-        setFormError("Your account has been deactivated. Contact fixlink.ph@gmail.com for help.")
+        setFormError("Your account has been deactivated. Contact support@gmail.com for help.")
         return
       }
 

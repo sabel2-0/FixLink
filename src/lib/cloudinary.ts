@@ -1,4 +1,4 @@
-export type UploadKind = "cert" | "id-front" | "id-back" | "selfie"
+export type UploadKind = "cert" | "id-front" | "id-back" | "selfie" | "coe" | "dti" | "bir" | "mayor"
 
 export async function uploadToCloudinary(file: File, kind: UploadKind): Promise<string> {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME

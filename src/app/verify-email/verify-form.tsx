@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 export default function VerifyForm() {
   const supabase = createClient()
@@ -90,8 +91,7 @@ export default function VerifyForm() {
         <Link
           href="/"
           className="display text-lg font-semibold block text-center mb-6 text-ink"
-        >
-          FixLink
+        ><SiteName />
         </Link>
 
         <h1 className="text-lg font-semibold text-ink mb-1 text-center">Check your inbox</h1>

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -25,6 +25,8 @@ const STATUS_META: Record<string, { label: string; icon: IconName }> = {
   quote_pending:         { label: "Quotation sent",               icon: "doc" },
   awaiting_confirmation: { label: "Waiting for confirmation",     icon: "clock" },
   completed:             { label: "Job completed",                icon: "check" },
+  payment_recorded:      { label: "Payment recorded",             icon: "dollar" },
+  payment_confirmed:     { label: "Payment confirmed",            icon: "check" },
   cancelled:             { label: "Cancelled",                    icon: "x" },
   disputed:              { label: "Disputed",                     icon: "alert" },
 }
@@ -120,7 +122,7 @@ export function BookingTimeline({ bookingId }: { bookingId: string }) {
   }, [bookingId, supabase])
 
   if (events === null) {
-    return <p className="text-xs text-muted">Loading timeline…</p>
+    return <p className="text-xs text-muted">Loading timeline...</p>
   }
   if (events.length === 0) {
     return (

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/Badge"
 import { peso } from "@/lib/format"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 export default async function TechCommissions() {
   const supabase = await createClient()
@@ -21,7 +22,7 @@ export default async function TechCommissions() {
   return (
     <div>
       <h1 className="text-3xl font-semibold mb-2 tracking-tight">Commissions</h1>
-      <p className="text-muted mb-6">10% of each completed job. Remit to FixLink after the customer pays you.</p>
+      <p className="text-muted mb-6">10% of each completed job. Remit to <SiteName /> after the customer pays you.</p>
 
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="card p-5">

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { RegisterForm } from "@/components/auth/register-form"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 type Role = "customer" | "technician"
 
@@ -32,8 +33,7 @@ export default function RegisterPage() {
       {/* Scrollable content */}
       <div className="relative flex flex-col min-h-full" style={{ zIndex: 2 }}>
         <header className="flex items-center justify-between px-5 sm:px-8 h-14 shrink-0">
-          <Link href="/" className="display text-lg font-semibold text-white tracking-tight drop-shadow">
-            FixLink
+          <Link href="/" className="display text-lg font-semibold text-white tracking-tight drop-shadow"><SiteName />
           </Link>
           <Link
             href="/login"
@@ -53,7 +53,7 @@ export default function RegisterPage() {
               }}
             >
               <h1 className="text-xl font-semibold text-ink mb-1 tracking-tight">Create your account</h1>
-              <p className="text-sm text-muted mb-6">Join FixLink as a customer or technician.</p>
+              <p className="text-sm text-muted mb-6">Join <SiteName /> as a customer or technician.</p>
               <RegisterForm onRoleChange={setRole} />
             </div>
 

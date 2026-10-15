@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 export default async function AdminDashboard() {
   const supabase = await createClient()
@@ -47,7 +48,7 @@ export default async function AdminDashboard() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <Stat label="Users" value={users.count ?? 0} />
-        <Stat label="Technicians" value={`${verifiedTechs.count ?? 0} / ${techs.count ?? 0}`} hint="verified / total" />
+        <Stat label="Technicians" value={`${verifiedTechs.count ?? 0} / ${techsObj.count ?? 0}`} hint="verified / total" />
         <Stat label="Bookings" value={bookings.count ?? 0} />
         <Stat label="Commission" value={`₱${totalCommission.toLocaleString()}`} hint="all-time" />
       </div>
@@ -92,7 +93,7 @@ export default async function AdminDashboard() {
             <Row label="Owed by techs" value={`₱${owed.toLocaleString()}`} warn />
           </div>
           <p className="text-xs text-muted mt-5 leading-relaxed">
-            Customers pay technicians directly. FixLink charges 10% of the final approved price — remitted by the technician after each job.
+            Customers pay technicians directly. <SiteName /> charges 10% of the final approved price — remitted by the technician after each job.
           </p>
         </div>
       </div>

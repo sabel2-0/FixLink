@@ -5,6 +5,9 @@ import { Icon } from "@/lib/icons"
 import { peso } from "@/lib/format"
 import { BookingTimeline } from "@/components/booking/BookingTimeline"
 import { BookingRealtimeRefresh } from "@/components/booking/BookingRealtimeRefresh"
+import { ConfirmPaymentReceived } from "@/components/booking/ConfirmPaymentReceived"
+import { PaymentReceipt } from "@/components/booking/PaymentReceipt"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 function fmtDate(d: string | null | undefined): string {
   if (!d) return "—"
@@ -219,7 +222,7 @@ export default async function TechJobDetail({ params }: { params: Promise<{ id: 
                   </div>
                   {booking.final_commission && (
                     <div className="px-3 py-2 rounded-lg bg-surface-2 flex items-center justify-between">
-                      <span className="text-sm text-muted">FixLink commission (10%)</span>
+                      <span className="text-sm text-muted"><SiteName /> commission (10%)</span>
                       <span className="text-sm text-ink">{peso(booking.final_commission)}</span>
                     </div>
                   )}
@@ -231,33 +234,65 @@ export default async function TechJobDetail({ params }: { params: Promise<{ id: 
           </div>
 
           {/* Payment */}
-          {(booking.paid_at || booking.payment_method) && (
+          {booking.paid_at && booking.payment_confirmed_at ? (
+            <PaymentReceipt
+              finalAmount={Number(booking.final_amount || 0)}
+              method={booking.payment_method}
+              reference={booking.payment_reference}
+              recordedBy={booking.payment_recorded_by}
+              paidAt={booking.paid_at}
+              confirmedBy={booking.payment_confirmed_by}
+              confirmedAt={booking.payment_confirmed_at}
+              commission={Number(booking.final_commission || Math.round(Number(booking.final_amount || 0) * 0.10))}
+              technicianName="You"
+              serviceLabel={services}
+              scheduledDate={booking.scheduled_date}
+            />
+          ) : booking.paid_at && !booking.payment_confirmed_at ? (
             <div className="card p-6">
               <p className="text-xs uppercase tracking-wider text-muted font-medium mb-4">Payment</p>
-              <div className="space-y-2 text-sm">
-                {booking.payment_method && (
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted">Method</span><span className="text-ink">{booking.payment_method}</span>
+              <div className="space-y-3 text-sm">
+                <div className="rounded-xl p-4" style={{ background: "color-mix(in srgb, var(--warn) 8%, transparent)" }}>
+                  <p className="text-xs uppercase tracking-wider font-medium mb-2" style={{ color: "var(--warn)" }}>
+                    Customer says they paid
+                  </p>
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted">Amount</span>
+                      <span className="text-ink font-semibold">₱{Number(booking.final_amount || 0).toLocaleString()}</span>
+                    </div>
+                    {booking.payment_method && (
+                      <div className="flex justify-between gap-3">
+                        <span className="text-muted">Method</span>
+                        <span className="text-ink">{booking.payment_method}</span>
+                      </div>
+                    )}
+                    {booking.payment_reference && (
+                      <div className="flex justify-between gap-3">
+                        <span className="text-muted">Reference</span>
+                        <span className="text-ink font-mono text-xs break-all">{booking.payment_reference}</span>
+                      </div>
+                    )}
+                    {booking.paid_at && (
+                      <div className="flex justify-between gap-3">
+                        <span className="text-muted">Recorded</span>
+                        <span className="text-ink text-xs">{new Date(booking.paid_at).toLocaleString()}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-                {booking.payment_reference && (
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted">Reference</span><span className="text-ink font-mono text-xs">{booking.payment_reference}</span>
-                  </div>
-                )}
-                {booking.paid_at && (
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted">Recorded</span><span className="text-ink">{new Date(booking.paid_at).toLocaleString()}</span>
-                  </div>
-                )}
-                {booking.payment_confirmed_at && (
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted">Confirmed</span><span className="text-ink">{new Date(booking.payment_confirmed_at).toLocaleString()}</span>
-                  </div>
-                )}
+                </div>
+                <p className="text-xs text-muted leading-relaxed">
+                  If you received the payment, confirm below. This locks in the 10% <SiteName /> commission.
+                </p>
+                <ConfirmPaymentReceived
+                  bookingId={booking.id}
+                  amount={Number(booking.final_amount || 0)}
+                  method={booking.payment_method || "Cash"}
+                  reference={booking.payment_reference}
+                />
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Cancellation */}
           {booking.status === "cancelled" && (

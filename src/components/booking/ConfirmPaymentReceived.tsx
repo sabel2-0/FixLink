@@ -4,6 +4,7 @@ import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { Icon } from "@/lib/icons"
+import { SiteName } from "@/components/shared/SiteNameProvider"
 
 export function ConfirmPaymentReceived({ bookingId, amount, method, reference }: { bookingId: string; amount: number; method: string; reference: string | null }) {
   const supabase = createClient()
@@ -51,7 +52,7 @@ export function ConfirmPaymentReceived({ bookingId, amount, method, reference }:
                 The customer recorded a payment of <b style={{ color: "var(--ink)" }}>₱{amount.toLocaleString()}</b> via <b style={{ color: "var(--ink)" }}>{method}</b>{reference ? <> (ref <span className="font-mono text-xs">{reference}</span>)</> : null}.
               </p>
               <p className="text-xs text-muted leading-relaxed">
-                Confirming marks this payment as verified on both sides. FixLink's 10% commission becomes due.
+                Confirming marks this payment as verified on both sides. <SiteName />&apos;s 10% commission becomes due.
               </p>
               {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
             </div>
