@@ -80,7 +80,7 @@ export default async function AdminBookingDetail({ params }: { params: Promise<{
         {/* LEFT — main content */}
         <div className="min-w-0 space-y-4">
           {/* Header card */}
-          <div className="card p-6">
+          <div className="card p-4 sm:p-6">
             <div className="flex items-center justify-between mb-5 gap-3">
               <h1 className="text-2xl font-semibold tracking-tight">{services || "Service request"}</h1>
               <Badge status={booking.status} />
@@ -112,7 +112,7 @@ export default async function AdminBookingDetail({ params }: { params: Promise<{
           </div>
 
           {/* People */}
-          <div className="card p-6">
+          <div className="card p-4 sm:p-6">
             <p className="text-xs uppercase tracking-wider text-muted font-medium mb-4">Participants</p>
 
             <div className="grid sm:grid-cols-2 gap-4">
@@ -164,7 +164,7 @@ export default async function AdminBookingDetail({ params }: { params: Promise<{
 
           {/* Service items */}
           {(booking.booking_items || []).length > 0 && (
-            <div className="card p-6">
+            <div className="card p-4 sm:p-6">
               <p className="text-xs uppercase tracking-wider text-muted font-medium mb-4">Reported issues</p>
               <div className="space-y-3">
                 {(booking.booking_items || []).map((it: any) => (
@@ -183,7 +183,7 @@ export default async function AdminBookingDetail({ params }: { params: Promise<{
           )}
 
           {/* Price journey */}
-          <div className="card p-6">
+          <div className="card p-4 sm:p-6">
             <p className="text-xs uppercase tracking-wider text-muted font-medium mb-5">Price journey</p>
 
             {/* Estimates */}
@@ -268,7 +268,7 @@ export default async function AdminBookingDetail({ params }: { params: Promise<{
 
           {/* Payment */}
           {(booking.paid_at || booking.payment_method) && (
-            <div className="card p-6">
+            <div className="card p-4 sm:p-6">
               <p className="text-xs uppercase tracking-wider text-muted font-medium mb-4">Payment</p>
               <div className="space-y-2 text-sm">
                 {booking.payment_method && (
@@ -301,7 +301,7 @@ export default async function AdminBookingDetail({ params }: { params: Promise<{
 
           {/* Cancellation */}
           {booking.status === "cancelled" && (
-            <div className="card p-6">
+            <div className="card p-4 sm:p-6">
               <p className="text-xs uppercase tracking-wider text-muted font-medium mb-4">Cancellation</p>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between gap-3">

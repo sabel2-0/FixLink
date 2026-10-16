@@ -114,7 +114,7 @@ export function UserList({ users, deleted = [] }: { users: any[]; deleted?: any[
       </div>
 
       {filtered.length === 0 ? (
-        <div className="card p-8 text-center text-muted text-sm">
+        <div className="card p-6 sm:p-8 text-center text-muted text-sm">
           {search ? "No users match your search." : "No users in this filter."}
         </div>
       ) : (
@@ -148,7 +148,7 @@ function DeletedAccounts({ rows }: { rows: any[] }) {
         <div className="card overflow-hidden">
           <div className="divide-y divide-line">
             {rows.map(r => (
-              <div key={r.id} className="p-4 flex items-start gap-3">
+              <div key={r.id} className="p-4 flex items-start gap-3 flex-wrap sm:flex-nowrap">
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                   style={{
@@ -171,7 +171,7 @@ function DeletedAccounts({ rows }: { rows: any[] }) {
                     <p className="text-xs text-muted mt-1 italic">Reason: {r.reason}</p>
                   )}
                 </div>
-                <div className="text-right shrink-0">
+                <div className="text-left sm:text-right shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
                   <p className="text-[10px] uppercase tracking-wider text-muted font-medium">Deleted by</p>
                   <p className="text-xs text-ink mt-0.5">{r.deleted_by_name || "—"}</p>
                   <p className="text-[10px] text-muted mt-1">
@@ -248,7 +248,7 @@ function UserCard({ u }: { u: any }) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm mt-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 sm:gap-y-1.5 text-sm mt-4 mb-4">
         <DetailBlock label="Phone" value={u.phone || "—"} />
         <DetailBlock label="Joined" value={u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"} />
         {isTech && t?.cert_trade && <DetailBlock label="Trade" value={t.cert_trade} />}

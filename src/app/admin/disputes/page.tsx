@@ -16,13 +16,13 @@ export default async function AdminDisputesPage() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-3xl font-semibold mb-2 text-ink tracking-tight">Disputes</h1>
+      <h1 className="text-2xl sm:text-3xl font-semibold mb-2 text-ink tracking-tight">Disputes</h1>
       <p className="text-muted mb-8">Customer complaints against technicians.</p>
 
       {rows.length ? (
         <div className="space-y-3">
           {rows.map((d: any) => (
-            <div key={d.id} className="card p-6">
+            <div key={d.id} className="card p-4 sm:p-6">
               <div className="flex items-center justify-between mb-2 gap-3">
                 <p className="text-sm font-medium text-ink">
                   {d.customer?.full_name || "Customer"} — {d.reason || "no reason"}

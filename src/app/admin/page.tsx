@@ -44,7 +44,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="text-3xl font-semibold mb-8 text-ink tracking-tight">Dashboard</h1>
+      <h1 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8 text-ink tracking-tight">Dashboard</h1>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <Stat label="Users" value={users.count ?? 0} />
@@ -55,8 +55,8 @@ export default async function AdminDashboard() {
 
       {(pendingTechs.count ?? 0) > 0 && (
         <Link
-          href="/admin/technicians"
-          className="card p-5 mb-6 flex items-center justify-between gap-4 hover:bg-surface-2 transition"
+          href="/admin/registrations"
+          className="card p-4 sm:p-5 mb-6 flex items-center justify-between gap-3 sm:gap-4 hover:bg-surface-2 transition"
           style={{ borderLeft: "3px solid var(--warn)" }}
         >
           <div>
@@ -70,7 +70,7 @@ export default async function AdminDashboard() {
       )}
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <div className="card p-6">
+        <div className="card p-5 sm:p-6">
           <h2 className="text-xs uppercase tracking-wider text-muted font-medium mb-4">Recent bookings</h2>
           <div className="divide-y divide-line">
             {bookingsList.length ? bookingsList.map((b: any) => (
@@ -85,7 +85,7 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        <div className="card p-6">
+        <div className="card p-5 sm:p-6">
           <h2 className="text-xs uppercase tracking-wider text-muted font-medium mb-4">Commission (10%)</h2>
           <div className="space-y-3 text-sm">
             <Row label="Total earned" value={`₱${totalCommission.toLocaleString()}`} />
@@ -103,9 +103,9 @@ export default async function AdminDashboard() {
 
 function Stat({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
-    <div className="card p-5">
+    <div className="card p-4 sm:p-5">
       <p className="text-xs uppercase tracking-wider text-muted font-medium mb-2">{label}</p>
-      <p className="text-3xl font-semibold text-ink tracking-tight">{value}</p>
+      <p className="text-2xl sm:text-3xl font-semibold text-ink tracking-tight">{value}</p>
       {hint && <p className="text-xs text-muted mt-1">{hint}</p>}
     </div>
   )

@@ -67,39 +67,39 @@ export default async function AdminReviewsPage() {
   return (
     <div className="max-w-5xl">
       <RealtimeRefresh tables={["reviews", "technician_profiles"]} />
-      <h1 className="text-3xl font-semibold mb-2 tracking-tight">Ratings</h1>
+      <h1 className="text-2xl sm:text-3xl font-semibold mb-2 tracking-tight">Ratings</h1>
       <p className="text-muted mb-8">Every review customers have left on <SiteName />.</p>
 
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div className="card p-5">
+        <div className="card p-4 sm:p-5">
           <p className="text-xs uppercase tracking-wider text-muted font-medium mb-2">Total reviews</p>
-          <p className="text-3xl font-semibold tracking-tight">{total}</p>
+          <p className="text-2xl sm:text-3xl font-semibold tracking-tight">{total}</p>
         </div>
-        <div className="card p-5">
+        <div className="card p-4 sm:p-5">
           <p className="text-xs uppercase tracking-wider text-muted font-medium mb-2">Average</p>
-          <p className="text-3xl font-semibold tracking-tight mb-1">
+          <p className="text-2xl sm:text-3xl font-semibold tracking-tight mb-1">
             {total > 0 ? overallAvg.toFixed(1) : "—"}
           </p>
           {total > 0 && <Stars avg={overallAvg} size={12} />}
         </div>
-        <div className="card p-5">
+        <div className="card p-4 sm:p-5">
           <p className="text-xs uppercase tracking-wider text-muted font-medium mb-2">Low ratings</p>
-          <p className="text-3xl font-semibold tracking-tight" style={{ color: lowRated > 0 ? "var(--danger)" : "var(--ink)" }}>
+          <p className="text-2xl sm:text-3xl font-semibold tracking-tight" style={{ color: lowRated > 0 ? "var(--danger)" : "var(--ink)" }}>
             {lowRated}
           </p>
           <p className="text-xs text-muted mt-1">≤ 2 stars</p>
         </div>
-        <div className="card p-5">
+        <div className="card p-4 sm:p-5">
           <p className="text-xs uppercase tracking-wider text-muted font-medium mb-2">Technicians</p>
-          <p className="text-3xl font-semibold tracking-tight">{techs.length}</p>
+          <p className="text-2xl sm:text-3xl font-semibold tracking-tight">{techs.length}</p>
           <p className="text-xs text-muted mt-1">{techList.filter((x) => x.count > 0).length} rated</p>
         </div>
       </div>
 
       {/* Category averages */}
       {total > 0 && (
-        <div className="card p-5 mb-8">
+        <div className="card p-4 sm:p-5 mb-6 sm:mb-8">
           <p className="text-xs uppercase tracking-wider text-muted font-medium mb-4">Platform averages</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {categories.map((c) => (
@@ -121,7 +121,7 @@ export default async function AdminReviewsPage() {
         By technician
       </h2>
       {techList.length === 0 ? (
-        <div className="card mb-10"><EmptyState icon="users" title="No technicians yet" /></div>
+        <div className="card p-4 sm:p-5 mb-8 sm:mb-10"><EmptyState icon="users" title="No technicians yet" /></div>
       ) : (
         <div className="card overflow-x-auto mb-10">
           <table className="w-full text-sm min-w-[720px]">
@@ -188,7 +188,7 @@ export default async function AdminReviewsPage() {
             return (
               <div
                 key={r.id}
-                className="card p-5"
+                className="card p-4 sm:p-5"
                 style={isLow ? { borderLeft: "3px solid var(--danger)" } : undefined}
               >
                 <div className="flex items-start justify-between gap-4 mb-2">
