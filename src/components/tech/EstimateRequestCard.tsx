@@ -1,7 +1,7 @@
 import { ChatButton } from "@/components/chat/ChatButton"
 import { EstimateComposer } from "@/components/tech/EstimateComposer"
 import { Icon, ApplianceIcon } from "@/lib/icons"
-import { SERVICES } from "@/lib/booking/constants"
+import { SERVICES, haversine } from "@/lib/booking/constants"
 
 function fmtDate(d: string | null | undefined): string {
   if (!d) return "--"
@@ -15,10 +15,33 @@ function fmtTime(t: string | null | undefined): string {
   if (isNaN(hour)) return t
   return (hour % 12 === 0 ? 12 : hour % 12) + ":" + m + " " + (hour >= 12 ? "PM" : "AM")
 }
+function relativeTime(iso: string | null | undefined): string {
+  if (!iso) return ""
+  const t = new Date(iso).getTime()
+  if (isNaN(t)) return ""
+  const diff = Math.max(0, Date.now() - t)
+  const m = Math.floor(diff / 60000)
+  if (m < 1) return "just now"
+  if (m < 60) return m + " min ago"
+  const h = Math.floor(m / 60)
+  if (h < 24) return h + "h ago"
+  const d = Math.floor(h / 24)
+  return d + "d ago"
+}
 function serviceIdForLabel(label: string): string | null {
   const t = label.trim().toLowerCase()
   const hit = SERVICES.find((s) => s.label.toLowerCase() === t)
   return hit ? hit.id : null
+}
+function displayAddress(addr: string | null | undefined, barangay: string | null | undefined): string {
+  const raw = (addr && addr.trim()) || barangay || ""
+  if (!raw) return ""
+  const cleaned = raw.replace(/,\s*Philippines\s*$/i, "").trim()
+  return cleaned.split(",").slice(0, 3).map((s) => s.trim()).join(", ")
+}
+function fmtDistance(km: number): string {
+  if (km < 1) return Math.round(km * 1000) + " m away"
+  return km.toFixed(1) + " km away"
 }
 
 export function EstimateRequestCard({
@@ -30,7 +53,12 @@ export function EstimateRequestCard({
   address,
   scheduledDate,
   scheduledTime,
+  createdAt,
   problems,
+  techLat,
+  techLng,
+  bookingLat,
+  bookingLng,
   showChat,
 }: {
   bookingId: string
@@ -41,15 +69,34 @@ export function EstimateRequestCard({
   address?: string | null
   scheduledDate: string | null
   scheduledTime: string | null
+  createdAt?: string | null
   problems: string[]
+  techLat?: number | null
+  techLng?: number | null
+  bookingLat?: number | null
+  bookingLng?: number | null
   showChat?: boolean
 }) {
   const firstService = services.split(" + ")[0]?.trim() || "Service"
   const iconId = serviceIdForLabel(firstService)
 
+  const loc = displayAddress(address, barangay)
+
+  let distanceKm: number | null = null
+  if (
+    techLat != null && techLng != null &&
+    bookingLat != null && bookingLng != null
+  ) {
+    try {
+      distanceKm = haversine(techLat, techLng, bookingLat, bookingLng)
+    } catch { distanceKm = null }
+  }
+
+  const posted = relativeTime(createdAt)
+
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 rounded-xl border border-line bg-surface-2/40 hover:bg-surface-2 transition-all">
-      <div className="flex items-start gap-3 min-w-0 flex-1">
+    <div className="flex flex-col gap-3 p-4 rounded-xl border border-line bg-surface-2/40 hover:bg-surface-2 transition-all">
+      <div className="flex items-start gap-3 min-w-0">
         <div
           className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0"
           style={{
@@ -68,64 +115,73 @@ export function EstimateRequestCard({
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-ink truncate">{services || "Service"}</p>
 
-          <div className="flex items-center gap-1.5 text-xs text-muted mt-1 flex-wrap">
+          <div className="flex items-center gap-1.5 text-xs text-muted mt-1">
             <Icon name="user" className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate max-w-[40ch]">{customerName}</span>
-            {(() => {
-              const loc = (address && address.trim()) || barangay || ""
-              if (!loc) return null
-              const clean = loc.replace(/,\s*Philippines\s*$/i, "").trim()
-              const display = clean.split(",").slice(0, 3).map((s: string) => s.trim()).join(", ")
-              return (
-                <>
-                  <span className="opacity-40">{"\u00B7"}</span>
-                  <Icon name="pin" className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate max-w-[44ch]" title={loc}>{display}</span>
-                </>
-              )
-            })()}
+            <span className="truncate">{customerName}</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-muted mt-0.5">
+          {loc && (
+            <div className="flex items-start gap-1.5 text-xs text-muted mt-0.5">
+              <Icon name="pin" className="w-3.5 h-3.5 shrink-0 mt-[1px]" />
+              <span className="truncate" title={(address || "").replace(/,\s*Philippines\s*$/i, "")}>
+                {loc}
+                {distanceKm != null && (
+                  <span className="opacity-70"> {"\u00B7"} {fmtDistance(distanceKm)}</span>
+                )}
+              </span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-1.5 text-xs text-muted mt-0.5 flex-wrap">
             <Icon name="clock" className="w-3.5 h-3.5 shrink-0" />
             <span>
               {fmtDate(scheduledDate)}
               {scheduledTime ? " " + "\u00B7" + " " + fmtTime(scheduledTime) : ""}
             </span>
+            {posted && (
+              <>
+                <span className="opacity-40">{"\u00B7"}</span>
+                <span className="italic">posted {posted}</span>
+              </>
+            )}
           </div>
-
-          {problems.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {problems.map((p, i) => (
-                <span
-                  key={i}
-                  className="text-[10px] px-2 py-0.5 rounded-full border border-line bg-surface text-muted"
-                >
-                  {p}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-auto">
+      {problems.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {problems.map((p, i) => (
+            <span
+              key={i}
+              className="text-[11px] px-2.5 py-1 rounded-full border border-line bg-surface text-ink/80"
+            >
+              {p}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-stretch gap-2 w-full">
         {showChat && customerId && (
-          <ChatButton
-            bookingId={bookingId}
-            partnerId={customerId}
-            partnerName={customerName}
-            partnerRole={services || "Service"}
-            variant="icon"
-          />
+          <div className="shrink-0 flex items-stretch">
+            <ChatButton
+              bookingId={bookingId}
+              partnerId={customerId}
+              partnerName={customerName}
+              partnerRole={services || "Service"}
+              variant="icon"
+            />
+          </div>
         )}
-        <EstimateComposer
-          bookingId={bookingId}
-          service={services || "Service"}
-          customer={customerName}
-          barangay={barangay || "--"}
-          problems={problems}
-        />
+        <div className="flex-1 min-w-0">
+          <EstimateComposer
+            bookingId={bookingId}
+            service={services || "Service"}
+            customer={customerName}
+            barangay={barangay || "--"}
+            problems={problems}
+          />
+        </div>
       </div>
     </div>
   )

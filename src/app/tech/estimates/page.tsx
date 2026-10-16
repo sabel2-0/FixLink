@@ -31,12 +31,18 @@ export default async function TechEstimates() {
   const { data: requests } = ids.length
     ? await supabase
         .from("bookings")
-        .select("id, status, scheduled_date, scheduled_time, barangay, address, customer_id, technician_id, customer:profiles!bookings_customer_id_fkey(full_name), booking_items(service, problems), estimates(id, technician_id)")
+        .select("id, status, scheduled_date, scheduled_time, barangay, address, lat, lng, created_at, customer_id, technician_id, customer:profiles!bookings_customer_id_fkey(full_name), booking_items(service, problems), estimates(id, technician_id)")
         .in("id", ids)
         .in("status", ["pending", "estimated"])
         .is("technician_id", null)
         .order("created_at", { ascending: false })
     : { data: [] as any[] }
+
+  const { data: me } = await supabase
+    .from("technician_profiles")
+    .select("home_lat, home_lng")
+    .eq("id", user.id)
+    .maybeSingle()
 
   const openRequests = (requests || []).filter((b: any) => {
     const mine = (b.estimates || []).find((e: any) => e.technician_id === user.id)
@@ -76,6 +82,11 @@ export default async function TechEstimates() {
                   address={b.address || null}
                   scheduledDate={b.scheduled_date}
                   scheduledTime={b.scheduled_time}
+                  createdAt={b.created_at}
+                  bookingLat={b.lat}
+                  bookingLng={b.lng}
+                  techLat={me?.home_lat ?? null}
+                  techLng={me?.home_lng ?? null}
                   problems={problems}
                   showChat
                 />
