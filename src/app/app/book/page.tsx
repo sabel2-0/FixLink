@@ -15,6 +15,7 @@ import { SERVICES, COMMON_PROBLEMS, nearestBarangay, haversine, BARANGAYS } from
 
 import { NearbyMap } from "@/components/booking/NearbyMap"
 import { TechProfileModal } from "@/components/booking/TechProfileModal"
+import { TimeSlotPicker } from "@/components/ui/TimeSlotPicker"
 
 
 
@@ -740,7 +741,7 @@ const withDist = useMemo(() => {
 
               <label className="input-label">Time</label>
 
-              <input type="time" className="input" value={time} onChange={(e) => setTime(e.target.value)} />
+              <TimeSlotPicker value={time} onChange={setTime} />
 
             </div>
 
