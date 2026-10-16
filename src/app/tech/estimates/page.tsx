@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { EstimateRequestCard } from "@/components/tech/EstimateRequestCard"
 import { Icon, ApplianceIcon } from "@/lib/icons"
-import { peso } from "@/lib/format"
+import { peso, formatEta } from "@/lib/format"
 import { SERVICES } from "@/lib/booking/constants"
 
 function serviceIdForLabel(label: string): string | null {
@@ -51,7 +51,7 @@ export default async function TechEstimates() {
 
   const { data: posted } = await supabase
     .from("estimates")
-    .select("id, amount, eta_minutes, note, created_at, booking:bookings(id, status, barangay, address, customer:profiles!bookings_customer_id_fkey(full_name), booking_items(service))")
+    .select("id, amount, eta_minutes, note, created_at, booking:bookings(id, status, barangay, address, scheduled_date, scheduled_time, customer:profiles!bookings_customer_id_fkey(full_name), booking_items(service))")
     .eq("technician_id", user.id)
     .order("created_at", { ascending: false })
 
@@ -157,7 +157,7 @@ export default async function TechEstimates() {
                         <p className="text-xs text-muted mt-1 italic">&quot;{e.note}&quot;</p>
                       )}
                       {e.eta_minutes != null && (
-                        <p className="text-xs text-muted mt-1">~{e.eta_minutes} min ETA</p>
+                        <p className="text-xs text-muted mt-1">{formatEta(e.eta_minutes, e.booking?.scheduled_time)}</p>
                       )}
                     </div>
                   </div>

@@ -2,7 +2,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/Badge"
 import { Icon } from "@/lib/icons"
-import { peso } from "@/lib/format"
+import { peso, formatEta } from "@/lib/format"
 import { BookingTimeline } from "@/components/booking/BookingTimeline"
 import { BookingRealtimeRefresh } from "@/components/booking/BookingRealtimeRefresh"
 import { SiteName } from "@/components/shared/SiteNameProvider"
@@ -201,7 +201,7 @@ export default async function AdminBookingDetail({ params }: { params: Promise<{
                         </p>
                         {e.note && <p className="text-xs text-muted mt-0.5">{e.note}</p>}
                         {e.eta_minutes != null && (
-                          <p className="text-xs text-muted mt-0.5">~{e.eta_minutes} min ETA</p>
+                          <p className="text-xs text-muted mt-0.5">{formatEta(e.eta_minutes, booking.scheduled_time)}</p>
                         )}
                       </div>
                       <p className="text-sm font-semibold text-ink shrink-0">{peso(e.amount)}</p>

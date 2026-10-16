@@ -2,7 +2,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/Badge"
 import { Icon } from "@/lib/icons"
-import { peso } from "@/lib/format"
+import { peso, formatEta } from "@/lib/format"
 import { BookingTimeline } from "@/components/booking/BookingTimeline"
 import { BookingRealtimeRefresh } from "@/components/booking/BookingRealtimeRefresh"
 import { ConfirmPaymentReceived } from "@/components/booking/ConfirmPaymentReceived"
@@ -149,7 +149,7 @@ export default async function TechJobDetail({ params }: { params: Promise<{ id: 
                       <div className="min-w-0 flex-1">
                         {e.note && <p className="text-xs text-muted">{e.note}</p>}
                         {e.eta_minutes != null && (
-                          <p className="text-xs text-muted">~{e.eta_minutes} min ETA</p>
+                          <p className="text-xs text-muted">{formatEta(e.eta_minutes, booking.scheduled_time)}</p>
                         )}
                       </div>
                       <p className="text-sm font-semibold text-ink shrink-0">{peso(e.amount)}</p>

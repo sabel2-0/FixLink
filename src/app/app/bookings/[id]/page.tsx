@@ -1,8 +1,8 @@
-﻿import Link from "next/link"
+import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/Badge"
 import { Icon } from "@/lib/icons"
-import { peso } from "@/lib/format"
+import { peso, formatEta } from "@/lib/format"
 import { CancelBookingButton } from "@/components/booking/CancelBookingButton"
 import { SelectEstimateButton } from "@/components/booking/SelectEstimateButton"
 import { DecideQuoteButtons } from "@/components/booking/DecideQuoteButtons"
@@ -181,7 +181,7 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
                             {isChosen && <span className="badge badge-info text-[10px]">Selected</span>}
                           </p>
                           {e.note && <p className="text-xs text-muted mt-0.5">{e.note}</p>}
-                          {e.eta_minutes != null && <p className="text-xs text-muted mt-0.5">~{e.eta_minutes} min ETA</p>}
+                          {e.eta_minutes != null && <p className="text-xs text-muted mt-0.5">{formatEta(e.eta_minutes, booking.scheduled_time)}</p>}
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <p className="text-sm font-semibold">{peso(e.amount)}</p>

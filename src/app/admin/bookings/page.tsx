@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/Badge"
-import { BookingRealtimeRefresh } from "@/components/booking/BookingRealtimeRefresh"
+import { RealtimeRefresh } from "@/components/RealtimeRefresh"
 
 function fmtDate(d: string | null | undefined): string {
   if (!d) return "\u2014"
@@ -52,10 +52,8 @@ export default async function AdminBookingsPage() {
       <h1 className="text-2xl sm:text-3xl font-semibold mb-2 text-ink tracking-tight">Bookings</h1>
       <p className="text-muted mb-6 sm:mb-8 text-sm sm:text-base">All job requests, newest first.</p>
 
-      {/* Realtime refresh - refreshes the list when any booking changes */}
-      {rows.slice(0, 5).map((b: any) => (
-        <BookingRealtimeRefresh key={"rt-" + b.id} bookingId={b.id} />
-      ))}
+      {/* Realtime: refresh the whole list whenever any booking changes */}
+      <RealtimeRefresh tables={["bookings"]} />
 
       {error && (
         <div

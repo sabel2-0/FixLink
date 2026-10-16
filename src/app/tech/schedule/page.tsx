@@ -1,4 +1,4 @@
-﻿import Link from "next/link"
+import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/Badge"
 import { Icon } from "@/lib/icons"
@@ -10,6 +10,7 @@ import { ConfirmPaymentReceived } from "@/components/booking/ConfirmPaymentRecei
 import { BookingRealtimeRefresh } from "@/components/booking/BookingRealtimeRefresh"
 import { ViewLocationButton } from "@/components/booking/ViewLocationButton"
 import { SiteName } from "@/components/shared/SiteNameProvider"
+import { formatEta } from "@/lib/format"
 
 function fmtDate(d: string | null | undefined): string {
   if (!d) return "—"
@@ -117,7 +118,7 @@ export default async function TechSchedule() {
                           <p className="text-[10px] uppercase tracking-wider text-muted font-medium">Your estimate</p>
                           <p className="text-sm mt-1">
                             <span className="text-ink font-semibold">₱{Number(myEst.amount).toLocaleString()}</span>
-                            {myEst.eta_minutes != null && <span className="text-muted"> · ETA ~{myEst.eta_minutes} min</span>}
+                            {myEst.eta_minutes != null && <span className="text-muted"> · {formatEta(myEst.eta_minutes, b.scheduled_time)}</span>}
                           </p>
                         </div>
                       </div>
