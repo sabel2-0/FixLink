@@ -31,7 +31,7 @@ export default async function TechDashboard() {
   const { data: pendingBookings } = ids.length
     ? await supabase
         .from("bookings")
-        .select("id, status, scheduled_date, scheduled_time, barangay, customer_id, technician_id, booking_items(service, problems)")
+        .select("id, status, scheduled_date, scheduled_time, barangay, address, customer_id, technician_id, booking_items(service, problems)")
         .in("id", ids)
         .in("status", ["pending", "estimated"])
         .is("technician_id", null)
@@ -117,6 +117,7 @@ export default async function TechDashboard() {
                   customerName={customerName(b.customer_id)}
                   customerId={b.customer_id}
                   barangay={b.barangay || null}
+                  address={b.address || null}
                   scheduledDate={b.scheduled_date}
                   scheduledTime={b.scheduled_time}
                   problems={problems}

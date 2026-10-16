@@ -27,6 +27,7 @@ export function EstimateRequestCard({
   customerName,
   customerId,
   barangay,
+  address,
   scheduledDate,
   scheduledTime,
   problems,
@@ -37,6 +38,7 @@ export function EstimateRequestCard({
   customerName: string
   customerId?: string
   barangay: string | null
+  address?: string | null
   scheduledDate: string | null
   scheduledTime: string | null
   problems: string[]
@@ -69,13 +71,19 @@ export function EstimateRequestCard({
           <div className="flex items-center gap-1.5 text-xs text-muted mt-1 flex-wrap">
             <Icon name="user" className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate max-w-[40ch]">{customerName}</span>
-            {barangay && (
-              <>
-                <span className="opacity-40">{"\u00B7"}</span>
-                <Icon name="pin" className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate max-w-[40ch]">{barangay}</span>
-              </>
-            )}
+            {(() => {
+              const loc = (address && address.trim()) || barangay || ""
+              if (!loc) return null
+              const clean = loc.replace(/,\s*Philippines\s*$/i, "").trim()
+              const display = clean.split(",").slice(0, 3).map((s: string) => s.trim()).join(", ")
+              return (
+                <>
+                  <span className="opacity-40">{"\u00B7"}</span>
+                  <Icon name="pin" className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate max-w-[44ch]" title={loc}>{display}</span>
+                </>
+              )
+            })()}
           </div>
 
           <div className="flex items-center gap-1.5 text-xs text-muted mt-0.5">
