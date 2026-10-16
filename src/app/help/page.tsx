@@ -201,7 +201,7 @@ export default function HelpPage() {
                 <button
                   type="button"
                   onClick={() => setOpenIdx(isOpen ? null : i)}
-                  className="w-full text-left p-4 sm:p-5 flex items-start gap-3 hover:bg-surface-2 transition"
+                  className="w-full text-left p-4 sm:p-5 flex items-start gap-3 hover:bg-ink/5 transition"
                 >
                   <span className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
                     <CategoryPill cat={f.cat} />
