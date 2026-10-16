@@ -2,10 +2,10 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/Badge"
 import { EmptyState } from "@/components/ui/EmptyState"
-import { EstimateComposer } from "@/components/tech/EstimateComposer"
+import { EstimateRequestCard } from "@/components/tech/EstimateRequestCard"
 
 function fmtDate(d: string | null | undefined): string {
-  if (!d) return "—"
+  if (!d) return "--"
   const dt = new Date(d)
   return isNaN(dt.getTime()) ? d : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" })
 }
@@ -22,14 +22,12 @@ export default async function TechDashboard() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  // 1. My invited booking ids
   const { data: invitedRows } = await supabase
     .from("booking_requested_techs")
     .select("booking_id")
     .eq("technician_id", user.id)
   const ids = (invitedRows || []).map((r: any) => r.booking_id)
 
-  // 2. Fetch those bookings (simple select, no nested FK)
   const { data: pendingBookings } = ids.length
     ? await supabase
         .from("bookings")
@@ -40,17 +38,14 @@ export default async function TechDashboard() {
         .order("created_at", { ascending: false })
     : { data: [] as any[] }
 
-  // 3. My already-posted estimate ids
   const { data: myEstimates } = await supabase
     .from("estimates")
     .select("booking_id")
     .eq("technician_id", user.id)
   const myEstimateIds = new Set((myEstimates || []).map((e: any) => e.booking_id))
 
-  // 4. Filter openRequests: not yet estimated by me
   const openRequests = (pendingBookings || []).filter((b: any) => !myEstimateIds.has(b.id))
 
-  // 5. Customer names (separate query)
   const customerIds = [...new Set(openRequests.map((b: any) => b.customer_id).filter(Boolean))]
   const { data: customerProfiles } = customerIds.length
     ? await supabase.from("profiles").select("id, full_name").in("id", customerIds)
@@ -58,7 +53,6 @@ export default async function TechDashboard() {
   const customerName = (id: string) =>
     (customerProfiles || []).find((p: any) => p.id === id)?.full_name || "Customer"
 
-  // 6. Assigned jobs
   const { data: assigned } = await supabase
     .from("bookings")
     .select("id, status, scheduled_date, scheduled_time, barangay, customer_id, booking_items(service, problems)")
@@ -74,7 +68,6 @@ export default async function TechDashboard() {
   const assignedName = (id: string) =>
     (assignedCustomers || []).find((p: any) => p.id === id)?.full_name || "Customer"
 
-  // 7. My stats
   const { data: me } = await supabase
     .from("technician_profiles")
     .select("rating, jobs_completed")
@@ -83,28 +76,28 @@ export default async function TechDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold mb-8 tracking-tight">Dashboard</h1>
+      <h1 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8 tracking-tight">Dashboard</h1>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-        <div className="card p-5">
-          <p className="text-xs uppercase tracking-wider text-muted font-medium mb-2">Active jobs</p>
-          <p className="text-3xl font-semibold tracking-tight">{activeAssigned.length}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6 sm:mb-8">
+        <div className="card p-4 sm:p-5">
+          <p className="text-[10px] sm:text-xs uppercase tracking-wider text-muted font-medium mb-2">Active jobs</p>
+          <p className="text-2xl sm:text-3xl font-semibold tracking-tight">{activeAssigned.length}</p>
         </div>
-        <div className="card p-5">
-          <p className="text-xs uppercase tracking-wider text-muted font-medium mb-2">Estimate requests</p>
-          <p className="text-3xl font-semibold tracking-tight">{openRequests.length}</p>
+        <div className="card p-4 sm:p-5">
+          <p className="text-[10px] sm:text-xs uppercase tracking-wider text-muted font-medium mb-2">Estimate requests</p>
+          <p className="text-2xl sm:text-3xl font-semibold tracking-tight">{openRequests.length}</p>
         </div>
-        <div className="card p-5">
-          <p className="text-xs uppercase tracking-wider text-muted font-medium mb-2">Rating</p>
-          <p className="text-3xl font-semibold tracking-tight">{(me?.rating || 0).toFixed(1)}</p>
+        <div className="card p-4 sm:p-5">
+          <p className="text-[10px] sm:text-xs uppercase tracking-wider text-muted font-medium mb-2">Rating</p>
+          <p className="text-2xl sm:text-3xl font-semibold tracking-tight">{(me?.rating || 0).toFixed(1)}</p>
         </div>
-        <div className="card p-5">
-          <p className="text-xs uppercase tracking-wider text-muted font-medium mb-2">Jobs done</p>
-          <p className="text-3xl font-semibold tracking-tight">{me?.jobs_completed || 0}</p>
+        <div className="card p-4 sm:p-5">
+          <p className="text-[10px] sm:text-xs uppercase tracking-wider text-muted font-medium mb-2">Jobs done</p>
+          <p className="text-2xl sm:text-3xl font-semibold tracking-tight">{me?.jobs_completed || 0}</p>
         </div>
       </div>
 
-      <div className="card p-6 mb-6">
+      <div className="card p-4 sm:p-6 mb-6">
         <div className="flex items-center justify-between mb-4 gap-3">
           <h2 className="text-xs uppercase tracking-wider text-muted font-medium">New estimate requests</h2>
           <Link href="/tech/estimates" className="btn-link text-xs">View all</Link>
@@ -112,33 +105,29 @@ export default async function TechDashboard() {
         {openRequests.length === 0 ? (
           <p className="text-sm text-muted py-2">No new requests right now.</p>
         ) : (
-          <div className="divide-y divide-line">
+          <div className="flex flex-col gap-3">
             {openRequests.slice(0, 5).map((b: any) => {
               const services = (b.booking_items || []).map((i: any) => i.service).join(" + ")
               const problems = (b.booking_items || []).flatMap((i: any) => i.problems || [])
               return (
-                <div key={b.id} className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">{services || "Service"}</p>
-                    <p className="text-xs text-muted mt-0.5">{customerName(b.customer_id)} · {b.barangay}</p>
-                    <p className="text-xs text-muted mt-0.5">{fmtDate(b.scheduled_date)}{b.scheduled_time ? " · " + fmtTime(b.scheduled_time) : ""}</p>
-                    {problems.length > 0 && <p className="text-xs text-muted mt-1 truncate">{problems.join(", ")}</p>}
-                  </div>
-                  <EstimateComposer
-                    bookingId={b.id}
-                    service={services || "Service"}
-                    customer={customerName(b.customer_id)}
-                    barangay={b.barangay || "—"}
-                    problems={problems}
-                  />
-                </div>
+                <EstimateRequestCard
+                  key={b.id}
+                  bookingId={b.id}
+                  services={services || "Service"}
+                  customerName={customerName(b.customer_id)}
+                  customerId={b.customer_id}
+                  barangay={b.barangay || null}
+                  scheduledDate={b.scheduled_date}
+                  scheduledTime={b.scheduled_time}
+                  problems={problems}
+                />
               )
             })}
           </div>
         )}
       </div>
 
-      <div className="card p-6">
+      <div className="card p-4 sm:p-6">
         <div className="flex items-center justify-between mb-4 gap-3">
           <h2 className="text-xs uppercase tracking-wider text-muted font-medium">My active jobs</h2>
           <Link href="/tech/schedule" className="btn-link text-xs">View all</Link>
@@ -150,11 +139,20 @@ export default async function TechDashboard() {
             {activeAssigned.map((b: any) => {
               const services = (b.booking_items || []).map((i: any) => i.service).join(" + ")
               return (
-                <Link key={b.id} href="/tech/schedule" className="py-4 flex items-center justify-between gap-3 hover:bg-surface-2 -mx-2 px-2 rounded transition">
+                <Link
+                  key={b.id}
+                  href="/tech/schedule"
+                  className="py-4 flex items-center justify-between gap-3 hover:bg-surface-2 -mx-2 px-2 rounded transition"
+                >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">{assignedName(b.customer_id)}</p>
-                    <p className="text-xs text-muted mt-0.5">{services} · {b.barangay}</p>
-                    <p className="text-xs text-muted mt-0.5">{fmtDate(b.scheduled_date)}{b.scheduled_time ? " · " + fmtTime(b.scheduled_time) : ""}</p>
+                    <p className="text-xs text-muted mt-0.5">
+                      {services} {"\u00B7"} {b.barangay}
+                    </p>
+                    <p className="text-xs text-muted mt-0.5">
+                      {fmtDate(b.scheduled_date)}
+                      {b.scheduled_time ? " " + "\u00B7" + " " + fmtTime(b.scheduled_time) : ""}
+                    </p>
                   </div>
                   <Badge status={b.status} />
                 </Link>
