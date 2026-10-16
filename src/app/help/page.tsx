@@ -13,8 +13,8 @@ const FAQS: FAQ[] = [
     a: (<>
       Go to <strong>Book a service</strong> from your dashboard. Pick the appliance(s),
       describe the symptoms, verify your location, choose a date and time, then select
-      one or more technicians. Each technician will send you their own estimate — you
-      pick the one you like best.
+      one or more technicians. Each technician will send you their own estimate —
+      you pick the one you like best.
     </>),
   },
   {
@@ -31,9 +31,11 @@ const FAQS: FAQ[] = [
     cat: "customer",
     q: "How do I pay?",
     a: (<>
-      You pay the technician <strong>directly</strong> in cash or GCash at the end of
-      the job. <SiteName /> never handles your money. The platform only charges the technician
-      a 10% commission on the final approved price.
+      You pay the technician <strong>directly</strong> in cash, GCash, or Maya at the
+      end of the job. The technician shows their GCash/Maya details (or a QR code) right
+      in the booking. After you pay, tap <strong>Record payment</strong> so both sides
+      have it on file, and the technician confirms receipt. <SiteName /> never touches
+      your money.
     </>),
   },
   {
@@ -44,13 +46,28 @@ const FAQS: FAQ[] = [
       may issue a refund, warn the technician, or dismiss the case.
     </>),
   },
+
+  {
+    cat: "technician",
+    q: "What are the ways I can get verified?",
+    a: (<>
+      You can qualify through any of these (combine as many as apply):
+      <ul className="list-disc pl-6 space-y-1 mt-2">
+        <li><strong>TESDA NC2</strong> — cert number, trade, and a photo of the certificate.</li>
+        <li><strong>Employed / Former</strong> — employer, position, and a Certificate of Employment.</li>
+        <li><strong>Self-employed</strong> — DTI registration, BIR 2303, or a Mayor&apos;s permit (any one).</li>
+        <li><strong>Freelance</strong> — Facebook page (6+ months old, 10+ reviews) plus 3 customer references.</li>
+      </ul>
+      A bachelor&apos;s degree alone doesn&apos;t qualify — the certificates and documents above do.
+    </>),
+  },
   {
     cat: "technician",
     q: "How long does verification take?",
     a: (<>
-      Usually <strong>1–2 business days</strong>. We check your TESDA NC2 certificate
-      against the official Registry of Certified Workers, then review your submitted ID
-      and selfie. You&apos;ll get an email when the review is done.
+      Usually <strong>1–2 business days</strong>. We review the documents you
+      submitted along with your government ID and selfie. You&apos;ll get an email when
+      the review is done.
     </>),
   },
   {
@@ -64,28 +81,53 @@ const FAQS: FAQ[] = [
   },
   {
     cat: "technician",
-    q: "How and when do I pay the 10% commission?",
+    q: "How does the wallet work?",
     a: (<>
-      After you receive payment from the customer, remit 10% of the final approved price
-      to <SiteName />. You can view what you owe on <strong>Commissions</strong> in your
-      dashboard. Failure to remit may result in account suspension.
+      Your wallet is a prepaid balance that covers the platform&apos;s <strong>10% commission</strong>.
+      Every time you mark a job as <strong>completed</strong>, 10% of the final amount
+      is automatically deducted from your wallet. You don&apos;t need to click anything —
+      the deduction happens the moment the job closes.
+      <br /><br />
+      Keep a positive balance. If your balance drops below the minimum threshold
+      (₱100 by default), you&apos;ll be hidden from new customer searches until
+      you top up.
+    </>),
+  },
+  {
+    cat: "technician",
+    q: "How do I top up my wallet?",
+    a: (<>
+      Go to <strong>Wallet</strong> in your dashboard. Send the amount via GCash or Maya
+      to the account shown, then submit the reference number. An admin confirms it and
+      your balance is credited. Top-ups are usually reviewed the same day.
+    </>),
+  },
+  {
+    cat: "technician",
+    q: "What happens if my wallet goes negative?",
+    a: (<>
+      You owe that amount to <SiteName />. You&apos;ll be hidden from new customer
+      searches until you top up. You can still finish jobs you&apos;re already assigned
+      to. See the exact balance owed on your <strong>Earnings</strong> page.
     </>),
   },
   {
     cat: "technician",
     q: "Can I choose which barangays I serve?",
     a: (<>
-      Yes. When you register (or resubmit), select your home <strong>region → province →
-      city → barangay</strong> and turn on <strong>Use my current location</strong>.
-      Only jobs within a short distance will be shown to you.
+      Yes. When you register (or resubmit), select your home <strong>region →
+      province → city → barangay</strong> and turn on
+      <strong>Use my current location</strong>. Only jobs within a short distance will
+      be shown to you.
     </>),
   },
+
   {
     cat: "account",
     q: "I didn't receive the email verification code.",
     a: (<>
       Check your spam folder first. If still nothing, wait 10 minutes — email providers
-      rate-limit new senders. If you never get it, email
+      rate-limit new senders. If you never get it, email{" "}
       <a href="mailto:support@gmail.com" className="text-accent hover:underline">support@gmail.com</a>.
     </>),
   },
@@ -103,7 +145,7 @@ const FAQS: FAQ[] = [
     q: "I forgot my password.",
     a: (<>
       On the login page, click <strong>Forgot?</strong> and follow the reset link sent
-      to your email. If you don&apos;t receive it, contact
+      to your email. If you don&rsquo;t receive it, contact{" "}
       <a href="mailto:support@gmail.com" className="text-accent hover:underline">support@gmail.com</a>.
     </>),
   },
