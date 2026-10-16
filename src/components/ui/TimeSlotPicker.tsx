@@ -1,93 +1,107 @@
 "use client"
 
-import { useMemo } from "react"
-
-const DEFAULT_SLOTS = [
-  "07:00",
-  "08:00",
-  "09:00",
-  "10:00",
-  "11:00",
-  "13:00",
-  "14:00",
-  "15:00",
-  "16:00",
-  "17:00",
-  "18:00",
-  "19:00",
+const HOURS = [
+  "07", "08", "09", "10", "11",
+  "13", "14", "15", "16", "17", "18", "19",
 ]
+const MINUTES = ["00", "15", "30", "45"]
 
-function fmt(t: string): string {
-  const [h, m] = t.split(":").map(Number)
-  const ampm = h >= 12 ? "PM" : "AM"
-  const h12 = h % 12 === 0 ? 12 : h % 12
-  return h12 + ":" + String(m).padStart(2, "0") + " " + ampm
+function fmtHour(h: string): string {
+  const n = parseInt(h, 10)
+  const ampm = n >= 12 ? "PM" : "AM"
+  const h12 = n % 12 === 0 ? 12 : n % 12
+  return h12 + " " + ampm
+}
+
+function fmtSelected(v: string): string {
+  if (!v || v.length < 5) return ""
+  const [h, m] = v.split(":")
+  return fmtHour(h) + ":" + m
 }
 
 export function TimeSlotPicker({
   value,
   onChange,
-  slots = DEFAULT_SLOTS,
 }: {
   value: string
   onChange: (v: string) => void
-  slots?: string[]
 }) {
-  const { am, pm } = useMemo(() => {
-    const sorted = [...slots].sort()
-    return {
-      am: sorted.filter((s) => parseInt(s.split(":")[0], 10) < 12),
-      pm: sorted.filter((s) => parseInt(s.split(":")[0], 10) >= 12),
-    }
-  }, [slots])
+  const parts = value && value.includes(":") ? value.split(":") : ["", ""]
+  const selHour = parts[0]
+  const selMin = parts[1]
+
+  const am = HOURS.filter((h) => parseInt(h, 10) < 12)
+  const pm = HOURS.filter((h) => parseInt(h, 10) >= 12)
+
+  function pickHour(h: string) {
+    onChange(h + ":" + (selMin || "00"))
+  }
+  function pickMinute(m: string) {
+    if (!selHour) return
+    onChange(selHour + ":" + m)
+  }
+
+  const groups = [
+    { label: "Morning", list: am },
+    { label: "Afternoon & evening", list: pm },
+  ]
 
   return (
     <div className="space-y-4">
-      {am.length > 0 && (
+      {groups.map((g) =>
+        g.list.length === 0 ? null : (
+          <div key={g.label}>
+            <p className="text-[10px] uppercase tracking-wider text-muted font-medium mb-2">
+              {g.label}
+            </p>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {g.list.map((h) => (
+                <button
+                  key={h}
+                  type="button"
+                  onClick={() => pickHour(h)}
+                  aria-pressed={selHour === h}
+                  className={"chip w-full justify-center " + (selHour === h ? "chip-active" : "")}
+                >
+                  {fmtHour(h)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      )}
+
+      {selHour && (
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted font-medium mb-2">
-            Morning
+            Minutes
           </p>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-            {am.map((s) => (
+          <div className="grid grid-cols-4 gap-2">
+            {MINUTES.map((m) => (
               <button
-                key={s}
+                key={m}
                 type="button"
-                onClick={() => onChange(s)}
-                aria-pressed={value === s}
-                className={"chip w-full justify-center " + (value === s ? "chip-active" : "")}
+                onClick={() => pickMinute(m)}
+                aria-pressed={selMin === m}
+                className={"chip w-full justify-center " + (selMin === m ? "chip-active" : "")}
               >
-                {fmt(s)}
+                :{m}
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {pm.length > 0 && (
-        <div>
-          <p className="text-[10px] uppercase tracking-wider text-muted font-medium mb-2">
-            Afternoon &amp; evening
-          </p>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-            {pm.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => onChange(s)}
-                aria-pressed={value === s}
-                className={"chip w-full justify-center " + (value === s ? "chip-active" : "")}
-              >
-                {fmt(s)}
-              </button>
-            ))}
-          </div>
+      {value && (
+        <div className="rounded-lg bg-surface-2 px-3 py-2 flex items-center justify-between">
+          <span className="text-xs text-muted">Selected time</span>
+          <span className="text-sm font-semibold text-ink">{fmtSelected(value)}</span>
         </div>
       )}
 
       <p className="text-[11px] text-muted leading-relaxed">
-        Slots shown are typical working hours. Need a different time? Note it below and the
-        technician will confirm.
+        Pick an hour, then fine-tune the minutes. Need a specific time not shown? Note it below
+        and the technician will confirm.
       </p>
     </div>
   )
