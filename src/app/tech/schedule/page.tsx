@@ -261,6 +261,12 @@ export default async function TechSchedule() {
             <div className="divide-y divide-line">
               {history.map((b: any) => {
                 const services = (b.booking_items || []).map((i: any) => i.service).join(" + ")
+                const payState = (() => {
+                  if (b.status !== "completed") return null
+                  if (!b.paid_at) return { label: "Unpaid",  color: "var(--danger)",  bg: "color-mix(in srgb, var(--danger) 12%, transparent)" }
+                  if (!b.payment_confirmed_at) return { label: "Confirm", color: "var(--warn)",    bg: "color-mix(in srgb, var(--warn) 14%, transparent)" }
+                  return { label: "Paid",    color: "var(--success)", bg: "color-mix(in srgb, var(--success) 12%, transparent)" }
+                })()
                 return (
                   <Link
                     key={b.id}
@@ -286,6 +292,14 @@ export default async function TechSchedule() {
                         </span>
                       )}
                       <Badge status={b.status} />
+                      {payState && (
+                        <span
+                          className="text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider hidden sm:inline"
+                          style={{ background: payState.bg, color: payState.color }}
+                        >
+                          {payState.label}
+                        </span>
+                      )}
                       <Icon name="chevron" className="w-4 h-4 text-muted" />
                     </div>
                   </Link>
