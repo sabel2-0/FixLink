@@ -40,9 +40,9 @@ function displayAddress(addr: string | null | undefined, barangay: string | null
   return cleaned.split(",").slice(0, 3).map((s) => s.trim()).join(", ")
 }
 function fmtKm(km: number): string {
-  if (km < 1) return Math.round(km * 1000) + " m"
-  if (km < 10) return km.toFixed(1) + " km"
-  return Math.round(km) + " km"
+  if (km < 1) return Math.round(km * 1000) + " m away"
+  if (km < 10) return km.toFixed(1) + " km away"
+  return Math.round(km) + " km away"
 }
 
 export function EstimateRequestCard({

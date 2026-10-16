@@ -147,7 +147,7 @@ export function EstimateComposer({ bookingId, customer, service, barangay, probl
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="btn-primary text-xs py-2 px-3 whitespace-nowrap"
+        className="btn-primary text-xs whitespace-nowrap w-full h-10 px-4"
       >
         Post estimate
       </button>
