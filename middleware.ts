@@ -24,9 +24,19 @@ export async function middleware(request: NextRequest) {
   // Refresh the session and, if the refresh token is dead, wipe the stale
   // cookies so the next request starts clean instead of logging the same
   // AuthApiError forever.
-  const { error } = await supabase.auth.getUser()
-  if (error && /Refresh Token/i.test(error.message)) {
-    await supabase.auth.signOut()
+  try {
+    const { error } = await supabase.auth.getUser()
+    if (error && /Refresh Token/i.test(error.message)) {
+      // Stale cookie - clear it without a round trip to Supabase
+      for (const c of request.cookies.getAll()) {
+        if (c.name.startsWith("sb-")) {
+          response.cookies.set(c.name, "", { maxAge: 0, path: "/" })
+        }
+      }
+    }
+  } catch {
+    // Never let a Supabase hiccup hang the request. The page still renders;
+    // the client-side provider will re-check the session on hydrate.
   }
 
   return response
