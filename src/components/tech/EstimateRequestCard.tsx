@@ -4,7 +4,7 @@ import { Icon, ApplianceIcon } from "@/lib/icons"
 import { SERVICES, haversine } from "@/lib/booking/constants"
 
 function fmtDate(d: string | null | undefined): string {
-  if (!d) return "--"
+  if (!d) return ""
   const dt = new Date(d)
   return isNaN(dt.getTime()) ? d : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" })
 }
@@ -39,9 +39,10 @@ function displayAddress(addr: string | null | undefined, barangay: string | null
   const cleaned = raw.replace(/,\s*Philippines\s*$/i, "").trim()
   return cleaned.split(",").slice(0, 3).map((s) => s.trim()).join(", ")
 }
-function fmtDistance(km: number): string {
-  if (km < 1) return Math.round(km * 1000) + " m away"
-  return km.toFixed(1) + " km away"
+function fmtKm(km: number): string {
+  if (km < 1) return Math.round(km * 1000) + " m"
+  if (km < 10) return km.toFixed(1) + " km"
+  return Math.round(km) + " km"
 }
 
 export function EstimateRequestCard({
@@ -95,8 +96,10 @@ export function EstimateRequestCard({
   const posted = relativeTime(createdAt)
 
   return (
-    <div className="flex flex-col gap-3 p-4 rounded-xl border border-line bg-surface-2/40 hover:bg-surface-2 transition-all">
-      <div className="flex items-start gap-3 min-w-0">
+    <div className="rounded-xl border border-line bg-surface-2/40 p-4 flex flex-col gap-3">
+
+      {/* Row 1: icon + service / customer + posted time */}
+      <div className="flex items-start gap-3">
         <div
           className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0"
           style={{
@@ -114,53 +117,49 @@ export function EstimateRequestCard({
 
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-ink truncate">{services || "Service"}</p>
-
-          <div className="flex items-center gap-1.5 text-xs text-muted mt-1">
-            <Icon name="user" className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{customerName}</span>
-          </div>
-
-          {loc && (
-            <div className="flex items-start gap-1.5 text-xs text-muted mt-0.5">
-              <Icon name="pin" className="w-3.5 h-3.5 shrink-0 mt-[1px]" />
-              <span className="truncate" title={(address || "").replace(/,\s*Philippines\s*$/i, "")}>
-                {loc}
-                {distanceKm != null && (
-                  <span className="opacity-70"> {"\u00B7"} {fmtDistance(distanceKm)}</span>
-                )}
-              </span>
-            </div>
-          )}
-
-          <div className="flex items-center gap-1.5 text-xs text-muted mt-0.5 flex-wrap">
-            <Icon name="clock" className="w-3.5 h-3.5 shrink-0" />
-            <span>
-              {fmtDate(scheduledDate)}
-              {scheduledTime ? " " + "\u00B7" + " " + fmtTime(scheduledTime) : ""}
-            </span>
-            {posted && (
-              <>
-                <span className="opacity-40">{"\u00B7"}</span>
-                <span className="italic">posted {posted}</span>
-              </>
-            )}
-          </div>
+          <p className="text-xs text-muted mt-0.5 truncate">{customerName}</p>
         </div>
+
+        {posted && (
+          <span className="text-xs text-accent whitespace-nowrap shrink-0">{posted}</span>
+        )}
       </div>
 
-      {problems.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {problems.map((p, i) => (
-            <span
-              key={i}
-              className="text-[11px] px-2.5 py-1 rounded-full border border-line bg-surface text-ink/80"
-            >
-              {p}
+      {/* Row 2: location + distance */}
+      {loc && (
+        <div className="flex items-center gap-2 text-xs">
+          <Icon name="pin" className="w-3.5 h-3.5 text-muted shrink-0" />
+          <span className="text-muted truncate flex-1" title={(address || "").replace(/,\s*Philippines\s*$/i, "")}>
+            {loc}
+          </span>
+          {distanceKm != null && (
+            <span className="text-ink font-semibold whitespace-nowrap">
+              {fmtKm(distanceKm)}
             </span>
-          ))}
+          )}
         </div>
       )}
 
+      {/* Row 3: scheduled date + time */}
+      {(scheduledDate || scheduledTime) && (
+        <div className="flex items-center gap-2 text-xs text-muted">
+          <Icon name="clock" className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">
+            {fmtDate(scheduledDate)}
+            {scheduledTime ? ", " + fmtTime(scheduledTime) : ""}
+          </span>
+        </div>
+      )}
+
+      {/* Row 4: problem bar */}
+      {problems.length > 0 && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-line bg-surface">
+          <Icon name="alert" className="w-3.5 h-3.5 text-muted shrink-0" />
+          <span className="text-xs text-ink/90 truncate">{problems.join(" / ")}</span>
+        </div>
+      )}
+
+      {/* Row 5: actions */}
       <div className="flex items-stretch gap-2 w-full">
         {showChat && customerId && (
           <div className="shrink-0 flex items-stretch">
@@ -183,6 +182,7 @@ export function EstimateRequestCard({
           />
         </div>
       </div>
+
     </div>
   )
 }
