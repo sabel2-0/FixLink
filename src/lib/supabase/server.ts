@@ -18,7 +18,7 @@ export async function createClient() {
           } catch {
             // Called from a read-only context: RSC render, generateMetadata,
             // or a page/layout. Next.js 15 forbids cookie writes here. Safe to
-            // ignore — middleware (or the next Server Action) will refresh the
+            // ignore - middleware (or the next Server Action) will refresh the
             // session on the next mutation. Without this guard, Supabase's
             // token rotation throws an unhandled rejection and the request
             // hangs until Vercel's runtime timeout.
